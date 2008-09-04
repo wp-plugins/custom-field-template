@@ -1,0 +1,112 @@
+# WordPress 用日本語リソース (UTF-8) 
+# Japanese (UTF-8) translation for WordPress
+#
+# Copyright (c) 2005-2008
+# このファイルは WordPress 本体と同じライセンスのもと配布されています。
+# This file is distributed under the same license as the WordPress package.
+#
+# WordPress 日本語版作成チーム / WP ja translation team
+# <http://groups.google.com/group/wp-ja-pkg/web/members>
+#
+#  誤字脱字誤訳、あるいはよりよい訳などありましたら以下までぜひお知らせください。
+#  また、翻訳、校正、コミットをお手伝いしていただける方も随時募集中です。
+#  連絡先 / Contact: wpja.team@gmail.com (件名か内容に「日本語リソース」と入れてください)
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Custom Field Template\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-08-29 18:20+0900\n"
+"PO-Revision-Date: 2008-08-29 18:20+0900\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Japanese\n"
+"X-Poedit-Country: JAPAN\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;_c\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-SearchPath-0: custom-field-template\n"
+
+#: custom-field-template/custom-field-template.php:48
+msgid "Default Template"
+msgstr "デフォルトテンプレート"
+
+#: custom-field-template/custom-field-template.php:81
+#: custom-field-template/custom-field-template.php:112
+#: custom-field-template/custom-field-template.php:349
+#: custom-field-template/custom-field-template.php:357
+msgid "Custom Field Template"
+msgstr "カスタムフィールドテンプレート"
+
+#: custom-field-template/custom-field-template.php:97
+msgid "Options updated."
+msgstr "オプションは更新されました。"
+
+#: custom-field-template/custom-field-template.php:101
+msgid "Options resetted."
+msgstr "オプションはリセットされました。"
+
+#: custom-field-template/custom-field-template.php:105
+msgid "Options deleted."
+msgstr "オプションは削除されました。"
+
+#: custom-field-template/custom-field-template.php:114
+msgid "Custom Field Template Options"
+msgstr "カスタムフィールドテンプレートオプション"
+
+#: custom-field-template/custom-field-template.php:122
+#, php-format
+msgid "Template Title %d"
+msgstr "テンプレートタイトル %d"
+
+#: custom-field-template/custom-field-template.php:124
+#, php-format
+msgid "Template Content %d"
+msgstr "テンプレートコンテンツ %d"
+
+#: custom-field-template/custom-field-template.php:131
+msgid "Update Options &raquo;"
+msgstr "オプションを更新する &raquo;"
+
+#: custom-field-template/custom-field-template.php:137
+msgid "Reset Options"
+msgstr "オプションをリセットする"
+
+#: custom-field-template/custom-field-template.php:138
+msgid "Are you sure to reset options? Options you set will be reset to the default settings."
+msgstr "本当にオプションをリセットしてもよろしいですか？設定したオプションはデフォルトの状態に戻ります。"
+
+#: custom-field-template/custom-field-template.php:142
+msgid "Unset Options &raquo;"
+msgstr "オプションをリセットする &raquo;"
+
+#: custom-field-template/custom-field-template.php:148
+msgid "Delete Options"
+msgstr "オプションを削除する"
+
+#: custom-field-template/custom-field-template.php:149
+msgid "Are you sure to delete options? Options you set will be deleted."
+msgstr "本当にオプションを削除してもよろしいですか？設定したオプションは削除されます。"
+
+#: custom-field-template/custom-field-template.php:153
+msgid "Delete Options &raquo;"
+msgstr "オプションを削除する &raquo;"
+
+#~ msgid "Recent Posts Ext"
+#~ msgstr "最近の投稿 Ext"
+#~ msgid "camera"
+#~ msgstr "機種"
+#~ msgid "aperture"
+#~ msgstr "絞り値"
+#~ msgid "focal_length"
+#~ msgstr "焦点距離"
+#~ msgid "ISO"
+#~ msgstr "ISO"
+#~ msgid "shutter_speed"
+#~ msgstr "シャッタースピード"
+#~ msgid "created_timestamp"
+#~ msgstr "撮影日時"
+
