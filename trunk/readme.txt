@@ -29,7 +29,7 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 = How can I use this plugin? =
 
 The template format is basically same as the one of the rc:custom_field_gui plugin.
-See the default template and modify it.
+See the default template of the plugin settings and modify it.
 
 == Screenshots ==
 
