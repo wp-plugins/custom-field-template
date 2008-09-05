@@ -1,0 +1,500 @@
+<?php
+/*
+Plugin Name: Custom Field Template
+Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
+Description: This plugin adds the default custom fields on the Write Post/Page.
+Author: Hiroaki Miyashita
+Version: 0.2
+Author URI: http://wordpressgogo.com/
+*/
+
+/*
+This program is based on the rc:custom_field_gui plugin written by Joshua Sigar.
+I appreciate your efforts, Joshua.
+*/
+
+class custom_field_template {
+
+	function custom_field_template() {
+		global $wp_version;
+		
+		add_action( 'init', array(&$this, 'custom_field_template_init') );
+		add_action( 'admin_menu', array(&$this, 'custom_field_template_admin_menu') );
+		add_action( 'admin_print_scripts', array(&$this, 'custom_field_template_admin_scripts') );
+
+		add_action( 'simple_edit_form', array(&$this, 'insert_custome_field'), 1 );
+		add_action( 'edit_form_advanced', array(&$this, 'insert_custom_field'), 1 );
+		add_action( 'edit_page_form', array(&$this, 'insert_custom_field'), 1 );
+		add_action( 'edit_post', array(&$this, 'edit_meta_value') );
+		add_action( 'save_post', array(&$this, 'edit_meta_value') );
+		add_action( 'publish_post', array(&$this, 'edit_meta_value') );
+	}
+
+	function custom_field_template_init() {
+		if ( function_exists('load_plugin_textdomain') ) {
+			load_plugin_textdomain('custom-field-template', 'wp-content/plugins/custom-field-template');
+		}
+		
+		if ( is_user_logged_in() && isset($_REQUEST['id']) && $_REQUEST['page'] == 'custom-field-template/custom-field-template.php' ) {
+			echo $this->load_custom_field( $_REQUEST['id'] );
+			exit();
+		}
+		
+		if( strstr($_SERVER['REQUEST_URI'], 'wp-admin/plugins.php') && isset($_GET['activate']) && $_GET['activate'] == 'true' ) {
+			$options = $this->get_custom_field_template_data();
+			if( !$options ) {
+				$this->install_custom_field_template_data();
+			}
+		}
+	}
+	
+	function custom_field_template_admin_scripts() {
+		wp_enqueue_script( 'jquery');
+	}
+
+	function install_custom_field_template_data() {
+		$options['custom_fields'][0]['title']   = __('Default Template', 'custom-field-template');
+		$options['custom_fields'][0]['content'] = '[Plan]
+type = textfield
+size = 35
+
+[Favorite Post]
+type = checkbox
+default = checked
+
+[Miles Walked]
+type = radio
+value = 0-9 # 10-19 # 20+
+default = 10-19
+
+[Temper Level]
+type = select
+value = High # Medium # Low
+default = Low
+
+[Hidden Thought]
+type = textarea
+rows = 4
+cols = 40
+tinyMCE = true
+
+[Hidden Thought]
+type = textarea
+rows = 4
+cols = 40
+tinyMCE = true';
+		update_option('custom_field_template_data', $options);
+	}
+	
+	function get_custom_field_template_data() {
+		$options = get_option('custom_field_template_data');
+		return $options;
+	}
+
+	function custom_field_template_admin_menu() {
+		add_options_page(__('Custom Field Template', 'custom-field-template'), __('Custom Field Template', 'custom-field-template'), 8, basename(__FILE__), array(&$this, 'custom_field_template_admin'));
+	}
+	
+	function custom_field_template_admin() {
+		$options = $this->get_custom_field_template_data();
+		if($_POST["custom_field_template_set_options_submit"]) :
+			unset($options['custom_fields']);
+			$j = 0;
+			for($i=0;$i<count($_POST["custom_field_template_content"]);$i++) {
+				if( $_POST["custom_field_template_content"][$i] ) {
+					$options['custom_fields'][$j]['title']   = $_POST["custom_field_template_title"][$i];
+					$options['custom_fields'][$j]['content'] = $_POST["custom_field_template_content"][$i];
+					$j++;
+				}
+			}			
+			update_option('custom_field_template_data', $options);
+			$message = __('Options updated.', 'custom-field-template');
+		elseif ($_POST['custom_field_template_unset_options_submit']) :
+			$this->install_custom_field_template_data();
+			$options = $this->get_custom_field_template_data();
+			$message = __('Options resetted.', 'custom-field-template');
+		elseif ($_POST['custom_field_template_delete_options_submit']) :
+			delete_option('custom_field_template_data');
+			$options = $this->get_custom_field_template_data();
+			$message = __('Options deleted.', 'custom-field-template');
+		endif;
+?>
+<?php if ($message) : ?>
+<div id="message" class="updated"><p><?php echo $message; ?></p></div>
+<?php endif; ?>
+<div class="wrap">
+<h2><?php _e('Custom Field Template', 'custom-field-template'); ?></h2>
+
+<h3><?php _e('Custom Field Template Options', 'custom-field-template'); ?></h3>
+<form method="post">
+<table class="form-table">
+<tbody>
+<?php
+	for ( $i = 0; $i < count($options['custom_fields'])+1; $i++ ) {
+?>
+<tr><td>
+<p><label for="custom_field_template_title[<?= $i ?>]"><?php echo sprintf(__('Template Title %d', 'custom-field-template'), $i+1); ?></label>:<br />
+<input name="custom_field_template_title[<?= $i ?>]" id="custom_field_template_title[<?= $i ?>]" class="input" value="<?= stripcslashes($options['custom_fields'][$i]['title']) ?>" size="60" /></p>
+<p><label for="custom_field_template_content[<?= $i ?>]"><?php echo sprintf(__('Template Content %d', 'custom-field-template'), $i+1); ?></label>:<br />
+<textarea name="custom_field_template_content[<?= $i ?>]" id="custom_field_template_content[<?= $i ?>]" class="textarea" rows="10" cols="60"><?= stripcslashes($options['custom_fields'][$i]['content']) ?></textarea></p>
+</td></tr>
+<?php
+	}
+?>
+<tr><td>
+<p><input type="submit" name="custom_field_template_set_options_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" /></p>
+</td></tr>
+</tbody>
+</table>
+</form>
+
+<h3><?php _e('Reset Options', 'custom-field-template'); ?></h3>
+<form method="post" onsubmit="return confirm('<?php _e('Are you sure to reset options? Options you set will be reset to the default settings.', 'custom-field-template'); ?>');">
+<table class="form-table">
+<tbody>
+<tr><td>
+<p><input type="submit" name="custom_field_template_unset_options_submit" value="<?php _e('Unset Options &raquo;', 'custom-field-template'); ?>" /></p>
+</td></tr>
+</tbody>
+</table>
+</form>
+
+<h3><?php _e('Delete Options', 'custom-field-template'); ?></h3>
+<form method="post" onsubmit="return confirm('<?php _e('Are you sure to delete options? Options you set will be deleted.', 'custom-field-template'); ?>');">
+<table class="form-table">
+<tbody>
+<tr><td>
+<p><input type="submit" name="custom_field_template_delete_options_submit" value="<?php _e('Delete Options &raquo;', 'custom-field-template'); ?>" /></p>
+</td></tr>
+</tbody>
+</table>
+</form>
+
+</div>
+<?php
+	}
+		
+	function sanitize_name( $name ) {
+		$name = sanitize_title( $name );
+		$name = str_replace( '-', '_', $name );
+		
+		return $name;
+	}
+	
+	function get_custom_fields( $id ) {
+		$options = $this->get_custom_field_template_data();
+		if ( !$options['custom_fields'][$id] )
+			return null;
+			
+		$custom_fields = $this->parse_ini_str( $options['custom_fields'][$id]['content'], true );
+		return $custom_fields;
+	}
+	
+	function make_textfield( $name, $size = 25 ) {
+		$title = $name;
+		$name = $this->sanitize_name( $name );
+		
+		if( isset( $_REQUEST[ 'post' ] ) ) {
+			$value = get_post_meta( $_REQUEST[ 'post' ], $title );
+			$value = $value[ 0 ];
+		}
+		
+		$out = 
+			'<tr>' .
+			'<th scope="row">' . $title . ' </th>' .
+			'<td> <input id="' . $name . '" name="' . $name . '" value="' . attribute_escape($value) . '" type="textfield" size="' . $size . '" /></td>' .
+			'</tr>';
+		return $out;
+	}
+	
+	function make_checkbox( $name, $default ) {
+		$title = $name;
+		$name = $this->sanitize_name( $name );
+		
+		if( isset( $_REQUEST[ 'post' ] ) ) {
+			$checked = get_post_meta( $_REQUEST[ 'post' ], $title );
+			$checked = $checked ? 'checked="checked"' : '';
+		}
+		else {
+			if ( isset( $default ) && trim( $default ) == 'checked' ) {
+				$checked = 'checked="checked"';
+			}		
+		}
+
+		$out =
+			'<tr>' .
+			'<th scope="row" valign="top">' . $title. ' </th>' .
+			'<td>';
+			
+		$out .=	
+			'<input class="checkbox" name="' . $name . '" value="true" id="' . $name . '" ' . $checked . ' type="checkbox" />';
+			 
+		$out .= '</td>';
+		
+		return $out;
+	}
+	
+	function make_radio( $name, $values, $default ) {
+		$title = $name;
+		$name = $this->sanitize_name( $name );
+		
+		if( isset( $_REQUEST[ 'post' ] ) ) {
+			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
+			$selected = $selected[ 0 ];
+		}
+		else {
+			$selected = $default;
+		}
+	
+		$out =
+			'<tr>' .
+			'<th scope="row" valign="top">' . $title . ' </th>' .
+			'<td>';
+		
+		foreach( $values as $val ) {
+			$id = $name . '_' . $this->sanitize_name( $val );
+			
+			$checked = ( trim( $val ) == trim( $selected ) ) ? 'checked="checked"' : '';
+			
+			$out .=	
+				'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '" value="' . $val . '" ' . $checked . ' type="radio"> ' . $val . '</label><br>';
+		}	 
+		$out .= '</td>';
+		
+		return $out;			
+	}
+	
+	function make_select( $name, $values, $default ) {
+		$title = $name;
+		$name = $this->sanitize_name( $name );
+		
+		if( isset( $_REQUEST[ 'post' ] ) ) {
+			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
+			$selected = $selected[ 0 ];
+		}
+		else {
+			$selected = $default;
+		}
+		
+		$out =
+			'<tr>' .
+			'<th scope="row">' . $title . ' </th>' .
+			'<td>' .
+			'<select name="' . $name . '">' .
+			'<option value="" >Select</option>';
+			
+		foreach( $values as $val ) {
+			$checked = ( trim( $val ) == trim( $selected ) ) ? 'selected="selected"' : '';
+		
+			$out .=
+				'<option value="' . $val . '" ' . $checked . ' > ' . $val. '</option>'; 
+		}
+		$out .= '</select></td>';
+		
+		return $out;
+	}
+	
+	function make_textarea( $name, $rows, $cols, $tinyMCE ) {
+		$title = $name;
+		$name = $this->sanitize_name( $name );
+		
+		if( isset( $_REQUEST[ 'post' ] ) ) {
+			$value = get_post_meta( $_REQUEST[ 'post' ], $title );
+			$value = $value[ 0 ];
+		}
+		
+		$rand = rand();
+		
+		if( $tinyMCE == true ) {
+			$out = '<script type="text/javascript">' . "\n" .
+					'// <![CDATA[' . "\n" .
+					'if ( typeof tinyMCE != "undefined" )' . "\n" .
+					'jQuery(document).ready(function() {tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '");});' . "\n" .
+					'// ]]>' . "\n" .
+					'</script>';
+		}
+		
+		$out .= 
+			'<tr>' .
+			'<th scope="row" valign="top">' . $title . ' </th>' .
+			'<td><textarea id="' . $name . $rand . '" name="' . $name . '" type="textfield" rows="' .$rows. '" cols="' . $cols . '">' . attribute_escape($value) . '</textarea></td>' .
+			'</tr>';
+		return $out;
+	}
+
+	function load_custom_field( $id = 0 ) {
+		
+		$fields = $this->get_custom_fields( $id );
+		
+		if( $fields == null)
+			return;
+
+		$out .= '<input type="hidden" name="custom-field-template-id" id="custom-field-template-id" value="' . $id . '" />';
+		$out .= '<table class="editform">';
+		foreach( $fields as $title => $data ) {
+			if( $data[ 'type' ] == 'textfield' ) {
+				$out .= $this->make_textfield( $title, $data[ 'size' ] );
+			}
+			else if( $data[ 'type' ] == 'checkbox' ) {
+				$out .= 
+					$this->make_checkbox( $title, $data[ 'default' ] );
+			}
+			else if( $data[ 'type' ] == 'radio' ) {
+				$out .= 
+					$this->make_radio( 
+						$title, explode( '#', $data[ 'value' ] ), $data[ 'default' ] );
+			}
+			else if( $data[ 'type' ] == 'select' ) {
+				$out .= 
+					$this->make_select( 
+						$title, explode( '#', $data[ 'value' ] ), $data[ 'default' ] );
+			}
+			else if( $data[ 'type' ] == 'textarea' ) {
+				$out .= 
+					$this->make_textarea( $title, $data[ 'rows' ], $data[ 'cols' ], $data[ 'tinyMCE' ] );
+			}
+		}
+		
+		$out .= '</table>';
+	
+		return $out;
+	}
+
+	function insert_custom_field() {
+		global $wp_version;
+		$options = $this->get_custom_field_template_data();
+		
+		if( $options == null)
+			return;
+
+		if ( substr($wp_version, 0, 3) >= '2.5' ) {
+			$out .= '
+<div id="postaiosp" class="postbox">
+<h3>' . __('Custom Field Template', 'custom-field-template') . '</h3>
+<div class="inside">
+<div id="postaiosp">';
+		} else {
+			$out .= '
+<div class="dbx-b-ox-wrapper">
+<fieldset id="seodiv" class="dbx-box">
+<div class="dbx-h-andle-wrapper">
+<h3 class="dbx-handle">' . __('Custom Field Template', 'custom-field-template') . '</h3>
+</div>
+<div class="dbx-c-ontent-wrapper">
+<div class="dbx-content">';
+        }
+		
+		$body = $this->load_custom_field();
+		$out .= '<select id="custom_field_template_select" onchange="jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&id=\'+jQuery(this).val()+\'&post=' . $_REQUEST['post'] . '\', success: function(html) {jQuery(\'#custom-field-template-box\').html(html);}});">';
+		for ( $i=0; $i < count($options['custom_fields']); $i++ ) {
+			if ( $i == $options['posts'][$_REQUEST['post']] ) {
+				$out .= '<option value="' . $i . '" selected="selected">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
+				$body = $this->load_custom_field($i);
+			} else
+				$out .= '<option value="' . $i . '">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
+		}
+		$out .= '</select>';
+
+		$out .= '<input type="hidden" name="custom-field-template-verify-key" id="custom-field-template-verify-key" value="' . wp_create_nonce('custom-field-template') . '" />';
+		$out .= '<div id="custom-field-template-box">';
+		
+		$out .= $body;
+		
+		$out .= '</div>';
+			
+		if ( substr($wp_version, 0, 3) >= '2.5' ) {
+			$out .= '</div></div></div>';
+		} else {
+			$out .= '</div></fieldset></div>';
+		}
+
+		echo $out;
+	}
+
+	function edit_meta_value( $id ) {
+		global $wpdb;
+		$options = $this->get_custom_field_template_data();
+				
+		if( !isset( $id ) )
+			$id = $_REQUEST[ 'post_ID' ];
+		
+		if( !current_user_can('edit_post', $id) )
+				return $id;
+				
+		if( !wp_verify_nonce($_REQUEST['custom-field-template-verify-key'], 'custom-field-template') )
+				return $id;
+		
+		$fields = $this->get_custom_fields($_REQUEST['custom-field-template-id']);
+		
+		if ( $fields == null )
+			return;
+		
+		foreach( $fields as $title	=> $data) {
+			$name = $this->sanitize_name( $title );
+			$title = $wpdb->escape(stripslashes(trim($title)));
+			
+			$meta_value = stripslashes(trim($_REQUEST[ "$name" ]));
+			if( isset( $meta_value ) && !empty( $meta_value ) ) {
+				delete_post_meta( $id, $title );
+				
+				if( $data[ 'type' ] == 'textfield' || 
+						$data[ 'type' ] == 'radio'	||
+						$data[ 'type' ] == 'select' || 
+						$data[ 'type' ] == 'textarea' ) {
+					add_post_meta( $id, $title, $meta_value );
+				}
+				else if( $data[ 'type' ] == 'checkbox' )
+					add_post_meta( $id, $title, 'true' );
+			}
+			else {
+				delete_post_meta( $id, $title );
+			}
+		}
+		
+		$options['posts'][$_REQUEST['post_ID']] = $_REQUEST['custom-field-template-id'];
+		update_option('custom_field_template_data', $options);
+	}
+	
+	function parse_ini_str($Str,$ProcessSections = TRUE) {
+		$Section = NULL;
+		$Data = array();
+		if ($Temp = strtok($Str,"\r\n")) {
+			do {
+				switch ($Temp{0}) {
+					case ';':
+					case '#':
+						break;
+					case '[':
+						if (!$ProcessSections) {
+							break;
+						}
+						$Pos = strpos($Temp,'[');
+						$Section = substr($Temp,$Pos+1,strpos($Temp,']',$Pos)-1);
+						$Data[$Section] = array();
+						break;
+				default:
+					$Pos = strpos($Temp,'=');
+					if ($Pos === FALSE) {
+						break;
+					}
+					$Value = array();
+					$Value["NAME"] = trim(substr($Temp,0,$Pos));
+					$Value["VALUE"] = trim(substr($Temp,$Pos+1),' "');
+					
+					if ($ProcessSections) {
+						$Data[$Section][$Value["NAME"]] = $Value["VALUE"];
+					}
+					else {
+						$Data[$Value["NAME"]] = $Value["VALUE"];
+					}
+					break;
+				}
+			} while ($Temp = strtok("\r\n"));
+		}
+		return $Data;
+	}
+
+}
+
+$custom_field_template = new custom_field_template();
+?>
