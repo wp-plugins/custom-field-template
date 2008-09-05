@@ -2,18 +2,19 @@
 Contributors: Hiroaki Miyashita
 Donate link: http://wordpressgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template 
-Requires at least: 1.5
+Requires at least: 2.1
 Tested up to: 2.6.1
-Stable tag: 0.1.1
+Stable tag: 0.2
 
 This plugin adds the default custom fields on the Write Post/Page.
 
 == Description ==
 
-The Custom Field Template plugin adds the default custom fields on the Write Post/Page. The template format is almost same as the one of the rc:custom_field_gui plugin. The difference is following:
+The Custom Field Template plugin adds the default custom fields on the Write Post/Page. The template format is almost same as the one of the rc:custom_field_gui plugin. The difference is following.
 
 * You can set any number of the custom field templates and switch the templates when you write/edit the post/page.
 * This plugin does not use the ini file for the template but set it in the option page of the plugin.
+* Support for TinyMCE in the textarea.
 
 == Installation ==
 
@@ -29,7 +30,7 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 = How can I use this plugin? =
 
 The template format is basically same as the one of the rc:custom_field_gui plugin.
-See the default template of the plugin settings and modify it.
+See the default template and modify it.
 
 == Screenshots ==
 
