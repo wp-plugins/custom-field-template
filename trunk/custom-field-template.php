@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.1.1
+Version: 0.2
 Author URI: http://wordpressgogo.com/
 */
 
@@ -75,8 +75,14 @@ default = Low
 [Hidden Thought]
 type = textarea
 rows = 4
-cols = 40		
-		';
+cols = 40
+tinyMCE = true
+
+[Hidden Thought]
+type = textarea
+rows = 4
+cols = 40
+tinyMCE = true';
 		update_option('custom_field_template_data', $options);
 	}
 	
@@ -288,7 +294,7 @@ cols = 40
 		return $out;
 	}
 	
-	function make_textarea( $name, $rows, $cols ) {
+	function make_textarea( $name, $rows, $cols, $tinyMCE ) {
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
@@ -297,10 +303,21 @@ cols = 40
 			$value = $value[ 0 ];
 		}
 		
-		$out = 
+		$rand = rand();
+		
+		if( $tinyMCE == true ) {
+			$out = '<script type="text/javascript">' . "\n" .
+					'// <![CDATA[' . "\n" .
+					'if ( typeof tinyMCE != "undefined" )' . "\n" .
+					'jQuery(document).ready(function() {tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '");});' . "\n" .
+					'// ]]>' . "\n" .
+					'</script>';
+		}
+		
+		$out .= 
 			'<tr>' .
 			'<th scope="row" valign="top">' . $title . ' </th>' .
-			'<td> <textarea id="' . $name . '" name="' . $name . '" type="textfield" rows="' .$rows. '" cols="' .$cols. '">' .attribute_escape($value). '</textarea></td>' .
+			'<td><textarea id="' . $name . $rand . '" name="' . $name . '" type="textfield" rows="' .$rows. '" cols="' . $cols . '">' . attribute_escape($value) . '</textarea></td>' .
 			'</tr>';
 		return $out;
 	}
@@ -334,7 +351,7 @@ cols = 40
 			}
 			else if( $data[ 'type' ] == 'textarea' ) {
 				$out .= 
-					$this->make_textarea( $title, $data[ 'rows' ], $data[ 'cols' ] );
+					$this->make_textarea( $title, $data[ 'rows' ], $data[ 'cols' ], $data[ 'tinyMCE' ] );
 			}
 		}
 		
