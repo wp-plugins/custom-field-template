@@ -1,8 +1,0 @@
-﻿@charset "utf-8";
-
-.gallery {margin: auto;}
-.gallery-item {float: left; margin: 10px auto; text-align: center;}
-.gallery img {border: 2px solid #cfcfcf;}
-/* If you want to show images slowly, use this. And you need to edit lightbox-gallery.js too. */
-/* .gallery img {display: none; border: 2px solid #cfcfcf;} */
-.gallery-caption {margin-left: 0; display:none;}
