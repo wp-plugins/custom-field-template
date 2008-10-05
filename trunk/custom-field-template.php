@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.2
+Version: 0.3.1
 Author URI: http://wordpressgogo.com/
 */
 
@@ -28,6 +28,27 @@ class custom_field_template {
 		add_action( 'edit_post', array(&$this, 'edit_meta_value') );
 		add_action( 'save_post', array(&$this, 'edit_meta_value') );
 		add_action( 'publish_post', array(&$this, 'edit_meta_value') );
+
+		add_filter( 'media_send_to_editor', array(&$this, 'media_send_to_custom_field'), 15 );
+	}
+	
+	function media_send_to_custom_field($html) {
+		$options = $this->get_custom_field_template_data();
+
+		$out =  '<script type="text/javascript">' . "\n" .
+				'	/* <![CDATA[ */' . "\n" .
+				'	var win = window.dialogArguments || opener || parent || top;' . "\n" .
+				'	win.send_to_custom_field("' . addslashes($html) . '");' . "\n" .
+				'/* ]]> */' . "\n" .
+				'</script>' . "\n";
+
+		echo $out;
+
+		if ($options['custom_field_template_use_multiple_insert']) {
+			return;
+		} else {
+			exit();
+		}
 	}
 
 	function custom_field_template_init() {
@@ -100,6 +121,7 @@ tinyMCE = true';
 		if($_POST["custom_field_template_set_options_submit"]) :
 			unset($options['custom_fields']);
 			$j = 0;
+			$options['custom_field_template_use_multiple_insert'] = $_POST['custom_field_template_use_multiple_insert'];
 			for($i=0;$i<count($_POST["custom_field_template_content"]);$i++) {
 				if( $_POST["custom_field_template_content"][$i] ) {
 					$options['custom_fields'][$j]['title']   = $_POST["custom_field_template_title"][$i];
@@ -134,13 +156,18 @@ tinyMCE = true';
 ?>
 <tr><td>
 <p><label for="custom_field_template_title[<?= $i ?>]"><?php echo sprintf(__('Template Title %d', 'custom-field-template'), $i+1); ?></label>:<br />
-<input name="custom_field_template_title[<?= $i ?>]" id="custom_field_template_title[<?= $i ?>]" class="input" value="<?= stripcslashes($options['custom_fields'][$i]['title']) ?>" size="60" /></p>
+<input type="text" name="custom_field_template_title[<?= $i ?>]" id="custom_field_template_title[<?= $i ?>]" class="input" value="<?= stripcslashes($options['custom_fields'][$i]['title']) ?>" size="60" /></p>
 <p><label for="custom_field_template_content[<?= $i ?>]"><?php echo sprintf(__('Template Content %d', 'custom-field-template'), $i+1); ?></label>:<br />
 <textarea name="custom_field_template_content[<?= $i ?>]" id="custom_field_template_content[<?= $i ?>]" class="textarea" rows="10" cols="60"><?= stripcslashes($options['custom_fields'][$i]['content']) ?></textarea></p>
 </td></tr>
 <?php
 	}
 ?>
+<tr><td>
+<p><label for="custom_field_template_use_multiple_insert"><?php _e('In case that you would like to insert multiple images at once in use of the custom field media buttons', 'custom-field-template'); ?></label>:<br />
+<input type="checkbox" name="custom_field_template_use_multiple_insert" id="custom_field_template_use_multiple_insert" value="1" <?php if ($options['custom_field_template_use_multiple_insert']) { echo 'checked="checked"'; } ?> /> <?php _e('Use multiple image inset', 'custom-field-template'); ?><br /><span style="color:#FF0000; font-weight:bold;"><?php _e('Caution:', 'custom-field-teplate'); ?> <?php _e('You need to edit `wp-admin/includes/media.php`. Delete or comment out the code in the function media_send_to_editor at around line 88-96.', 'custom-field-template'); ?></span></p>
+</td>
+</tr>
 <tr><td>
 <p><input type="submit" name="custom_field_template_set_options_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" /></p>
 </td></tr>
@@ -295,6 +322,8 @@ tinyMCE = true';
 	}
 	
 	function make_textarea( $name, $rows, $cols, $tinyMCE ) {
+		global $wp_version;
+
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
@@ -309,15 +338,40 @@ tinyMCE = true';
 			$out = '<script type="text/javascript">' . "\n" .
 					'// <![CDATA[' . "\n" .
 					'if ( typeof tinyMCE != "undefined" )' . "\n" .
-					'jQuery(document).ready(function() {tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '");});' . "\n" .
+				'jQuery(document).ready(function() {tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '");});' . "\n" .
 					'// ]]>' . "\n" .
 					'</script>';
 		}
 		
+		if ( substr($wp_version, 0, 3) >= '2.5' ) {
+
+			$media_upload_iframe_src = "media-upload.php";
+			$media_title = __('Add Media');
+			$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src?type=image");
+			$image_title = __('Add an Image');
+			$video_upload_iframe_src = apply_filters('video_upload_iframe_src', "$media_upload_iframe_src?type=video");
+			$video_title = __('Add Video');
+			$audio_upload_iframe_src = apply_filters('audio_upload_iframe_src', "$media_upload_iframe_src?type=audio");
+			$audio_title = __('Add Audio');
+			$media = <<<EOF
+<a href="{$image_upload_iframe_src}&TB_iframe=true" id="add_image{$rand}" title='$image_title' onclick="focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);"><img src='images/media-button-image.gif' alt='$image_title' /></a>
+<a href="{$video_upload_iframe_src}&amp;TB_iframe=true" id="add_video{$rand}" title='$video_title' onclick="focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);"><img src='images/media-button-video.gif' alt='$video_title' /></a>
+<a href="{$audio_upload_iframe_src}&amp;TB_iframe=true" id="add_audio{$rand}" title='$audio_title' onclick="focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);"><img src='images/media-button-music.gif' alt='$audio_title' /></a>
+<a href="{$media_upload_iframe_src}?TB_iframe=true" id="add_media{$rand}" title='$media_title' onclick="focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);"><img src='images/media-button-other.gif' alt='$media_title' /></a>
+EOF;
+
+			$switch = '<div>';
+			if( $tinyMCE == true ) {
+				$switch .= '<a href="#toggle" onclick="switchMode(\''.$name.$rand.'\'); return false;">' . __('Toggle', 'custom-field-template') . '</a>';
+			}
+			$swicth .= '</div>';
+		
+		}
+		
 		$out .= 
 			'<tr>' .
-			'<th scope="row" valign="top">' . $title . ' </th>' .
-			'<td><textarea id="' . $name . $rand . '" name="' . $name . '" type="textfield" rows="' .$rows. '" cols="' . $cols . '">' . attribute_escape($value) . '</textarea></td>' .
+			'<th scope="row" valign="top">' . $title . '<br />' . $media . $switch . '</th>' .
+			'<td><textarea id="' . $name . $rand . '" name="' . $name . '" type="textfield" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000">' . attribute_escape($value) . '</textarea></td>' .
 			'</tr>';
 		return $out;
 	}
@@ -330,7 +384,7 @@ tinyMCE = true';
 			return;
 
 		$out .= '<input type="hidden" name="custom-field-template-id" id="custom-field-template-id" value="' . $id . '" />';
-		$out .= '<table class="editform">';
+		$out .= '<table class="editform" style="width:100%;">';
 		foreach( $fields as $title => $data ) {
 			if( $data[ 'type' ] == 'textfield' ) {
 				$out .= $this->make_textfield( $title, $data[ 'size' ] );
@@ -384,8 +438,76 @@ tinyMCE = true';
 <div class="dbx-content">';
         }
 		
+		$out .= '<script type="text/javascript">' . "\n" .
+					'// <![CDATA[' . "\n" .
+					'function send_to_custom_field(h) {' . "\n" .
+					'	if ( tmpFocus ) ed = tmpFocus;' . "\n" .
+					'	else {ed = tinyMCE.get("content"); if(ed) {if(!ed.isHidden()) isTinyMCE = true;}}' . "\n" .
+					'	if ( typeof tinyMCE != "undefined" && isTinyMCE && !ed.isHidden() ) {' . "\n" .
+					'		ed.focus();' . "\n" .
+					'		//if (tinymce.isIE)' . "\n" .
+					'			//ed.selection.moveToBookmark(tinymce.EditorManager.activeEditor.windowManager.bookmark);' . "\n" .
+					'		if ( h.indexOf("[caption") != -1 )' . "\n" .
+					'			h = ed.plugins.wpeditimage._do_shcode(h);' . "\n" .
+					'		ed.execCommand("mceInsertContent", false, h);' . "\n" .
+					'	} else {' . "\n" .
+					'		if ( tmpFocus ) edInsertContent(tmpFocus, h);' . "\n" .
+					'		else edInsertContent(edCanvas, h);' . "\n" .
+					'	}' . "\n";
+					
+					if (!$options['custom_field_template_use_multiple_insert']) {
+						$out .= '	tb_remove();' . "\n" .
+								'	tmpFocus = undefined;' . "\n" .
+								'	isTinyMCE = false;' . "\n";
+					}
+
+		$out .=		'}' . "\n" .
+					'jQuery(".thickbox").bind("click", function (e) {' . "\n" .
+					'	tmpFocus = undefined;' . "\n" .
+					'	isTinyMCE = false;' . "\n" . 
+					'});' . "\n" .
+					'var isTinyMCE;' . "\n" .
+					'var tmpFocus;' . "\n" .
+					'function focusTextArea(id) {' . "\n" . 
+					'	jQuery(document).ready(function() {' . "\n" .
+					'		var elm = tinyMCE.get(id);' . "\n" .
+					'		if ( ! elm || elm.isHidden() ) {' . "\n" .
+					'			elm = document.getElementById(id);' . "\n" .
+					'			isTinyMCE = false;' . "\n" .
+					'		}else isTinyMCE = true;' . "\n" .
+					'		tmpFocus = elm' . "\n" .
+					'		elm.focus();' . "\n" .
+					'		if (elm.createTextRange) {' . "\n" .
+					'			var range = elm.createTextRange();' . "\n" .
+					'			range.move("character", elm.value.length);' . "\n" .
+					'			range.select();' . "\n" .
+					'		} else if (elm.setSelectionRange) {' . "\n" .
+					'			elm.setSelectionRange(elm.value.length, elm.value.length);' . "\n" .
+					'		}' . "\n" .
+					'	});' . "\n" .
+					'}' . "\n" .
+					'function thickbox(link) {' . "\n" .
+					'	var t = link.title || link.name || null;' . "\n" .
+					'	var a = link.href || link.alt;' . "\n" .
+					'	var g = link.rel || false;' . "\n" .
+					'	tb_show(t,a,g);' . "\n" .
+					'	link.blur();' . "\n" .
+					'	return false;' . "\n" .
+					'}' . "\n" .
+					'function switchMode(id) {' . "\n" .
+					'	var ed = tinyMCE.get(id);' . "\n" .
+					'	if ( ! ed || ed.isHidden() ) {' . "\n" .
+					'		if ( ed ) ed.show();' . "\n" .
+					'		else tinyMCE.execCommand("mceAddControl", false, id);' . "\n" .
+					'	} else {' . "\n" .
+					'		ed.hide();document.getElementById(id).style.color="#000000";' . "\n" .
+					'	}' . "\n" .
+					'}' . "\n" .
+					'// ]]>' . "\n" .
+					'</script>';
+			
 		$body = $this->load_custom_field();
-		$out .= '<select id="custom_field_template_select" onchange="jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&id=\'+jQuery(this).val()+\'&post=' . $_REQUEST['post'] . '\', success: function(html) {jQuery(\'#custom-field-template-box\').html(html);}});">';
+		$out .= '<select id="custom_field_template_select" onchange="jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&id=\'+jQuery(this).val()+\'&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {jQuery(\'#custom-field-template-box\').html(html);}});">';
 		for ( $i=0; $i < count($options['custom_fields']); $i++ ) {
 			if ( $i == $options['posts'][$_REQUEST['post']] ) {
 				$out .= '<option value="' . $i . '" selected="selected">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';

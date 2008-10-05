@@ -1,23 +1,9 @@
-# WordPress 用日本語リソース (UTF-8) 
-# Japanese (UTF-8) translation for WordPress
-#
-# Copyright (c) 2005-2008
-# このファイルは WordPress 本体と同じライセンスのもと配布されています。
-# This file is distributed under the same license as the WordPress package.
-#
-# WordPress 日本語版作成チーム / WP ja translation team
-# <http://groups.google.com/group/wp-ja-pkg/web/members>
-#
-#  誤字脱字誤訳、あるいはよりよい訳などありましたら以下までぜひお知らせください。
-#  また、翻訳、校正、コミットをお手伝いしていただける方も随時募集中です。
-#  連絡先 / Contact: wpja.team@gmail.com (件名か内容に「日本語リソース」と入れてください)
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: Custom Field Template\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-08-29 18:28+0900\n"
-"PO-Revision-Date: 2008-08-29 18:28+0900\n"
+"POT-Creation-Date: 2008-10-01 02:34+0900\n"
+"PO-Revision-Date: 2008-10-01 02:34+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -27,68 +13,104 @@ msgstr ""
 "X-Poedit-Basepath: ../\n"
 "X-Poedit-SearchPath-0: custom-field-template\n"
 
-#: custom-field-template/custom-field-template.php:48
+#: custom-field-template/custom-field-template.php:81
 msgid "Default Template"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:81
-#: custom-field-template/custom-field-template.php:112
-#: custom-field-template/custom-field-template.php:349
-#: custom-field-template/custom-field-template.php:357
+#: custom-field-template/custom-field-template.php:120
+#: custom-field-template/custom-field-template.php:152
+#: custom-field-template/custom-field-template.php:431
+#: custom-field-template/custom-field-template.php:439
 msgid "Custom Field Template"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:97
+#: custom-field-template/custom-field-template.php:137
 msgid "Options updated."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:101
+#: custom-field-template/custom-field-template.php:141
 msgid "Options resetted."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:105
+#: custom-field-template/custom-field-template.php:145
 msgid "Options deleted."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:114
+#: custom-field-template/custom-field-template.php:154
 msgid "Custom Field Template Options"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:122
+#: custom-field-template/custom-field-template.php:162
 #, php-format
 msgid "Template Title %d"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:124
+#: custom-field-template/custom-field-template.php:164
 #, php-format
 msgid "Template Content %d"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:131
+#: custom-field-template/custom-field-template.php:171
+msgid "In case that you would like to insert multiple images at once in use of the custom field media buttons"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:172
+msgid "Use multiple image inset"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:172
+msgid "Caution:"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:172
+msgid "You need to edit `wp-admin/includes/media.php`. Delete or comment out the code in the function media_send_to_editor at around line 88-96."
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:176
 msgid "Update Options &raquo;"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:137
+#: custom-field-template/custom-field-template.php:182
 msgid "Reset Options"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:138
+#: custom-field-template/custom-field-template.php:183
 msgid "Are you sure to reset options? Options you set will be reset to the default settings."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:142
+#: custom-field-template/custom-field-template.php:187
 msgid "Unset Options &raquo;"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:148
+#: custom-field-template/custom-field-template.php:193
 msgid "Delete Options"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:149
+#: custom-field-template/custom-field-template.php:194
 msgid "Are you sure to delete options? Options you set will be deleted."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:153
+#: custom-field-template/custom-field-template.php:198
 msgid "Delete Options &raquo;"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:353
+msgid "Add Media"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:355
+msgid "Add an Image"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:357
+msgid "Add Video"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:359
+msgid "Add Audio"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:369
+msgid "Toggle"
 msgstr ""
 
