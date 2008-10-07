@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.3.1
+Version: 0.3.2
 Author URI: http://wordpressgogo.com/
 */
 
@@ -338,7 +338,7 @@ tinyMCE = true';
 			$out = '<script type="text/javascript">' . "\n" .
 					'// <![CDATA[' . "\n" .
 					'if ( typeof tinyMCE != "undefined" )' . "\n" .
-				'jQuery(document).ready(function() {tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '");});' . "\n" .
+				'jQuery(document).ready(function() {tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '"); tinyMCEID.push("'. $name . $rand . '");});' . "\n" .
 					'// ]]>' . "\n" .
 					'</script>';
 		}
@@ -361,7 +361,7 @@ tinyMCE = true';
 EOF;
 
 			$switch = '<div>';
-			if( $tinyMCE == true ) {
+			if( $tinyMCE == true && user_can_richedit() ) {
 				$switch .= '<a href="#toggle" onclick="switchMode(\''.$name.$rand.'\'); return false;">' . __('Toggle', 'custom-field-template') . '</a>';
 			}
 			$swicth .= '</div>';
@@ -502,12 +502,27 @@ EOF;
 					'	} else {' . "\n" .
 					'		ed.hide();document.getElementById(id).style.color="#000000";' . "\n" .
 					'	}' . "\n" .
-					'}' . "\n" .
+					'}' . "\n";
+					
+					if(count($options['custom_fields'])>$options['posts'][$_REQUEST['post']] && $options['posts'][$_REQUEST['post']]) $init_id = $options['posts'][$_REQUEST['post']];
+					else $init_id = 0;
+
+					$fields = $this->get_custom_fields( $init_id );
+					foreach( $fields as $title => $data ) {
+						if( $data[ 'type' ] == 'textarea' && $data[ 'tinyMCE' ] ) {
+		$out .=		'jQuery(document).ready(function() {' . "\n" .
+					'	if(wpTinyMCEConfig) if(wpTinyMCEConfig.defaultEditor == "html") { jQuery("#edButtonPreview").trigger("click"); }' . "\n" .
+					'});' . "\n";
+							break;
+						}
+					}					
+					
+		$out .=		'var tinyMCEID = new Array();' . "\n" .
 					'// ]]>' . "\n" .
 					'</script>';
 			
 		$body = $this->load_custom_field();
-		$out .= '<select id="custom_field_template_select" onchange="jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&id=\'+jQuery(this).val()+\'&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {jQuery(\'#custom-field-template-box\').html(html);}});">';
+		$out .= '<select id="custom_field_template_select" onchange="if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID = new Array();};jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&id=\'+jQuery(this).val()+\'&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {jQuery(\'#custom-field-template-box\').html(html);}});">';
 		for ( $i=0; $i < count($options['custom_fields']); $i++ ) {
 			if ( $i == $options['posts'][$_REQUEST['post']] ) {
 				$out .= '<option value="' . $i . '" selected="selected">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
