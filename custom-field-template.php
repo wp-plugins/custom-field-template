@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.3.2
+Version: 0.4
 Author URI: http://wordpressgogo.com/
 */
 
@@ -79,9 +79,25 @@ class custom_field_template {
 type = textfield
 size = 35
 
-[Favorite Post]
+[Plan]
+type = textfield
+size = 35
+hideKey = true
+
+[Favorite Animal]
 type = checkbox
-default = checked
+value = dog
+checked = true
+
+[Favorite Animal]
+type = checkbox
+value = cat
+hideKey = true
+
+[Favorite Animal]
+type = checkbox
+value = monkey
+hideKey = true
 
 [Miles Walked]
 type = radio
@@ -98,12 +114,7 @@ type = textarea
 rows = 4
 cols = 40
 tinyMCE = true
-
-[Hidden Thought]
-type = textarea
-rows = 4
-cols = 40
-tinyMCE = true';
+mediaButton = true';
 		update_option('custom_field_template_data', $options);
 	}
 	
@@ -217,65 +228,74 @@ tinyMCE = true';
 		return $custom_fields;
 	}
 	
-	function make_textfield( $name, $size = 25 ) {
+	function make_textfield( $name, $sid, $size = 25, $hideKey ) {
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
 		if( isset( $_REQUEST[ 'post' ] ) ) {
 			$value = get_post_meta( $_REQUEST[ 'post' ], $title );
-			$value = $value[ 0 ];
+			if ( $value ) {
+				$value = $value[ $sid ];
+			}
 		}
 		
-		$out = 
+		if( $hideKey == true ) $hide = ' style="visibility: hidden;"';
+		
+		$out .= 
 			'<tr>' .
-			'<th scope="row">' . $title . ' </th>' .
-			'<td> <input id="' . $name . '" name="' . $name . '" value="' . attribute_escape($value) . '" type="textfield" size="' . $size . '" /></td>' .
+			'<th scope="row"' . $hide . '>' . $title . ' </th>' .
+			'<td> <input id="' . $name . '" name="' . $name . '[]" value="' . attribute_escape($value) . '" type="textfield" size="' . $size . '" /></td>' .
 			'</tr>';
 		return $out;
 	}
 	
-	function make_checkbox( $name, $default ) {
+	function make_checkbox( $name, $sid, $value, $checked, $hideKey ) {
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
+		if ( !$value ) $value = "true";
+
 		if( isset( $_REQUEST[ 'post' ] ) ) {
-			$checked = get_post_meta( $_REQUEST[ 'post' ], $title );
-			$checked = $checked ? 'checked="checked"' : '';
+			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
+			if ( $selected ) {
+ 				if ( in_array($value, $selected) ) $checked = 'checked="checked"';
+			}
 		}
 		else {
-			if ( isset( $default ) && trim( $default ) == 'checked' ) {
-				$checked = 'checked="checked"';
-			}		
+			if( $checked == true )  $checked = 'checked="checked"';
 		}
-
-		$out =
+		
+		if( $hideKey == true ) $hide = ' style="visibility: hidden;"';
+		
+		$out .= 
 			'<tr>' .
-			'<th scope="row" valign="top">' . $title. ' </th>' .
+			'<th scope="row" valign="top"' . $hide . '>' . $title . ' </th>' .
 			'<td>';
 			
-		$out .=	
-			'<input class="checkbox" name="' . $name . '" value="true" id="' . $name . '" ' . $checked . ' type="checkbox" />';
-			 
+		$out .=	'<label for="' . $id . '" class="selectit"><input name="' . $name . '[' . $sid . ']" value="' . $value . '" ' . $checked . ' type="checkbox" /> ' . $value . '</label><br>';
+
 		$out .= '</td>';
 		
 		return $out;
 	}
 	
-	function make_radio( $name, $values, $default ) {
+	function make_radio( $name, $sid, $values, $default, $hideKey ) {
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
 		if( isset( $_REQUEST[ 'post' ] ) ) {
 			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
-			$selected = $selected[ 0 ];
+			$selected = $selected[ $sid ];
 		}
 		else {
 			$selected = $default;
 		}
 	
-		$out =
+		if( $hideKey == true ) $hide = ' style="visibility: hidden;"';
+		
+		$out .= 
 			'<tr>' .
-			'<th scope="row" valign="top">' . $title . ' </th>' .
+			'<th scope="row" valign="top"' . $hide . '>' . $title . ' </th>' .
 			'<td>';
 		
 		foreach( $values as $val ) {
@@ -284,30 +304,34 @@ tinyMCE = true';
 			$checked = ( trim( $val ) == trim( $selected ) ) ? 'checked="checked"' : '';
 			
 			$out .=	
-				'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '" value="' . $val . '" ' . $checked . ' type="radio"> ' . $val . '</label><br>';
+				'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . $val . '" ' . $checked . ' type="radio" /> ' . $val . '</label><br>';
 		}	 
 		$out .= '</td>';
 		
 		return $out;			
 	}
 	
-	function make_select( $name, $values, $default ) {
+	function make_select( $name, $sid, $values, $default, $hideKey ) {
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
 		if( isset( $_REQUEST[ 'post' ] ) ) {
 			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
-			$selected = $selected[ 0 ];
+			if ( $selected ) {
+				$selected = $selected[ $sid ];
+			}
 		}
 		else {
 			$selected = $default;
 		}
 		
-		$out =
+		if( $hideKey == true ) $hide = ' style="visibility: hidden;"';
+		
+		$out .= 
 			'<tr>' .
-			'<th scope="row">' . $title . ' </th>' .
+			'<th scope="row" valign="top"' . $hide . '>' . $title . ' </th>' .
 			'<td>' .
-			'<select name="' . $name . '">' .
+			'<select name="' . $name . '[]">' .
 			'<option value="" >Select</option>';
 			
 		foreach( $values as $val ) {
@@ -321,7 +345,7 @@ tinyMCE = true';
 		return $out;
 	}
 	
-	function make_textarea( $name, $rows, $cols, $tinyMCE ) {
+	function make_textarea( $name, $sid, $rows, $cols, $tinyMCE, $mediaButton, $hideKey ) {
 		global $wp_version;
 
 		$title = $name;
@@ -329,7 +353,7 @@ tinyMCE = true';
 		
 		if( isset( $_REQUEST[ 'post' ] ) ) {
 			$value = get_post_meta( $_REQUEST[ 'post' ], $title );
-			$value = $value[ 0 ];
+			$value = $value[ $sid ];
 		}
 		
 		$rand = rand();
@@ -345,20 +369,22 @@ tinyMCE = true';
 		
 		if ( substr($wp_version, 0, 3) >= '2.5' ) {
 
-			$media_upload_iframe_src = "media-upload.php";
-			$media_title = __('Add Media');
-			$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src?type=image");
-			$image_title = __('Add an Image');
-			$video_upload_iframe_src = apply_filters('video_upload_iframe_src', "$media_upload_iframe_src?type=video");
-			$video_title = __('Add Video');
-			$audio_upload_iframe_src = apply_filters('audio_upload_iframe_src', "$media_upload_iframe_src?type=audio");
-			$audio_title = __('Add Audio');
-			$media = <<<EOF
+			if ( $mediaButton == true ) {
+				$media_upload_iframe_src = "media-upload.php";
+				$media_title = __('Add Media');
+				$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src?type=image");
+				$image_title = __('Add an Image');
+				$video_upload_iframe_src = apply_filters('video_upload_iframe_src', "$media_upload_iframe_src?type=video");
+				$video_title = __('Add Video');
+				$audio_upload_iframe_src = apply_filters('audio_upload_iframe_src', "$media_upload_iframe_src?type=audio");
+				$audio_title = __('Add Audio');
+				$media = <<<EOF
 <a href="{$image_upload_iframe_src}&TB_iframe=true" id="add_image{$rand}" title='$image_title' onclick="focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);"><img src='images/media-button-image.gif' alt='$image_title' /></a>
 <a href="{$video_upload_iframe_src}&amp;TB_iframe=true" id="add_video{$rand}" title='$video_title' onclick="focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);"><img src='images/media-button-video.gif' alt='$video_title' /></a>
 <a href="{$audio_upload_iframe_src}&amp;TB_iframe=true" id="add_audio{$rand}" title='$audio_title' onclick="focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);"><img src='images/media-button-music.gif' alt='$audio_title' /></a>
 <a href="{$media_upload_iframe_src}?TB_iframe=true" id="add_media{$rand}" title='$media_title' onclick="focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);"><img src='images/media-button-other.gif' alt='$media_title' /></a>
 EOF;
+			}
 
 			$switch = '<div>';
 			if( $tinyMCE == true && user_can_richedit() ) {
@@ -368,10 +394,12 @@ EOF;
 		
 		}
 		
+		if( $hideKey == true ) $hide = ' style="visibility: hidden;"';
+		
 		$out .= 
 			'<tr>' .
-			'<th scope="row" valign="top">' . $title . '<br />' . $media . $switch . '</th>' .
-			'<td><textarea id="' . $name . $rand . '" name="' . $name . '" type="textfield" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000">' . attribute_escape($value) . '</textarea></td>' .
+			'<th scope="row" valign="top"><span' . $hide . '>' . $title . '</span><br />' . $media . $switch . '</th>' .
+			'<td><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" type="textfield" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000">' . attribute_escape($value) . '</textarea></td>' .
 			'</tr>';
 		return $out;
 	}
@@ -386,26 +414,28 @@ EOF;
 		$out .= '<input type="hidden" name="custom-field-template-id" id="custom-field-template-id" value="' . $id . '" />';
 		$out .= '<table class="editform" style="width:100%;">';
 		foreach( $fields as $title => $data ) {
-			if( $data[ 'type' ] == 'textfield' ) {
-				$out .= $this->make_textfield( $title, $data[ 'size' ] );
-			}
-			else if( $data[ 'type' ] == 'checkbox' ) {
-				$out .= 
-					$this->make_checkbox( $title, $data[ 'default' ] );
-			}
-			else if( $data[ 'type' ] == 'radio' ) {
-				$out .= 
-					$this->make_radio( 
-						$title, explode( '#', $data[ 'value' ] ), $data[ 'default' ] );
-			}
-			else if( $data[ 'type' ] == 'select' ) {
-				$out .= 
-					$this->make_select( 
-						$title, explode( '#', $data[ 'value' ] ), $data[ 'default' ] );
-			}
-			else if( $data[ 'type' ] == 'textarea' ) {
-				$out .= 
-					$this->make_textarea( $title, $data[ 'rows' ], $data[ 'cols' ], $data[ 'tinyMCE' ] );
+			for($i = 0; $i<count($data); $i++) {
+				if( $data[$i][ 'type' ] == 'textfield' ) {
+					$out .= $this->make_textfield( $title, $i, $data[$i][ 'size' ], $data[$i][ 'hideKey' ] );
+				}
+				else if( $data[$i][ 'type' ] == 'checkbox' ) {
+					$out .= 
+						$this->make_checkbox( $title, $i, $data[$i][ 'value' ], $data[$i][ 'checked' ], $data[$i][ 'hideKey' ] );
+				}
+				else if( $data[$i][ 'type' ] == 'radio' ) {
+					$out .= 
+						$this->make_radio( 
+							$title, $i, explode( '#', $data[$i][ 'value' ] ), $data[$i][ 'default' ], $data[$i][ 'hideKey' ] );
+				}
+				else if( $data[$i][ 'type' ] == 'select' ) {
+					$out .= 
+						$this->make_select( 
+							$title, $i, explode( '#', $data[$i][ 'value' ] ), $data[$i][ 'default' ], $data[$i][ 'hideKey' ] );
+				}
+				else if( $data[$i][ 'type' ] == 'textarea' ) {
+					$out .= 
+						$this->make_textarea( $title, $i, $data[$i][ 'rows' ], $data[$i][ 'cols' ], $data[$i][ 'tinyMCE' ], $data[$i][ 'mediaButton' ], $data[$i][ 'hideKey' ] );
+				}
 			}
 		}
 		
@@ -509,11 +539,13 @@ EOF;
 
 					$fields = $this->get_custom_fields( $init_id );
 					foreach( $fields as $title => $data ) {
-						if( $data[ 'type' ] == 'textarea' && $data[ 'tinyMCE' ] ) {
+						for($i = 0; $i<count($data); $i++) {
+							if( $data[$i][ 'type' ] == 'textarea' && $data[$i][ 'tinyMCE' ] ) {
 		$out .=		'jQuery(document).ready(function() {' . "\n" .
 					'	if(wpTinyMCEConfig) if(wpTinyMCEConfig.defaultEditor == "html") { jQuery("#edButtonPreview").trigger("click"); }' . "\n" .
 					'});' . "\n";
-							break;
+								break;
+							}
 						}
 					}					
 					
@@ -565,26 +597,30 @@ EOF;
 		
 		if ( $fields == null )
 			return;
-		
+	
 		foreach( $fields as $title	=> $data) {
 			$name = $this->sanitize_name( $title );
 			$title = $wpdb->escape(stripslashes(trim($title)));
-			
-			$meta_value = stripslashes(trim($_REQUEST[ "$name" ]));
-			if( isset( $meta_value ) && !empty( $meta_value ) ) {
-				delete_post_meta( $id, $title );
+			delete_post_meta($id, $title);
+		}
 				
-				if( $data[ 'type' ] == 'textfield' || 
-						$data[ 'type' ] == 'radio'	||
-						$data[ 'type' ] == 'select' || 
-						$data[ 'type' ] == 'textarea' ) {
-					add_post_meta( $id, $title, $meta_value );
+		foreach( $fields as $title	=> $data) {
+			for($i = 0; $i<count($data); $i++) {
+				$name = $this->sanitize_name( $title );
+				$title = $wpdb->escape(stripslashes(trim($title)));
+			
+				$meta_value = stripslashes(trim($_REQUEST[ "$name" ][$i]));
+				if( isset( $meta_value ) && !empty( $meta_value ) ) {
+				
+					/*if( $data[$i][ 'type' ] == 'textfield' || 
+							$data[$i][ 'type' ] == 'radio'	||
+							$data[$i][ 'type' ] == 'select' || 
+							$data[$i][ 'type' ] == 'textarea' ) {*/
+						add_post_meta( $id, $title, $meta_value );
+					/*}
+					else if( $data[$i][ 'type' ] == 'checkbox' )
+						add_post_meta( $id, $title, 'true' );*/
 				}
-				else if( $data[ 'type' ] == 'checkbox' )
-					add_post_meta( $id, $title, 'true' );
-			}
-			else {
-				delete_post_meta( $id, $title );
 			}
 		}
 		
@@ -595,6 +631,8 @@ EOF;
 	function parse_ini_str($Str,$ProcessSections = TRUE) {
 		$Section = NULL;
 		$Data = array();
+		$Sections = array();
+		$id = 0;
 		if ($Temp = strtok($Str,"\r\n")) {
 			do {
 				switch ($Temp{0}) {
@@ -607,7 +645,14 @@ EOF;
 						}
 						$Pos = strpos($Temp,'[');
 						$Section = substr($Temp,$Pos+1,strpos($Temp,']',$Pos)-1);
-						$Data[$Section] = array();
+						if ( in_array($Section, $Sections) ) {
+							$id++;
+						} else {
+							$id = 0;
+							$Data[$Section] = array();
+						}
+						$Sections[] = $Section;
+						if($Data[$Section])
 						break;
 				default:
 					$Pos = strpos($Temp,'=');
@@ -619,7 +664,7 @@ EOF;
 					$Value["VALUE"] = trim(substr($Temp,$Pos+1),' "');
 					
 					if ($ProcessSections) {
-						$Data[$Section][$Value["NAME"]] = $Value["VALUE"];
+						$Data[$Section][$id][$Value["NAME"]] = $Value["VALUE"];
 					}
 					else {
 						$Data[$Value["NAME"]] = $Value["VALUE"];
