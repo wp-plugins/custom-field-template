@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.4.1
+Version: 0.4.2
 Author URI: http://wordpressgogo.com/
 */
 
@@ -255,7 +255,7 @@ mediaButton = true';
 		
 		if ( !$value ) $value = "true";
 
-		if( isset( $_REQUEST[ 'post' ] ) ) {
+		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 ) {
 			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
 			if ( $selected ) {
  				if ( in_array($value, $selected) ) $checked = 'checked="checked"';
@@ -283,14 +283,14 @@ mediaButton = true';
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
-		if( isset( $_REQUEST[ 'post' ] ) ) {
+		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 ) {
 			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
 			$selected = $selected[ $sid ];
 		}
 		else {
 			$selected = $default;
 		}
-	
+			
 		if( $hideKey == true ) $hide = ' style="visibility: hidden;"';
 		
 		$out .= 
@@ -315,7 +315,7 @@ mediaButton = true';
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
-		if( isset( $_REQUEST[ 'post' ] ) ) {
+		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 ) {
 			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
 			if ( $selected ) {
 				$selected = $selected[ $sid ];
