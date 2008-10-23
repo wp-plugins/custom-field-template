@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.4.2
+Version: 0.4.3
 Author URI: http://wordpressgogo.com/
 */
 
@@ -272,7 +272,7 @@ mediaButton = true';
 			'<th scope="row" valign="top"' . $hide . '>' . $title . ' </th>' .
 			'<td>';
 			
-		$out .=	'<label for="' . $id . '" class="selectit"><input name="' . $name . '[' . $sid . ']" value="' . $value . '" ' . $checked . ' type="checkbox" /> ' . $value . '</label><br>';
+		$out .=	'<label for="' . $id . '" class="selectit"><input name="' . $name . '[' . $sid . ']" value="' . attribute_escape($value) . '" ' . $checked . ' type="checkbox" /> ' . stripcslashes($value) . '</label><br>';
 
 		$out .= '</td>';
 		
@@ -304,7 +304,7 @@ mediaButton = true';
 			$checked = ( trim( $val ) == trim( $selected ) ) ? 'checked="checked"' : '';
 			
 			$out .=	
-				'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . $val . '" ' . $checked . ' type="radio" /> ' . $val . '</label><br>';
+				'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape($val) . '" ' . $checked . ' type="radio" /> ' . stripcslashes($val) . '</label><br>';
 		}	 
 		$out .= '</td>';
 		
@@ -338,7 +338,7 @@ mediaButton = true';
 			$checked = ( trim( $val ) == trim( $selected ) ) ? 'selected="selected"' : '';
 		
 			$out .=
-				'<option value="' . $val . '" ' . $checked . ' > ' . $val. '</option>'; 
+				'<option value="' . attribute_escape($val) . '" ' . $checked . ' > ' . $val. '</option>'; 
 		}
 		$out .= '</select></td>';
 		
