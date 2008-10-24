@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.4.3
+Version: 0.4.4
 Author URI: http://wordpressgogo.com/
 */
 
@@ -83,6 +83,11 @@ size = 35
 type = textfield
 size = 35
 hideKey = true
+
+[Favorite Fruits]
+type = checkbox
+value = apple # orange # banana # grape
+default = orange # grape
 
 [Favorite Animal]
 type = checkbox
@@ -258,7 +263,7 @@ mediaButton = true';
 		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 ) {
 			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
 			if ( $selected ) {
- 				if ( in_array($value, $selected) ) $checked = 'checked="checked"';
+ 				if ( in_array(stripcslashes($value), $selected) ) $checked = 'checked="checked"';
 			}
 		}
 		else {
@@ -656,24 +661,46 @@ EOF;
 						$Sections[] = $Section;
 						if($Data[$Section])
 						break;
-				default:
-					$Pos = strpos($Temp,'=');
-					if ($Pos === FALSE) {
+					default:
+						$Pos = strpos($Temp,'=');
+						if ($Pos === FALSE) {
+							break;
+						}
+						$Value = array();
+						$Value["NAME"] = trim(substr($Temp,0,$Pos));
+						$Value["VALUE"] = trim(substr($Temp,$Pos+1),' "');
+											
+						if ($ProcessSections) {							
+							$Data[$Section][$id][$Value["NAME"]] = $Value["VALUE"];
+						}
+						else {
+							$Data[$Value["NAME"]] = $Value["VALUE"];
+						}
 						break;
-					}
-					$Value = array();
-					$Value["NAME"] = trim(substr($Temp,0,$Pos));
-					$Value["VALUE"] = trim(substr($Temp,$Pos+1),' "');
-					
-					if ($ProcessSections) {
-						$Data[$Section][$id][$Value["NAME"]] = $Value["VALUE"];
-					}
-					else {
-						$Data[$Value["NAME"]] = $Value["VALUE"];
-					}
-					break;
 				}
 			} while ($Temp = strtok("\r\n"));
+				
+				foreach($Data as $title => $data) {
+					foreach($data as $key => $val) {
+						if($val["type"] == "checkbox") {
+							$values = explode( '#', $val["value"] );
+							$defaults = explode( '#', $val["default"] );
+							foreach($defaults as $dkey => $dval) {
+								$defaults[$dkey] = trim($dval);
+							}
+							$tmp = $key;
+							foreach($values as $value) {
+								$Data[$title][$key]["type"] = "checkbox";
+								$Data[$title][$key]["value"] = trim($value);
+								if($tmp!=$key)
+									$Data[$title][$key]["hideKey"] = true;
+								if(in_array(trim($value), $defaults))
+									$Data[$title][$key]["checked"] = true;
+								$key++;
+							}
+						}
+					}
+				}			
 		}
 		return $Data;
 	}
