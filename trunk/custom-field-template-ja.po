@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Custom Field Template\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-10-01 02:34+0900\n"
-"PO-Revision-Date: 2008-10-01 02:34+0900\n"
+"POT-Creation-Date: 2008-11-05 03:17+0900\n"
+"PO-Revision-Date: 2008-11-05 03:17+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,104 +16,117 @@ msgstr ""
 "X-Poedit-Basepath: ../\n"
 "X-Poedit-SearchPath-0: custom-field-template\n"
 
-#: custom-field-template/custom-field-template.php:81
-msgid "Default Template"
-msgstr "デフォルトテンプレート"
-
-#: custom-field-template/custom-field-template.php:120
-#: custom-field-template/custom-field-template.php:152
-#: custom-field-template/custom-field-template.php:431
-#: custom-field-template/custom-field-template.php:439
+#: custom-field-template/custom-field-template.php:76
+#: custom-field-template/custom-field-template.php:77
+#: custom-field-template/custom-field-template.php:154
+#: custom-field-template/custom-field-template.php:186
+#: custom-field-template/custom-field-template.php:578
 msgid "Custom Field Template"
 msgstr "カスタムフィールドテンプレート"
 
-#: custom-field-template/custom-field-template.php:137
+#: custom-field-template/custom-field-template.php:88
+msgid "Settings"
+msgstr "設定"
+
+#: custom-field-template/custom-field-template.php:99
+msgid "Default Template"
+msgstr "デフォルトテンプレート"
+
+#: custom-field-template/custom-field-template.php:171
 msgid "Options updated."
 msgstr "オプションは更新されました。"
 
-#: custom-field-template/custom-field-template.php:141
+#: custom-field-template/custom-field-template.php:175
 msgid "Options resetted."
 msgstr "オプションはリセットされました。"
 
-#: custom-field-template/custom-field-template.php:145
+#: custom-field-template/custom-field-template.php:179
 msgid "Options deleted."
 msgstr "オプションは削除されました。"
 
-#: custom-field-template/custom-field-template.php:154
+#: custom-field-template/custom-field-template.php:191
 msgid "Custom Field Template Options"
 msgstr "カスタムフィールドテンプレートオプション"
 
-#: custom-field-template/custom-field-template.php:162
+#: custom-field-template/custom-field-template.php:200
 #, php-format
 msgid "Template Title %d"
 msgstr "テンプレートタイトル %d"
 
-#: custom-field-template/custom-field-template.php:164
+#: custom-field-template/custom-field-template.php:202
 #, php-format
 msgid "Template Content %d"
 msgstr "テンプレートコンテンツ %d"
 
-#: custom-field-template/custom-field-template.php:171
+#: custom-field-template/custom-field-template.php:209
 msgid "In case that you would like to insert multiple images at once in use of the custom field media buttons"
 msgstr "カスタムフィールへの画像挿入を一度に複数枚実行する場合"
 
-#: custom-field-template/custom-field-template.php:172
+#: custom-field-template/custom-field-template.php:210
 msgid "Use multiple image inset"
 msgstr "複数画像挿入を利用する"
 
-#: custom-field-template/custom-field-template.php:172
+#: custom-field-template/custom-field-template.php:210
 msgid "Caution:"
 msgstr "ご注意："
 
-#: custom-field-template/custom-field-template.php:172
+#: custom-field-template/custom-field-template.php:210
 msgid "You need to edit `wp-admin/includes/media.php`. Delete or comment out the code in the function media_send_to_editor at around line 88-96."
 msgstr "`wp-admin/includes/media.php`を編集する必要があります。88-96行目の media_send_to_editor関数の中身を削除するかコメントアウトしてください。"
 
-#: custom-field-template/custom-field-template.php:176
+#: custom-field-template/custom-field-template.php:214
 msgid "Update Options &raquo;"
 msgstr "オプションを更新する &raquo;"
 
-#: custom-field-template/custom-field-template.php:182
+#: custom-field-template/custom-field-template.php:225
+msgid "Option List"
+msgstr "オプションリスト"
+
+#: custom-field-template/custom-field-template.php:276
 msgid "Reset Options"
 msgstr "オプションをリセットする"
 
-#: custom-field-template/custom-field-template.php:183
+#: custom-field-template/custom-field-template.php:278
 msgid "Are you sure to reset options? Options you set will be reset to the default settings."
 msgstr "本当にオプションをリセットしてもよろしいですか？設定したオプションはデフォルトの状態に戻ります。"
 
-#: custom-field-template/custom-field-template.php:187
+#: custom-field-template/custom-field-template.php:282
 msgid "Unset Options &raquo;"
 msgstr "オプションをリセットする &raquo;"
 
-#: custom-field-template/custom-field-template.php:193
+#: custom-field-template/custom-field-template.php:293
 msgid "Delete Options"
 msgstr "オプションを削除する"
 
-#: custom-field-template/custom-field-template.php:194
+#: custom-field-template/custom-field-template.php:295
 msgid "Are you sure to delete options? Options you set will be deleted."
 msgstr "本当にオプションを削除してもよろしいですか？設定したオプションは削除されます。"
 
-#: custom-field-template/custom-field-template.php:198
+#: custom-field-template/custom-field-template.php:299
 msgid "Delete Options &raquo;"
 msgstr "オプションを削除する &raquo;"
 
-#: custom-field-template/custom-field-template.php:353
+#: custom-field-template/custom-field-template.php:412
+msgid "Clear"
+msgstr "解除"
+
+#: custom-field-template/custom-field-template.php:493
 msgid "Add Media"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:355
+#: custom-field-template/custom-field-template.php:495
 msgid "Add an Image"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:357
+#: custom-field-template/custom-field-template.php:497
 msgid "Add Video"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:359
+#: custom-field-template/custom-field-template.php:499
 msgid "Add Audio"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:369
+#: custom-field-template/custom-field-template.php:510
 msgid "Toggle"
 msgstr "切り替え"
 

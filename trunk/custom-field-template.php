@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.4.4
+Version: 0.5.0
 Author URI: http://wordpressgogo.com/
 */
 
@@ -16,20 +16,16 @@ I appreciate your efforts, Joshua.
 class custom_field_template {
 
 	function custom_field_template() {
-		global $wp_version;
-		
 		add_action( 'init', array(&$this, 'custom_field_template_init') );
 		add_action( 'admin_menu', array(&$this, 'custom_field_template_admin_menu') );
 		add_action( 'admin_print_scripts', array(&$this, 'custom_field_template_admin_scripts') );
-
-		add_action( 'simple_edit_form', array(&$this, 'insert_custome_field'), 1 );
-		add_action( 'edit_form_advanced', array(&$this, 'insert_custom_field'), 1 );
-		add_action( 'edit_page_form', array(&$this, 'insert_custom_field'), 1 );
+		
 		add_action( 'edit_post', array(&$this, 'edit_meta_value') );
 		add_action( 'save_post', array(&$this, 'edit_meta_value') );
 		add_action( 'publish_post', array(&$this, 'edit_meta_value') );
 
 		add_filter( 'media_send_to_editor', array(&$this, 'media_send_to_custom_field'), 15 );
+		add_filter( 'plugin_action_links', array(&$this, 'wpaq_filter_plugin_actions',), 10, 2);
 	}
 	
 	function media_send_to_custom_field($html) {
@@ -52,6 +48,8 @@ class custom_field_template {
 	}
 
 	function custom_field_template_init() {
+		global $wp_version;
+
 		if ( function_exists('load_plugin_textdomain') ) {
 			load_plugin_textdomain('custom-field-template', 'wp-content/plugins/custom-field-template');
 		}
@@ -61,12 +59,35 @@ class custom_field_template {
 			exit();
 		}
 		
-		if( strstr($_SERVER['REQUEST_URI'], 'wp-admin/plugins.php') && isset($_GET['activate']) && $_GET['activate'] == 'true' ) {
+		if( strstr($_SERVER['REQUEST_URI'], 'wp-admin/plugins.php') && ((isset($_GET['activate']) && $_GET['activate'] == 'true') || (isset($_GET['activate-multi']) && $_GET['activate-multi'] == 'true') ) ) {
 			$options = $this->get_custom_field_template_data();
 			if( !$options ) {
 				$this->install_custom_field_template_data();
 			}
 		}
+		
+		if ( substr($wp_version, 0, 3) < '2.5' ) {
+			add_action( 'simple_edit_form', array(&$this, 'insert_custome_field'), 1 );
+			add_action( 'edit_form_advanced', array(&$this, 'insert_custom_field'), 1 );
+			add_action( 'edit_page_form', array(&$this, 'insert_custom_field'), 1 );
+		} else {
+			require_once(ABSPATH . 'wp-admin/includes/template.php');
+			add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), 'post', 'normal', 'core');
+			add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), 'page', 'normal', 'core');
+		}
+
+	}
+	
+	function wpaq_filter_plugin_actions($links, $file){
+		static $this_plugin;
+
+		if( ! $this_plugin ) $this_plugin = plugin_basename(__FILE__);
+
+		if( $file == $this_plugin ){
+			$settings_link = '<a href="options-general.php?page=custom-field-template.php">' . __('Settings') . '</a>';
+			$links = array_merge( array($settings_link), $links);
+		}
+		return $links;
 	}
 	
 	function custom_field_template_admin_scripts() {
@@ -108,6 +129,7 @@ hideKey = true
 type = radio
 value = 0-9 # 10-19 # 20+
 default = 10-19
+clearButton = true
 
 [Temper Level]
 type = select
@@ -162,19 +184,23 @@ mediaButton = true';
 <?php endif; ?>
 <div class="wrap">
 <h2><?php _e('Custom Field Template', 'custom-field-template'); ?></h2>
+<br class="clear"/>
 
+<div id="poststuff" class="ui-sortable">
+<div class="postbox">
 <h3><?php _e('Custom Field Template Options', 'custom-field-template'); ?></h3>
+<div class="inside">
 <form method="post">
-<table class="form-table">
+<table class="form-table" style="margin-bottom:5px;">
 <tbody>
 <?php
 	for ( $i = 0; $i < count($options['custom_fields'])+1; $i++ ) {
 ?>
 <tr><td>
 <p><label for="custom_field_template_title[<?= $i ?>]"><?php echo sprintf(__('Template Title %d', 'custom-field-template'), $i+1); ?></label>:<br />
-<input type="text" name="custom_field_template_title[<?= $i ?>]" id="custom_field_template_title[<?= $i ?>]" class="input" value="<?= stripcslashes($options['custom_fields'][$i]['title']) ?>" size="60" /></p>
+<input type="text" name="custom_field_template_title[<?= $i ?>]" id="custom_field_template_title[<?= $i ?>]" value="<?= stripcslashes($options['custom_fields'][$i]['title']) ?>" size="60" /></p>
 <p><label for="custom_field_template_content[<?= $i ?>]"><?php echo sprintf(__('Template Content %d', 'custom-field-template'), $i+1); ?></label>:<br />
-<textarea name="custom_field_template_content[<?= $i ?>]" id="custom_field_template_content[<?= $i ?>]" class="textarea" rows="10" cols="60"><?= stripcslashes($options['custom_fields'][$i]['content']) ?></textarea></p>
+<textarea name="custom_field_template_content[<?= $i ?>]" id="custom_field_template_content[<?= $i ?>]" rows="10" cols="60"><?= stripcslashes($options['custom_fields'][$i]['content']) ?></textarea></p>
 </td></tr>
 <?php
 	}
@@ -190,10 +216,67 @@ mediaButton = true';
 </tbody>
 </table>
 </form>
+</div>
+</div>
+</div>
 
+<div id="poststuff" class="ui-sortable">
+<div class="postbox closed">
+<h3><?php _e('Option List', 'custom-field-template'); ?></h3>
+<div class="inside">
+ex.<br />
+[Plan]<br />
+type = textfield<br />
+size = 35<br />
+hideKey = true<br />
+
+<table class="form-table" style="margin-bottom:5px;">
+<thead>
+<tr>
+<th>type</th><th>textfield</th><th>checkbox</th><th>radio</th><th>select</th><th>textarea</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>hideKey</th><td>hideKey = true</td><td>hideKey = true</td><td>hideKey = true</td><td>hideKey = true</td><td>hideKey = true</td>
+</tr>
+<tr>
+<th>size</th><td>size = 30</td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+<th>value</th><td></td><td>value = apple # orange # banana</td><td>value = apple # orange # banana</td><td>value = apple # orange # banana</td>
+<td></td>
+</tr>
+<tr>
+<th>default</th><td></td><td>default = orange # banana</td><td>default = orange</td><td>default = orange</td><td></td>
+</tr>
+<tr>
+<th>clearButton</th><td></td><td></td><td>clearButton = true</td><td></td><td></td>
+</tr>
+<tr>
+<th>rows</th><td></td><td></td><td></td><td></td><td>rows = 4</td>
+</tr>
+<tr>
+<th>cols</th><td></td><td></td><td></td><td></td><td>cols = 40</td>
+</tr>
+<tr>
+<th>tinyMCE</th><td></td><td></td><td></td><td></td><td>tinyMCE = true</td>
+</tr>
+<tr>
+<th>mediaButton</th><td></td><td></td><td></td><td></td><td>mediaButton = true</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div id="poststuff" class="ui-sortable">
+<div class="postbox closed">
 <h3><?php _e('Reset Options', 'custom-field-template'); ?></h3>
+<div class="inside">
 <form method="post" onsubmit="return confirm('<?php _e('Are you sure to reset options? Options you set will be reset to the default settings.', 'custom-field-template'); ?>');">
-<table class="form-table">
+<table class="form-table" style="margin-bottom:5px;">
 <tbody>
 <tr><td>
 <p><input type="submit" name="custom_field_template_unset_options_submit" value="<?php _e('Unset Options &raquo;', 'custom-field-template'); ?>" /></p>
@@ -201,10 +284,16 @@ mediaButton = true';
 </tbody>
 </table>
 </form>
+</div>
+</div>
+</div>
 
+<div id="poststuff" class="ui-sortable">
+<div class="postbox closed">
 <h3><?php _e('Delete Options', 'custom-field-template'); ?></h3>
+<div class="inside">
 <form method="post" onsubmit="return confirm('<?php _e('Are you sure to delete options? Options you set will be deleted.', 'custom-field-template'); ?>');">
-<table class="form-table">
+<table class="form-table" style="margin-bottom:5px;">
 <tbody>
 <tr><td>
 <p><input type="submit" name="custom_field_template_delete_options_submit" value="<?php _e('Delete Options &raquo;', 'custom-field-template'); ?>" /></p>
@@ -212,6 +301,22 @@ mediaButton = true';
 </tbody>
 </table>
 </form>
+</div>
+</div>
+</div>
+
+<script type="text/javascript">
+// <![CDATA[
+<?php if ( version_compare( substr($wp_version, 0, 3), '2.7', '<' ) ) { ?>
+jQuery('.postbox h3').prepend('<a class="togbox">+</a> ');
+<?php } ?>
+jQuery('.postbox h3').click( function() { jQuery(jQuery(this).parent().get(0)).toggleClass('closed'); } );
+jQuery('.postbox.close-me').each(function(){
+jQuery(this).addClass("closed");
+});
+//-->
+</script>
+
 
 </div>
 <?php
@@ -284,7 +389,7 @@ mediaButton = true';
 		return $out;
 	}
 	
-	function make_radio( $name, $sid, $values, $default, $hideKey ) {
+	function make_radio( $name, $sid, $values, $clearButton, $default, $hideKey ) {
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
@@ -297,10 +402,19 @@ mediaButton = true';
 		}
 			
 		if( $hideKey == true ) $hide = ' style="visibility: hidden;"';
-		
+
 		$out .= 
 			'<tr>' .
-			'<th scope="row" valign="top"' . $hide . '>' . $title . ' </th>' .
+			'<th scope="row" valign="top"' . $hide . '>' . $title;
+			
+		if( $clearButton == true ) {
+			$out .= '<div>';
+			$out .= '<a href="#clear" onclick="jQuery(this).parent().parent().parent().find(\'input\').attr(\'checked\', \'\'); return false;">' . __('Clear', 'custom-field-template') . '</a>';
+			$out .= '</div>';
+		}
+			
+		$out .=
+			'</th>' .
 			'<td>';
 		
 		foreach( $values as $val ) {
@@ -367,7 +481,7 @@ mediaButton = true';
 			$out = '<script type="text/javascript">' . "\n" .
 					'// <![CDATA[' . "\n" .
 					'if ( typeof tinyMCE != "undefined" )' . "\n" .
-				'jQuery(document).ready(function() {tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '"); tinyMCEID.push("'. $name . $rand . '");});' . "\n" .
+					'jQuery(document).ready(function() {tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '"); tinyMCEID.push("'. $name . $rand . '");});' . "\n" .
 					'// ]]>' . "\n" .
 					'</script>';
 		}
@@ -399,18 +513,19 @@ EOF;
 		
 		}
 		
-		if( $hideKey == true ) $hide = ' style="visibility: hidden;"';
+		if ( $hideKey == true ) $hide = ' style="visibility: hidden;"';
 		
 		$out .= 
 			'<tr>' .
 			'<th scope="row" valign="top"><span' . $hide . '>' . $title . '</span><br />' . $media . $switch . '</th>' .
-			'<td><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" type="textfield" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000">' . attribute_escape($value) . '</textarea></td>' .
+			'<td><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" type="textfield" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000">' . attribute_escape($value) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></td>' .
 			'</tr>';
 		return $out;
 	}
 
 	function load_custom_field( $id = 0 ) {
-		
+		$options = $this->get_custom_field_template_data();
+
 		$fields = $this->get_custom_fields( $id );
 		
 		if( $fields == null)
@@ -430,7 +545,7 @@ EOF;
 				else if( $data[$i][ 'type' ] == 'radio' ) {
 					$out .= 
 						$this->make_radio( 
-							$title, $i, explode( '#', $data[$i][ 'value' ] ), $data[$i][ 'default' ], $data[$i][ 'hideKey' ] );
+							$title, $i, explode( '#', $data[$i][ 'value' ] ), $data[$i][ 'clearButton' ], $data[$i][ 'default' ], $data[$i][ 'hideKey' ] );
 				}
 				else if( $data[$i][ 'type' ] == 'select' ) {
 					$out .= 
@@ -438,6 +553,7 @@ EOF;
 							$title, $i, explode( '#', $data[$i][ 'value' ] ), $data[$i][ 'default' ], $data[$i][ 'hideKey' ] );
 				}
 				else if( $data[$i][ 'type' ] == 'textarea' ) {
+					if ( $options['tinyMCE'][$_REQUEST['post']][$this->sanitize_name($title)][$i] )  $data[$i][ 'rows' ] = $options['tinyMCE'][$_REQUEST['post']][$this->sanitize_name($title)][$i];
 					$out .= 
 						$this->make_textarea( $title, $i, $data[$i][ 'rows' ], $data[$i][ 'cols' ], $data[$i][ 'tinyMCE' ], $data[$i][ 'mediaButton' ], $data[$i][ 'hideKey' ] );
 				}
@@ -456,13 +572,7 @@ EOF;
 		if( $options == null)
 			return;
 
-		if ( substr($wp_version, 0, 3) >= '2.5' ) {
-			$out .= '
-<div id="postaiosp" class="postbox">
-<h3>' . __('Custom Field Template', 'custom-field-template') . '</h3>
-<div class="inside">
-<div id="postaiosp">';
-		} else {
+		if ( substr($wp_version, 0, 3) < '2.5' ) {
 			$out .= '
 <div class="dbx-b-ox-wrapper">
 <fieldset id="seodiv" class="dbx-box">
@@ -547,9 +657,14 @@ EOF;
 						foreach( $fields as $title => $data ) {
 							for($i = 0; $i<count($data); $i++) {
 								if( $data[$i][ 'type' ] == 'textarea' && $data[$i][ 'tinyMCE' ] ) {
-		$out .=		'jQuery(document).ready(function() {' . "\n" .
-					'	if(wpTinyMCEConfig) if(wpTinyMCEConfig.defaultEditor == "html") { jQuery("#edButtonPreview").trigger("click"); }' . "\n" .
-					'});' . "\n";
+		$out .=		'jQuery(document).ready(function() {' . "\n";
+		if ( substr($wp_version, 0, 3) >= '2.7' ) {
+		$out .=		'	if ( getUserSetting( "editor" ) == "html" ) {
+jQuery("#edButtonPreview").trigger("click"); }' . "\n";
+		} else {
+		$out .=		'	if(wpTinyMCEConfig) if(wpTinyMCEConfig.defaultEditor == "html") { jQuery("#edButtonPreview").trigger("click"); }' . "\n";
+		}
+		$out .=		'});' . "\n";
 									break;
 								}
 							}
@@ -578,9 +693,7 @@ EOF;
 		
 		$out .= '</div>';
 			
-		if ( substr($wp_version, 0, 3) >= '2.5' ) {
-			$out .= '</div></div></div>';
-		} else {
+		if ( substr($wp_version, 0, 3) < '2.5' ) {
 			$out .= '</div></fieldset></div>';
 		}
 
@@ -590,7 +703,7 @@ EOF;
 	function edit_meta_value( $id ) {
 		global $wpdb;
 		$options = $this->get_custom_field_template_data();
-				
+						
 		if( !isset( $id ) )
 			$id = $_REQUEST[ 'post_ID' ];
 		
@@ -618,20 +731,17 @@ EOF;
 			
 				$meta_value = stripslashes(trim($_REQUEST[ "$name" ][$i]));
 				if( isset( $meta_value ) && !empty( $meta_value ) ) {
-				
-					/*if( $data[$i][ 'type' ] == 'textfield' || 
-							$data[$i][ 'type' ] == 'radio'	||
-							$data[$i][ 'type' ] == 'select' || 
-							$data[$i][ 'type' ] == 'textarea' ) {*/
-						add_post_meta( $id, $title, $meta_value );
-					/*}
-					else if( $data[$i][ 'type' ] == 'checkbox' )
-						add_post_meta( $id, $title, 'true' );*/
+					add_post_meta( $id, $title, $meta_value );						
+						
+					if ( $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'] ) {
+						preg_match('/cw=[0-9]+&ch=([0-9]+)/', $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'], $matched);
+						$options['tinyMCE'][$id][$name][$i] = (int)($matched[1]/20);			
+					}
 				}
 			}
 		}
-		
-		$options['posts'][$_REQUEST['post_ID']] = $_REQUEST['custom-field-template-id'];
+			
+		$options['posts'][$id] = $_REQUEST['custom-field-template-id'];
 		update_option('custom_field_template_data', $options);
 	}
 	
