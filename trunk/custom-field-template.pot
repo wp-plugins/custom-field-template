@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Custom Field Template\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-05 04:45+0900\n"
-"PO-Revision-Date: 2008-11-05 04:45+0900\n"
+"POT-Creation-Date: 2008-11-05 19:03+0900\n"
+"PO-Revision-Date: 2008-11-05 19:03+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -13,117 +13,123 @@ msgstr ""
 "X-Poedit-Basepath: ../\n"
 "X-Poedit-SearchPath-0: custom-field-template\n"
 
-#: custom-field-template/custom-field-template.php:75
 #: custom-field-template/custom-field-template.php:76
-#: custom-field-template/custom-field-template.php:154
-#: custom-field-template/custom-field-template.php:186
-#: custom-field-template/custom-field-template.php:580
+#: custom-field-template/custom-field-template.php:77
+#: custom-field-template/custom-field-template.php:153
+#: custom-field-template/custom-field-template.php:190
+#: custom-field-template/custom-field-template.php:620
 msgid "Custom Field Template"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:87
+#: custom-field-template/custom-field-template.php:88
 msgid "Settings"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:98
+#: custom-field-template/custom-field-template.php:99
 msgid "Default Template"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:171
+#: custom-field-template/custom-field-template.php:170
+#: custom-field-template/custom-field-template.php:174
 msgid "Options updated."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:175
+#: custom-field-template/custom-field-template.php:179
 msgid "Options resetted."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:179
+#: custom-field-template/custom-field-template.php:183
 msgid "Options deleted."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:191
+#: custom-field-template/custom-field-template.php:195
 msgid "Custom Field Template Options"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:200
+#: custom-field-template/custom-field-template.php:204
 #, php-format
 msgid "Template Title %d"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:202
+#: custom-field-template/custom-field-template.php:206
 #, php-format
 msgid "Template Content %d"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:209
+#: custom-field-template/custom-field-template.php:213
 msgid "In case that you would like to insert multiple images at once in use of the custom field media buttons"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:210
+#: custom-field-template/custom-field-template.php:214
 msgid "Use multiple image inset"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:210
+#: custom-field-template/custom-field-template.php:214
 msgid "Caution:"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:210
+#: custom-field-template/custom-field-template.php:214
 msgid "You need to edit `wp-admin/includes/media.php`. Delete or comment out the code in the function media_send_to_editor at around line 88-96."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:214
+#: custom-field-template/custom-field-template.php:218
+#: custom-field-template/custom-field-template.php:238
 msgid "Update Options &raquo;"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:225
+#: custom-field-template/custom-field-template.php:229
+msgid "Admin CSS"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:249
 msgid "Option List"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:276
+#: custom-field-template/custom-field-template.php:303
 msgid "Reset Options"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:278
+#: custom-field-template/custom-field-template.php:305
 msgid "Are you sure to reset options? Options you set will be reset to the default settings."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:282
+#: custom-field-template/custom-field-template.php:309
 msgid "Unset Options &raquo;"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:293
+#: custom-field-template/custom-field-template.php:320
 msgid "Delete Options"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:295
+#: custom-field-template/custom-field-template.php:322
 msgid "Are you sure to delete options? Options you set will be deleted."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:299
+#: custom-field-template/custom-field-template.php:326
 msgid "Delete Options &raquo;"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:412
+#: custom-field-template/custom-field-template.php:443
 msgid "Clear"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:493
+#: custom-field-template/custom-field-template.php:527
 msgid "Add Media"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:495
+#: custom-field-template/custom-field-template.php:529
 msgid "Add an Image"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:497
+#: custom-field-template/custom-field-template.php:531
 msgid "Add Video"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:499
+#: custom-field-template/custom-field-template.php:533
 msgid "Add Audio"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:510
+#: custom-field-template/custom-field-template.php:544
 msgid "Toggle"
 msgstr ""
 
