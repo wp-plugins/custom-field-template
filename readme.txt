@@ -4,7 +4,7 @@ Donate link: http://wordpressgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
 Tested up to: 2.7 beta 1
-Stable tag: 0.5.0
+Stable tag: 0.5.1
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -17,8 +17,9 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 * Support for TinyMCE in the textarea.
 * Support for media buttons in the textarea. - requires at least 2.5.
 * Support for multiple fields with the same key.
-* Support for hideKey options.
-* You can see the full option list in the setting page of the plugin. 
+* Support for hideKey and label options.
+* You can see the full option list in the setting page of the plugin.
+* You can customize the design of custom field template with css. 
 
 == Installation ==
 
