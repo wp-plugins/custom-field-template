@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.5.1
+Version: 0.5.2
 Author URI: http://wordpressgogo.com/
 */
 
@@ -383,7 +383,7 @@ jQuery(this).addClass("closed");
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
 			'<dd>';
 
-		if ( !empty($label) ) $out .= '<p class="label">' . $label . '</p>';
+		if ( !empty($label) ) $out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$out .= '<input id="' . $name . '" name="' . $name . '[]" value="' . attribute_escape($value) . '" type="textfield" size="' . $size . '" /></dd>' .
 			'</dl>';
 		return $out;
@@ -412,7 +412,7 @@ jQuery(this).addClass("closed");
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
 			'<dd>';
 		
-		if ( !empty($label) ) $out .= '<p class="label">' . $label . '</p>';
+		if ( !empty($label) ) $out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$out .=	'<label for="' . $id . '" class="selectit"><input name="' . $name . '[' . $sid . ']" value="' . attribute_escape($value) . '" ' . $checked . ' type="checkbox" /> ' . stripcslashes($value) . '</label><br />';
 
 		$out .= '</dd></dl>';
@@ -448,7 +448,7 @@ jQuery(this).addClass("closed");
 			'</dt>' .
 			'<dd>';
 
-		if ( !empty($label) ) $out .= '<p class="label">' . $label . '</p>';
+		if ( !empty($label) ) $out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		foreach( $values as $val ) {
 			$id = $name . '_' . $this->sanitize_name( $val );
 			
@@ -483,7 +483,7 @@ jQuery(this).addClass("closed");
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
 			'<dd>';
 			
-		if ( !empty($label) ) $out .= '<p class="label">' . $label . '</p>';
+		if ( !empty($label) ) $out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$out .=	'<select name="' . $name . '[]">' .
 			'<option value="" >Select</option>';
 			
@@ -554,7 +554,7 @@ EOF;
 			'<dt><span' . $hide . '>' . $title . '</span><br />' . $media . $switch . '</dt>' .
 			'<dd>';
 
-		if ( !empty($label) ) $out .= '<p class="label">' . $label . '</p>';
+		if ( !empty($label) ) $out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$out .= '<textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" type="textfield" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000">' . attribute_escape($value) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></dd>' .
 			'</dl>';
 		return $out;
@@ -766,16 +766,16 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 	
 		foreach( $fields as $title	=> $data) {
 			$name = $this->sanitize_name( $title );
-			$title = $wpdb->escape(stripslashes(trim($title)));
+			$title = $wpdb->escape(stripcslashes(trim($title)));
 			delete_post_meta($id, $title);
 		}
 				
 		foreach( $fields as $title	=> $data) {
 			for($i = 0; $i<count($data); $i++) {
 				$name = $this->sanitize_name( $title );
-				$title = $wpdb->escape(stripslashes(trim($title)));
+				$title = $wpdb->escape(stripcslashes(trim($title)));
 			
-				$meta_value = stripslashes(trim($_REQUEST[ "$name" ][$i]));
+				$meta_value = stripcslashes(trim($_REQUEST[ "$name" ][$i]));
 				if( isset( $meta_value ) && !empty( $meta_value ) ) {
 					add_post_meta( $id, $title, $meta_value );						
 						
@@ -824,7 +824,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 						}
 						$Value = array();
 						$Value["NAME"] = trim(substr($Temp,0,$Pos));
-						$Value["VALUE"] = trim(substr($Temp,$Pos+1),' "');
+						$Value["VALUE"] = trim(substr($Temp,$Pos+1));
 											
 						if ($ProcessSections) {							
 							$Data[$Section][$id][$Value["NAME"]] = $Value["VALUE"];
