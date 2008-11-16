@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.5.3
+Version: 0.6
 Author URI: http://wordpressgogo.com/
 */
 
@@ -51,7 +51,11 @@ class custom_field_template {
 		global $wp_version;
 
 		if ( function_exists('load_plugin_textdomain') ) {
-			load_plugin_textdomain('custom-field-template', 'wp-content/plugins/custom-field-template');
+			if ( !defined('WP_PLUGIN_DIR') ) {
+				load_plugin_textdomain('custom-field-template', str_replace( ABSPATH, '', dirname(__FILE__) ) );
+			} else {
+				load_plugin_textdomain('custom-field-template', false, dirname( plugin_basename(__FILE__) ) );
+			}
 		}
 		
 		if ( is_user_logged_in() && isset($_REQUEST['id']) && $_REQUEST['page'] == 'custom-field-template/custom-field-template.php' ) {
@@ -68,7 +72,7 @@ class custom_field_template {
 		}
 		
 		if ( substr($wp_version, 0, 3) < '2.5' ) {
-			add_action( 'simple_edit_form', array(&$this, 'insert_custome_field'), 1 );
+			add_action( 'simple_edit_form', array(&$this, 'insert_custom_field'), 1 );
 			add_action( 'edit_form_advanced', array(&$this, 'insert_custom_field'), 1 );
 			add_action( 'edit_page_form', array(&$this, 'insert_custom_field'), 1 );
 		} else {
@@ -98,7 +102,7 @@ class custom_field_template {
 	function install_custom_field_template_data() {
 		$options['custom_fields'][0]['title']   = __('Default Template', 'custom-field-template');
 		$options['custom_fields'][0]['content'] = '[Plan]
-type = textfield
+type = text
 size = 35
 label = Where are you going to go?
 
@@ -158,6 +162,7 @@ mediaButton = true';
 		if($_POST["custom_field_template_set_options_submit"]) :
 			unset($options['custom_fields']);
 			$j = 0;
+			$options['custom_field_template_replace_keys_by_labels'] = $_POST['custom_field_template_replace_keys_by_labels'];
 			$options['custom_field_template_use_multiple_insert'] = $_POST['custom_field_template_use_multiple_insert'];
 			for($i=0;$i<count($_POST["custom_field_template_content"]);$i++) {
 				if( $_POST["custom_field_template_content"][$i] ) {
@@ -215,6 +220,11 @@ mediaButton = true';
 </td>
 </tr>
 <tr><td>
+<p><label for="custom_field_template_replace_keys_by_labels"><?php _e('In case that you would like to replace custom keys by labels if `label` is set', 'custom-field-template'); ?></label>:<br />
+<input type="checkbox" name="custom_field_template_replace_keys_by_labels" id="custom_field_template_replace_keys_by_labels" value="1" <?php if ($options['custom_field_template_replace_keys_by_labels']) { echo 'checked="checked"'; } ?> /> <?php _e('Use labels in place of custom keys', 'custom-field-template'); ?></p>
+</td>
+</tr>
+<tr><td>
 <p><input type="submit" name="custom_field_template_set_options_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" /></p>
 </td></tr>
 </tbody>
@@ -257,7 +267,7 @@ hideKey = true<br />
 <table class="form-table" style="margin-bottom:5px;">
 <thead>
 <tr>
-<th>type</th><th>textfield</th><th>checkbox</th><th>radio</th><th>select</th><th>textarea</th>
+<th>type</th><th>text or textfield</th><th>checkbox</th><th>radio</th><th>select</th><th>textarea</th>
 </tr>
 </thead>
 <tbody>
@@ -366,6 +376,8 @@ jQuery(this).addClass("closed");
 	}
 	
 	function make_textfield( $name, $sid, $size = 25, $hideKey, $label ) {
+		$options = $this->get_custom_field_template_data();
+
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
@@ -378,18 +390,24 @@ jQuery(this).addClass("closed");
 		
 		if ( $hideKey == true ) $hide = ' class="hideKey""';
 		
+		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
+			$title = stripcslashes($label);
+		
 		$out .= 
 			'<dl>' .
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
 			'<dd>';
 
-		if ( !empty($label) ) $out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= '<input id="' . $name . '" name="' . $name . '[]" value="' . attribute_escape($value) . '" type="textfield" size="' . $size . '" /></dd>' .
+		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
+			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
+		$out .= '<input id="' . $name . '" name="' . $name . '[]" value="' . attribute_escape($value) . '" type="text" size="' . $size . '" /></dd>' .
 			'</dl>';
 		return $out;
 	}
 	
 	function make_checkbox( $name, $sid, $value, $checked, $hideKey, $label ) {
+		$options = $this->get_custom_field_template_data();
+
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
@@ -407,12 +425,16 @@ jQuery(this).addClass("closed");
 		
 		if ( $hideKey == true ) $hide = ' class="hideKey""';
 		
+		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
+			$title = stripcslashes($label);
+		
 		$out .= 
 			'<dl>' .
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
 			'<dd>';
 		
-		if ( !empty($label) ) $out .= '<p class="label">' . stripcslashes($label) . '</p>';
+		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
+			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$out .=	'<label for="' . $id . '" class="selectit"><input name="' . $name . '[' . $sid . ']" value="' . attribute_escape($value) . '" ' . $checked . ' type="checkbox" /> ' . stripcslashes($value) . '</label><br />';
 
 		$out .= '</dd></dl>';
@@ -421,6 +443,8 @@ jQuery(this).addClass("closed");
 	}
 	
 	function make_radio( $name, $sid, $values, $clearButton, $default, $hideKey, $label ) {
+		$options = $this->get_custom_field_template_data();
+
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
@@ -433,6 +457,9 @@ jQuery(this).addClass("closed");
 		}
 			
 		if ( $hideKey == true ) $hide = ' class="hideKey""';
+
+		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
+			$title = stripcslashes($label);
 
 		$out .= 
 			'<dl>' .
@@ -448,7 +475,8 @@ jQuery(this).addClass("closed");
 			'</dt>' .
 			'<dd>';
 
-		if ( !empty($label) ) $out .= '<p class="label">' . stripcslashes($label) . '</p>';
+		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
+			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		foreach( $values as $val ) {
 			$id = $name . '_' . $this->sanitize_name( $val );
 			
@@ -463,6 +491,8 @@ jQuery(this).addClass("closed");
 	}
 	
 	function make_select( $name, $sid, $values, $default, $hideKey, $label ) {
+		$options = $this->get_custom_field_template_data();
+
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		
@@ -477,13 +507,17 @@ jQuery(this).addClass("closed");
 		}
 		
 		if ( $hideKey == true ) $hide = ' class="hideKey""';
+
+		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
+			$title = stripcslashes($label);
 		
 		$out .= 
 			'<dl>' .
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
 			'<dd>';
 			
-		if ( !empty($label) ) $out .= '<p class="label">' . stripcslashes($label) . '</p>';
+		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
+			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$out .=	'<select name="' . $name . '[]">' .
 			'<option value="" >Select</option>';
 			
@@ -499,6 +533,8 @@ jQuery(this).addClass("closed");
 	}
 	
 	function make_textarea( $name, $sid, $rows, $cols, $tinyMCE, $mediaButton, $hideKey, $label ) {
+		$options = $this->get_custom_field_template_data();
+
 		global $wp_version;
 
 		$title = $name;
@@ -515,7 +551,7 @@ jQuery(this).addClass("closed");
 			$out = '<script type="text/javascript">' . "\n" .
 					'// <![CDATA[' . "\n" .
 					'if ( typeof tinyMCE != "undefined" )' . "\n" .
-					'jQuery(document).ready(function() {tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '"); tinyMCEID.push("'. $name . $rand . '");});' . "\n" .
+					'jQuery(document).ready(function() {document.getElementById("'. $name . $rand . '").value = switchEditors.wpautop(document.getElementById("'. $name . $rand . '").value); tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '"); tinyMCEID.push("'. $name . $rand . '");});' . "\n" .
 					'// ]]>' . "\n" .
 					'</script>';
 		}
@@ -548,14 +584,18 @@ EOF;
 		}
 		
 		if ( $hideKey == true ) $hide = ' class="hideKey""';
+
+		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
+			$title = stripcslashes($label);
 		
 		$out .= 
 			'<dl>' .
 			'<dt><span' . $hide . '>' . $title . '</span><br />' . $media . $switch . '</dt>' .
 			'<dd>';
 
-		if ( !empty($label) ) $out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= '<textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" type="textfield" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000">' . attribute_escape($value) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></dd>' .
+		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
+			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
+		$out .= '<textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000">' . attribute_escape($value) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></dd>' .
 			'</dl>';
 		return $out;
 	}
@@ -571,7 +611,7 @@ EOF;
 		$out .= '<input type="hidden" name="custom-field-template-id" id="custom-field-template-id" value="' . $id . '" />';
 		foreach( $fields as $title => $data ) {
 			for($i = 0; $i<count($data); $i++) {
-				if( $data[$i]['type'] == 'textfield' ) {
+				if( $data[$i]['type'] == 'textfield' || $data[$i]['type'] == 'text' ) {
 					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['hideKey'], $data[$i]['label'] );
 				}
 				else if( $data[$i]['type'] == 'checkbox' ) {
@@ -682,6 +722,7 @@ EOF;
 					'function switchMode(id) {' . "\n" .
 					'	var ed = tinyMCE.get(id);' . "\n" .
 					'	if ( ! ed || ed.isHidden() ) {' . "\n" .
+					'		document.getElementById(id).value = switchEditors.wpautop(document.getElementById(id).value);' . "\n" .
 					'		if ( ed ) ed.show();' . "\n" .
 					'		else tinyMCE.execCommand("mceAddControl", false, id);' . "\n" .
 					'	} else {' . "\n" .
@@ -748,7 +789,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 	function edit_meta_value( $id ) {
 		global $wpdb;
 		$options = $this->get_custom_field_template_data();
-								
+		
 		if( !isset( $id ) )
 			$id = $_REQUEST[ 'post_ID' ];
 		
