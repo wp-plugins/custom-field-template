@@ -4,7 +4,7 @@ Donate link: http://wordpressgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
 Tested up to: 2.7 beta 3
-Stable tag: 0.6
+Stable tag: 0.6.1
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -21,6 +21,7 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 * You can see the full option list in the setting page of the plugin.
 * You can customize the design of custom field template with css.
 * You can replace custom keys by labels.
+* You can use wpautop function.
 
 == Installation ==
 
