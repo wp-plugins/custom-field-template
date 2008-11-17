@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.6
+Version: 0.6.1
 Author URI: http://wordpressgogo.com/
 */
 
@@ -164,6 +164,7 @@ mediaButton = true';
 			$j = 0;
 			$options['custom_field_template_replace_keys_by_labels'] = $_POST['custom_field_template_replace_keys_by_labels'];
 			$options['custom_field_template_use_multiple_insert'] = $_POST['custom_field_template_use_multiple_insert'];
+			$options['custom_field_template_use_wpautop'] = $_POST['custom_field_template_use_wpautop'];
 			for($i=0;$i<count($_POST["custom_field_template_content"]);$i++) {
 				if( $_POST["custom_field_template_content"][$i] ) {
 					$options['custom_fields'][$j]['title']   = $_POST["custom_field_template_title"][$i];
@@ -222,6 +223,10 @@ mediaButton = true';
 <tr><td>
 <p><label for="custom_field_template_replace_keys_by_labels"><?php _e('In case that you would like to replace custom keys by labels if `label` is set', 'custom-field-template'); ?></label>:<br />
 <input type="checkbox" name="custom_field_template_replace_keys_by_labels" id="custom_field_template_replace_keys_by_labels" value="1" <?php if ($options['custom_field_template_replace_keys_by_labels']) { echo 'checked="checked"'; } ?> /> <?php _e('Use labels in place of custom keys', 'custom-field-template'); ?></p>
+</td>
+<tr><td>
+<p><label for="custom_field_template_use_wpautop"><?php _e('In case that you would like to add p and br tags in textareas automatically', 'custom-field-template'); ?></label>:<br />
+<input type="checkbox" name="custom_field_template_use_wpautop" id="custom_field_template_use_wpautop" value="1" <?php if ($options['custom_field_template_use_wpautop']) { echo 'checked="checked"'; } ?> /> <?php _e('Use wpautop function', 'custom-field-template'); ?></p>
 </td>
 </tr>
 <tr><td>
@@ -582,7 +587,7 @@ EOF;
 			$switch .= '</div>';
 		
 		}
-		
+				
 		if ( $hideKey == true ) $hide = ' class="hideKey""';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
@@ -816,6 +821,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 				$title = $wpdb->escape(stripcslashes(trim($title)));
 			
 				$meta_value = stripcslashes(trim($_REQUEST[ "$name" ][$i]));
+				
+				if ( $options['custom_field_template_use_wpautop'] && $data[$i]['type'] == 'textarea' )
+					$meta_value = wpautop($meta_value);
 				if( isset( $meta_value ) && !empty( $meta_value ) ) {
 					add_post_meta( $id, $title, $meta_value );						
 						
