@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.6.1
+Version: 0.6.2
 Author URI: http://wordpressgogo.com/
 */
 
@@ -555,10 +555,14 @@ jQuery(this).addClass("closed");
 		if( $tinyMCE == true ) {
 			$out = '<script type="text/javascript">' . "\n" .
 					'// <![CDATA[' . "\n" .
-					'if ( typeof tinyMCE != "undefined" )' . "\n" .
-					'jQuery(document).ready(function() {document.getElementById("'. $name . $rand . '").value = switchEditors.wpautop(document.getElementById("'. $name . $rand . '").value); tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '"); tinyMCEID.push("'. $name . $rand . '");});' . "\n" .
-					'// ]]>' . "\n" .
-					'</script>';
+					'if ( typeof tinyMCE != "undefined" )' . "\n";
+			if ( $options['custom_field_template_use_wpautop'] ) :
+				$out .=	'jQuery(document).ready(function() {document.getElementById("'. $name . $rand . '").value = document.getElementById("'. $name . $rand . '").value; tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '"); tinyMCEID.push("'. $name . $rand . '");});' . "\n";
+			else:
+				$out .=	'jQuery(document).ready(function() {document.getElementById("'. $name . $rand . '").value = switchEditors.wpautop(document.getElementById("'. $name . $rand . '").value); tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '"); tinyMCEID.push("'. $name . $rand . '");});' . "\n";
+			endif;		
+				$out .= '// ]]>' . "\n" .
+						'</script>';
 		}
 		
 		if ( substr($wp_version, 0, 3) >= '2.5' ) {
