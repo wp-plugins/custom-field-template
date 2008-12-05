@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.6.3
+Version: 0.6.4
 Author URI: http://wordpressgogo.com/
 */
 
@@ -178,6 +178,14 @@ mediaButton = true';
 			$options['css'] = $_POST['custom_field_template_css'];
 			update_option('custom_field_template_data', $options);
 			$message = __('Options updated.', 'custom-field-template');
+		elseif ($_POST['custom_field_template_php_submit']) :
+			unset($options['php']);
+			for($i=0;$i<count($_POST["custom_field_template_php"]);$i++) {
+				if( $_POST["custom_field_template_php"][$i] )
+					$options['php'][] = $_POST["custom_field_template_php"][$i];
+			}			
+			update_option('custom_field_template_data', $options);
+			$message = __('Options updated.', 'custom-field-template');
 		elseif ($_POST['custom_field_template_unset_options_submit']) :
 			$this->install_custom_field_template_data();
 			$this->install_custom_field_template_css();
@@ -241,7 +249,7 @@ mediaButton = true';
 
 <div id="poststuff" class="ui-sortable">
 <div class="postbox closed">
-<h3><?php _e('Admin CSS', 'custom-field-template'); ?></h3>
+<h3><?php _e('CSS', 'custom-field-template'); ?></h3>
 <div class="inside">
 <form method="post">
 <table class="form-table" style="margin-bottom:5px;">
@@ -251,6 +259,34 @@ mediaButton = true';
 </td></tr>
 <tr><td>
 <p><input type="submit" name="custom_field_template_css_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" /></p>
+</td></tr>
+</tbody>
+</table>
+</form>
+</div>
+</div>
+</div>
+
+<div id="poststuff" class="ui-sortable">
+<div class="postbox closed">
+<h3><?php _e('PHP CODE (Experimental Option)', 'custom-field-template'); ?></h3>
+<div class="inside">
+<form method="post" onsubmit="return confirm('<?php _e('Are you sure to save PHP codes? Please do it at your own risk.', 'custom-field-template'); ?>');">
+<p><?php _e('This option is available only for `radio` and `select` types. You must set $values as an array.', 'custom-field-template'); ?><br />ex. $values = array('dog', 'cat', 'monkey'); $default = 'cat';</p>
+<table class="form-table" style="margin-bottom:5px;">
+<tbody>
+<?php
+	for ($i=0;$i<count($options['php'])+1;$i++) :
+?>
+<tr><th>CODE# <?= $i ?></th></tr>
+<tr><td>
+<p><textarea name="custom_field_template_php[]" rows="10" cols="60"><?= stripcslashes($options['php'][$i]) ?></textarea></p>
+</td></tr>
+<?php
+	endfor;
+?>
+<tr><td>
+<p><input type="submit" name="custom_field_template_php_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" /></p>
 </td></tr>
 </tbody>
 </table>
@@ -306,6 +342,9 @@ hideKey = true<br />
 </tr>
 <tr>
 <th>mediaButton</th><td></td><td></td><td></td><td></td><td>mediaButton = true</td>
+</tr>
+<tr>
+<th>code</th>><td></td><td></td><td>code = 0</td><td>code = 0</td><td></td>
 </tr>
 </tbody>
 </table>
@@ -447,11 +486,15 @@ jQuery(this).addClass("closed");
 		return $out;
 	}
 	
-	function make_radio( $name, $sid, $values, $clearButton, $default, $hideKey, $label ) {
+	function make_radio( $name, $sid, $values, $clearButton, $default, $hideKey, $label, $code ) {
 		$options = $this->get_custom_field_template_data();
 
 		$title = $name;
 		$name = $this->sanitize_name( $name );
+
+		if ( is_numeric($code) ) :
+			eval(stripcslashes($options['php'][$code]));
+		endif;
 		
 		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 ) {
 			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
@@ -495,12 +538,16 @@ jQuery(this).addClass("closed");
 		return $out;			
 	}
 	
-	function make_select( $name, $sid, $values, $default, $hideKey, $label ) {
+	function make_select( $name, $sid, $values, $default, $hideKey, $label, $code ) {
 		$options = $this->get_custom_field_template_data();
 
 		$title = $name;
 		$name = $this->sanitize_name( $name );
-		
+
+		if ( is_numeric($code) ) :
+			eval(stripcslashes($options['php'][$code]));
+		endif;
+	
 		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 ) {
 			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
 			if ( $selected ) {
@@ -525,7 +572,7 @@ jQuery(this).addClass("closed");
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$out .=	'<select name="' . $name . '[]">' .
 			'<option value="" >Select</option>';
-			
+						
 		foreach( $values as $val ) {
 			$checked = ( trim( $val ) == trim( $selected ) ) ? 'selected="selected"' : '';
 		
@@ -630,12 +677,12 @@ EOF;
 				else if( $data[$i]['type'] == 'radio' ) {
 					$out .= 
 						$this->make_radio( 
-							$title, $i, explode( '#', $data[$i]['value'] ), $data[$i]['clearButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'] );
+							$title, $i, explode( '#', $data[$i]['value'] ), $data[$i]['clearButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'] );
 				}
 				else if( $data[$i]['type'] == 'select' ) {
 					$out .= 
 						$this->make_select( 
-							$title, $i, explode( '#', $data[$i]['value'] ), $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'] );
+							$title, $i, explode( '#', $data[$i]['value'] ), $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'] );
 				}
 				else if( $data[$i]['type'] == 'textarea' ) {
 					if ( $options['tinyMCE'][$_REQUEST['post']][$this->sanitize_name($title)][$i] )  $data[$i]['rows']  = $options['tinyMCE'][$_REQUEST['post']][$this->sanitize_name($title)][$i];
