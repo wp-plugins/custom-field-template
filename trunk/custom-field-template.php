@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.6.4
+Version: 0.6.5
 Author URI: http://wordpressgogo.com/
 */
 
@@ -344,7 +344,10 @@ hideKey = true<br />
 <th>mediaButton</th><td></td><td></td><td></td><td></td><td>mediaButton = true</td>
 </tr>
 <tr>
-<th>code</th>><td></td><td></td><td>code = 0</td><td>code = 0</td><td></td>
+<th>code</th><td></td><td></td><td>code = 0</td><td>code = 0</td><td></td>
+</tr>
+<tr>
+<th>level</th><td>level = 1</td><td>level = 3</td><td>level = 5</td><td>level = 7</td><td>level = 9</td>
 </tr>
 </tbody>
 </table>
@@ -657,6 +660,10 @@ EOF;
 	}
 
 	function load_custom_field( $id = 0 ) {
+		global $userdata;
+		get_currentuserinfo();
+		$level = $userdata->user_level;
+		
 		$options = $this->get_custom_field_template_data();
 
 		$fields = $this->get_custom_fields( $id );
@@ -667,6 +674,9 @@ EOF;
 		$out .= '<input type="hidden" name="custom-field-template-id" id="custom-field-template-id" value="' . $id . '" />';
 		foreach( $fields as $title => $data ) {
 			for($i = 0; $i<count($data); $i++) {
+				if ( is_numeric($data[$i]['level']) ) :
+					if ( $data[$i]['level'] > $level ) continue;
+				endif; 
 				if( $data[$i]['type'] == 'textfield' || $data[$i]['type'] == 'text' ) {
 					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['hideKey'], $data[$i]['label'] );
 				}
