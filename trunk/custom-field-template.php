@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.6.5
+Version: 0.7
 Author URI: http://wordpressgogo.com/
 */
 
@@ -26,6 +26,8 @@ class custom_field_template {
 
 		add_filter( 'media_send_to_editor', array(&$this, 'media_send_to_custom_field'), 15 );
 		add_filter( 'plugin_action_links', array(&$this, 'wpaq_filter_plugin_actions',), 10, 2);
+		
+		add_shortcode( 'cft', array(&$this, 'output_custom_field_values') );
 	}
 	
 	function media_send_to_custom_field($html) {
@@ -215,6 +217,7 @@ mediaButton = true';
 	for ( $i = 0; $i < count($options['custom_fields'])+1; $i++ ) {
 ?>
 <tr><td>
+<p><strong>TEMPLATE #<?= $i ?></strong></p>
 <p><label for="custom_field_template_title[<?= $i ?>]"><?php echo sprintf(__('Template Title %d', 'custom-field-template'), $i+1); ?></label>:<br />
 <input type="text" name="custom_field_template_title[<?= $i ?>]" id="custom_field_template_title[<?= $i ?>]" value="<?= stripcslashes($options['custom_fields'][$i]['title']) ?>" size="60" /></p>
 <p><label for="custom_field_template_content[<?= $i ?>]"><?php echo sprintf(__('Template Content %d', 'custom-field-template'), $i+1); ?></label>:<br />
@@ -278,7 +281,7 @@ mediaButton = true';
 <?php
 	for ($i=0;$i<count($options['php'])+1;$i++) :
 ?>
-<tr><th>CODE# <?= $i ?></th></tr>
+<tr><th><strong>CODE #<?= $i ?></strong></th></tr>
 <tr><td>
 <p><textarea name="custom_field_template_php[]" rows="10" cols="60"><?= stripcslashes($options['php'][$i]) ?></textarea></p>
 </td></tr>
@@ -348,6 +351,12 @@ hideKey = true<br />
 </tr>
 <tr>
 <th>level</th><td>level = 1</td><td>level = 3</td><td>level = 5</td><td>level = 7</td><td>level = 9</td>
+</tr>
+<tr>
+<th>insertTag</th><td>insertTag = true</td><td>insertTag = true</td><td>insertTag = true</td><td>insertTag = true</td><td>insertTag = true</td>
+</tr>
+<tr>
+<th>output</th><td>output = true</td><td>output = true</td><td>output = true</td><td>output = true</td><td>output = true</td>
 </tr>
 </tbody>
 </table>
@@ -435,7 +444,7 @@ jQuery(this).addClass("closed");
 			}
 		}
 		
-		if ( $hideKey == true ) $hide = ' class="hideKey""';
+		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -470,7 +479,7 @@ jQuery(this).addClass("closed");
 			if( $checked == true )  $checked = 'checked="checked"';
 		}
 		
-		if ( $hideKey == true ) $hide = ' class="hideKey""';
+		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -507,7 +516,7 @@ jQuery(this).addClass("closed");
 			$selected = $default;
 		}
 			
-		if ( $hideKey == true ) $hide = ' class="hideKey""';
+		if ( $hideKey == true ) $hide = ' class="hideKey"';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -561,7 +570,7 @@ jQuery(this).addClass("closed");
 			$selected = $default;
 		}
 		
-		if ( $hideKey == true ) $hide = ' class="hideKey""';
+		if ( $hideKey == true ) $hide = ' class="hideKey"';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -642,7 +651,7 @@ EOF;
 		
 		}
 				
-		if ( $hideKey == true ) $hide = ' class="hideKey""';
+		if ( $hideKey == true ) $hide = ' class="hideKey"';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -875,6 +884,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			$title = $wpdb->escape(stripcslashes(trim($title)));
 			delete_post_meta($id, $title);
 		}
+
+		$tags_input = explode(",", $_POST['tags_input']);
 				
 		foreach( $fields as $title	=> $data) {
 			for($i = 0; $i<count($data); $i++) {
@@ -886,7 +897,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 				if ( $options['custom_field_template_use_wpautop'] && $data[$i]['type'] == 'textarea' )
 					$meta_value = wpautop($meta_value);
 				if( isset( $meta_value ) && strlen( $meta_value ) ) {
-					add_post_meta( $id, $title, $meta_value );						
+					add_post_meta( $id, $title, $meta_value );
+					if ( $data[$i]['insertTag'] == true ) $tags_input[] = $meta_value;
 						
 					if ( $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'] ) {
 						preg_match('/cw=[0-9]+&ch=([0-9]+)/', $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'], $matched);
@@ -895,6 +907,11 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 				}
 			}
 		}
+
+		if ( is_array($tags_input) ) :
+			$tags_input = array_unique($tags_input);
+			wp_set_post_tags( $id, $tags_input );
+		endif;
 			
 		$options['posts'][$id] = $_REQUEST['custom-field-template-id'];
 		update_option('custom_field_template_data', $options);
@@ -970,6 +987,38 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		return $Data;
 	}
 
+	function output_custom_field_values($attr) {
+		global $post;
+		$options = $this->get_custom_field_template_data();
+
+		extract(shortcode_atts(array(
+			'post_id'   => $post->ID,
+			'template'  => 0
+		), $attr));
+		
+		$fields = $this->get_custom_fields( $template );
+		
+		if( $fields == null)
+			return;
+
+		$output = '<dl class="cft">' . "\n";
+		foreach ( $fields as $key => $val ) :
+			$value = get_post_meta( $post_id, $key );
+			foreach ( $val as $key2 => $val2 ) :
+				$hide = '';
+				if ( $val2['output'] == true ) :
+					if ( $val2['hideKey'] == true ) $hide = ' class="hideKey"';
+					if ( !empty($val2['label']) && $options['custom_field_template_replace_keys_by_labels'] )
+						$key = stripcslashes($val2['label']);
+					$output .= '<dt><span' . $hide . '>' . $key . '</span></dt>' . "\n";
+					$output .= '<dd>' . $value[$key2] . '</dd>' . "\n";
+				endif;
+			endforeach;
+		endforeach;
+		$output .= '</dl>' . "\n";
+
+		return $output;
+	}
 }
 
 $custom_field_template = new custom_field_template();
