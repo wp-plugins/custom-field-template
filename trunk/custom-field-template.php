@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.7.1
+Version: 0.7.2
 Author URI: http://wordpressgogo.com/
 */
 
@@ -280,7 +280,8 @@ mediaButton = true';
 <h3><?php _e('PHP CODE (Experimental Option)', 'custom-field-template'); ?></h3>
 <div class="inside">
 <form method="post" onsubmit="return confirm('<?php _e('Are you sure to save PHP codes? Please do it at your own risk.', 'custom-field-template'); ?>');">
-<p><?php _e('This option is available only for `radio` and `select` types. You must set $values as an array.', 'custom-field-template'); ?><br />ex. $values = array('dog', 'cat', 'monkey'); $default = 'cat';</p>
+<p><?php _e('This option is available only for `radio` and `select` types. You must set $values as an array.', 'custom-field-template'); ?><br />ex. `radio` and `select`:<br />$values = array('dog', 'cat', 'monkey'); $default = 'cat';<br />
+ex. `checkbox`:<br />$values = array('dog', 'cat', 'monkey'); $defaults = array('dog', 'cat');</p>
 <table class="form-table" style="margin-bottom:5px;">
 <tbody>
 <?php
@@ -463,12 +464,12 @@ jQuery(this).addClass("closed");
 		return $out;
 	}
 	
-	function make_checkbox( $name, $sid, $value, $checked, $hideKey, $label ) {
+	function make_checkbox( $name, $sid, $value, $checked, $hideKey, $label, $code ) {
 		$options = $this->get_custom_field_template_data();
 
 		$title = $name;
 		$name = $this->sanitize_name( $name );
-		
+
 		if ( !$value ) $value = "true";
 
 		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 ) {
@@ -696,7 +697,7 @@ EOF;
 				}
 				else if( $data[$i]['type'] == 'checkbox' ) {
 					$out .= 
-						$this->make_checkbox( $title, $i, $data[$i]['value'], $data[$i]['checked'], $data[$i]['hideKey'], $data[$i]['label'] );
+						$this->make_checkbox( $title, $i, $data[$i]['value'], $data[$i]['checked'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'] );
 				}
 				else if( $data[$i]['type'] == 'radio' ) {
 					$out .= 
@@ -930,6 +931,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 	}
 	
 	function parse_ini_str($Str,$ProcessSections = TRUE) {
+		$options = $this->get_custom_field_template_data();
+
 		$Section = NULL;
 		$Data = array();
 		$Sections = array();
@@ -977,19 +980,32 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 				foreach($Data as $title => $data) {
 					foreach($data as $key => $val) {
 						if($val["type"] == "checkbox") {
-							$values = explode( '#', $val["value"] );
-							$defaults = explode( '#', $val["default"] );
-							foreach($defaults as $dkey => $dval) {
-								$defaults[$dkey] = trim($dval);
-							}
+							if ( is_numeric($val["code"]) ) :
+								eval(stripcslashes($options['php'][$val["code"]]));
+							else :
+								$values = explode( '#', $val["value"] );
+								$defaults = explode( '#', $val["default"] );
+							endif;
+
+							if ( is_array($defaults) )
+								foreach($defaults as $dkey => $dval)
+									$defaults[$dkey] = trim($dval);
+							
 							$tmp = $key;
 							foreach($values as $value) {
 								$Data[$title][$key]["type"] = "checkbox";
 								$Data[$title][$key]["value"] = trim($value);
-								if($tmp!=$key)
+								if ( $tmp!=$key )
 									$Data[$title][$key]["hideKey"] = true;
-								if(in_array(trim($value), $defaults))
-									$Data[$title][$key]["checked"] = true;
+								if ( is_array($defaults) )
+									if ( in_array(trim($value), $defaults) )
+										$Data[$title][$key]["checked"] = true;
+								if ( $val["level"] )
+									$Data[$title][$key]["level"] = $val["level"];
+								if ( $val["insertTag"] == true )
+									$Data[$title][$key]["insertTag"] = true;
+								if ( $val["output"] == true )
+									$Data[$title][$key]["output"] = true;
 								$key++;
 							}
 						}
@@ -1022,8 +1038,15 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 					if ( $val2['hideKey'] == true ) $hide = ' class="hideKey"';
 					if ( !empty($val2['label']) && $options['custom_field_template_replace_keys_by_labels'] )
 						$key = stripcslashes($val2['label']);
-					$output .= '<dt><span' . $hide . '>' . $key . '</span></dt>' . "\n";
-					$output .= '<dd>' . $value[$key2] . '</dd>' . "\n";
+					if ( $val2['type'] == 'checkbox' ) :
+						if( in_array($val2['value'], $value) ) :
+							$output .= '<dt><span' . $hide . '>' . $key . '</span></dt>' . "\n";
+							$output .= '<dd>' . $val2['value'] . '</dd>' . "\n";
+						endif;
+					else :
+						$output .= '<dt><span' . $hide . '>' . $key . '</span></dt>' . "\n";
+						$output .= '<dd>' . $value[$key2] . '</dd>' . "\n";
+					endif;
 				endif;
 			endforeach;
 		endforeach;
