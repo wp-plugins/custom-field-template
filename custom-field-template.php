@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.7
+Version: 0.7.1
 Author URI: http://wordpressgogo.com/
 */
 
@@ -20,14 +20,15 @@ class custom_field_template {
 		add_action( 'admin_menu', array(&$this, 'custom_field_template_admin_menu') );
 		add_action( 'admin_print_scripts', array(&$this, 'custom_field_template_admin_scripts') );
 		
-		add_action( 'edit_post', array(&$this, 'edit_meta_value') );
-		add_action( 'save_post', array(&$this, 'edit_meta_value') );
-		add_action( 'publish_post', array(&$this, 'edit_meta_value') );
+		add_action( 'edit_post', array(&$this, 'edit_meta_value'), 100 );
+		add_action( 'save_post', array(&$this, 'edit_meta_value'), 100 );
+		add_action( 'publish_post', array(&$this, 'edit_meta_value'), 100 );
 
 		add_filter( 'media_send_to_editor', array(&$this, 'media_send_to_custom_field'), 15 );
 		add_filter( 'plugin_action_links', array(&$this, 'wpaq_filter_plugin_actions',), 10, 2);
 		
-		add_shortcode( 'cft', array(&$this, 'output_custom_field_values') );
+		if ( function_exists('add_shortcode') )
+			add_shortcode( 'cft', array(&$this, 'output_custom_field_values') );
 	}
 	
 	function media_send_to_custom_field($html) {
@@ -145,6 +146,7 @@ mediaButton = true';
 #cft dt .hideKey { visibility:hidden; }
 #cft dd { float:left; margin:0; text-align:left; width:80%; }
 #cft dd p.label { font-weight:bold; margin:0; }
+#cft_instruction { margin:10px; }
 		';
 		update_option('custom_field_template_data', $options);
 	}
@@ -171,6 +173,7 @@ mediaButton = true';
 				if( $_POST["custom_field_template_content"][$i] ) {
 					$options['custom_fields'][$j]['title']   = $_POST["custom_field_template_title"][$i];
 					$options['custom_fields'][$j]['content'] = $_POST["custom_field_template_content"][$i];
+					$options['custom_fields'][$j]['instruction'] = $_POST["custom_field_template_instruction"][$i];
 					$j++;
 				}
 			}			
@@ -203,11 +206,13 @@ mediaButton = true';
 <div id="message" class="updated"><p><?php echo $message; ?></p></div>
 <?php endif; ?>
 <div class="wrap">
+<div id="icon-plugins" class="icon32"><br/></div>
 <h2><?php _e('Custom Field Template', 'custom-field-template'); ?></h2>
+
 <br class="clear"/>
 
-<div id="poststuff" class="ui-sortable">
-<div class="postbox">
+<div id="poststuff" class="meta-box-sortables" style="position: relative; margin-top:10px;">
+<div class="stuffbox">
 <h3><?php _e('Custom Field Template Options', 'custom-field-template'); ?></h3>
 <div class="inside">
 <form method="post">
@@ -218,9 +223,11 @@ mediaButton = true';
 ?>
 <tr><td>
 <p><strong>TEMPLATE #<?= $i ?></strong></p>
-<p><label for="custom_field_template_title[<?= $i ?>]"><?php echo sprintf(__('Template Title %d', 'custom-field-template'), $i+1); ?></label>:<br />
+<p><label for="custom_field_template_title[<?= $i ?>]"><?php echo sprintf(__('Template Title %d', 'custom-field-template'), $i); ?></label>:<br />
 <input type="text" name="custom_field_template_title[<?= $i ?>]" id="custom_field_template_title[<?= $i ?>]" value="<?= stripcslashes($options['custom_fields'][$i]['title']) ?>" size="60" /></p>
-<p><label for="custom_field_template_content[<?= $i ?>]"><?php echo sprintf(__('Template Content %d', 'custom-field-template'), $i+1); ?></label>:<br />
+<p><label for="custom_field_template_instruction[<?= $i ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Template Instruction %d', 'custom-field-template'), $i); ?></a></label>:<br />
+<textarea name="custom_field_template_instruction[<?= $i ?>]" id="custom_field_template_instruction[<?= $i ?>]" rows="5" cols="60"<?php if ( empty($options['custom_fields'][$i]['instruction']) ) : echo ' style="display:none;"'; endif; ?>><?= stripcslashes($options['custom_fields'][$i]['instruction']) ?></textarea></p>
+<p><label for="custom_field_template_content[<?= $i ?>]"><?php echo sprintf(__('Template Content %d', 'custom-field-template'), $i); ?></label>:<br />
 <textarea name="custom_field_template_content[<?= $i ?>]" id="custom_field_template_content[<?= $i ?>]" rows="10" cols="60"><?= stripcslashes($options['custom_fields'][$i]['content']) ?></textarea></p>
 </td></tr>
 <?php
@@ -228,7 +235,7 @@ mediaButton = true';
 ?>
 <tr><td>
 <p><label for="custom_field_template_use_multiple_insert"><?php _e('In case that you would like to insert multiple images at once in use of the custom field media buttons', 'custom-field-template'); ?></label>:<br />
-<input type="checkbox" name="custom_field_template_use_multiple_insert" id="custom_field_template_use_multiple_insert" value="1" <?php if ($options['custom_field_template_use_multiple_insert']) { echo 'checked="checked"'; } ?> /> <?php _e('Use multiple image inset', 'custom-field-template'); ?><br /><span style="color:#FF0000; font-weight:bold;"><?php _e('Caution:', 'custom-field-teplate'); ?> <?php _e('You need to edit `wp-admin/includes/media.php`. Delete or comment out the code in the function media_send_to_editor at around line 88-96.', 'custom-field-template'); ?></span></p>
+<input type="checkbox" name="custom_field_template_use_multiple_insert" id="custom_field_template_use_multiple_insert" value="1" <?php if ($options['custom_field_template_use_multiple_insert']) { echo 'checked="checked"'; } ?> /> <?php _e('Use multiple image inset', 'custom-field-template'); ?><br /><span style="color:#FF0000; font-weight:bold;"><?php _e('Caution:', 'custom-field-teplate'); ?> <?php _e('You need to edit `wp-admin/includes/media.php`. Delete or comment out the code in the function media_send_to_editor.', 'custom-field-template'); ?></span></p>
 </td>
 </tr>
 <tr><td>
@@ -241,17 +248,16 @@ mediaButton = true';
 </td>
 </tr>
 <tr><td>
-<p><input type="submit" name="custom_field_template_set_options_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" /></p>
+<p><input type="submit" name="custom_field_template_set_options_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
 </td></tr>
 </tbody>
 </table>
 </form>
 </div>
 </div>
-</div>
 
-<div id="poststuff" class="ui-sortable">
 <div class="postbox closed">
+<div class="handlediv" title="<?php _e('Click to toggle', 'meta-ext'); ?>"><br /></div>
 <h3><?php _e('CSS', 'custom-field-template'); ?></h3>
 <div class="inside">
 <form method="post">
@@ -261,17 +267,16 @@ mediaButton = true';
 <p><textarea name="custom_field_template_css" id="custom_field_template_css" rows="10" cols="60"><?= stripcslashes($options['css']) ?></textarea></p>
 </td></tr>
 <tr><td>
-<p><input type="submit" name="custom_field_template_css_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" /></p>
+<p><input type="submit" name="custom_field_template_css_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
 </td></tr>
 </tbody>
 </table>
 </form>
 </div>
 </div>
-</div>
 
-<div id="poststuff" class="ui-sortable">
 <div class="postbox closed">
+<div class="handlediv" title="<?php _e('Click to toggle', 'meta-ext'); ?>"><br /></div>
 <h3><?php _e('PHP CODE (Experimental Option)', 'custom-field-template'); ?></h3>
 <div class="inside">
 <form method="post" onsubmit="return confirm('<?php _e('Are you sure to save PHP codes? Please do it at your own risk.', 'custom-field-template'); ?>');">
@@ -289,17 +294,16 @@ mediaButton = true';
 	endfor;
 ?>
 <tr><td>
-<p><input type="submit" name="custom_field_template_php_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" /></p>
+<p><input type="submit" name="custom_field_template_php_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
 </td></tr>
 </tbody>
 </table>
 </form>
 </div>
 </div>
-</div>
 
-<div id="poststuff" class="ui-sortable">
 <div class="postbox closed">
+<div class="handlediv" title="<?php _e('Click to toggle', 'meta-ext'); ?>"><br /></div>
 <h3><?php _e('Option List', 'custom-field-template'); ?></h3>
 <div class="inside">
 ex.<br />
@@ -362,34 +366,32 @@ hideKey = true<br />
 </table>
 </div>
 </div>
-</div>
 
-<div id="poststuff" class="ui-sortable">
 <div class="postbox closed">
+<div class="handlediv" title="<?php _e('Click to toggle', 'meta-ext'); ?>"><br /></div>
 <h3><?php _e('Reset Options', 'custom-field-template'); ?></h3>
 <div class="inside">
 <form method="post" onsubmit="return confirm('<?php _e('Are you sure to reset options? Options you set will be reset to the default settings.', 'custom-field-template'); ?>');">
 <table class="form-table" style="margin-bottom:5px;">
 <tbody>
 <tr><td>
-<p><input type="submit" name="custom_field_template_unset_options_submit" value="<?php _e('Unset Options &raquo;', 'custom-field-template'); ?>" /></p>
+<p><input type="submit" name="custom_field_template_unset_options_submit" value="<?php _e('Unset Options &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
 </td></tr>
 </tbody>
 </table>
 </form>
 </div>
 </div>
-</div>
 
-<div id="poststuff" class="ui-sortable">
 <div class="postbox closed">
+<div class="handlediv" title="<?php _e('Click to toggle', 'meta-ext'); ?>"><br /></div>
 <h3><?php _e('Delete Options', 'custom-field-template'); ?></h3>
 <div class="inside">
 <form method="post" onsubmit="return confirm('<?php _e('Are you sure to delete options? Options you set will be deleted.', 'custom-field-template'); ?>');">
 <table class="form-table" style="margin-bottom:5px;">
 <tbody>
 <tr><td>
-<p><input type="submit" name="custom_field_template_delete_options_submit" value="<?php _e('Delete Options &raquo;', 'custom-field-template'); ?>" /></p>
+<p><input type="submit" name="custom_field_template_delete_options_submit" value="<?php _e('Delete Options &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
 </td></tr>
 </tbody>
 </table>
@@ -403,13 +405,13 @@ hideKey = true<br />
 <?php if ( version_compare( substr($wp_version, 0, 3), '2.7', '<' ) ) { ?>
 jQuery('.postbox h3').prepend('<a class="togbox">+</a> ');
 <?php } ?>
+jQuery('.postbox div.handlediv').click( function() { jQuery(jQuery(this).parent().get(0)).toggleClass('closed'); } );
 jQuery('.postbox h3').click( function() { jQuery(jQuery(this).parent().get(0)).toggleClass('closed'); } );
 jQuery('.postbox.close-me').each(function(){
 jQuery(this).addClass("closed");
 });
 //-->
 </script>
-
 
 </div>
 <?php
@@ -680,6 +682,9 @@ EOF;
 		if( $fields == null)
 			return;
 
+		if ( $options['custom_fields'][$id]['instruction'] )
+			$out .= '<div id="cft_instruction">' . stripcslashes($options['custom_fields'][$id]['instruction']) . '</div>';
+
 		$out .= '<input type="hidden" name="custom-field-template-id" id="custom-field-template-id" value="' . $id . '" />';
 		foreach( $fields as $title => $data ) {
 			for($i = 0; $i<count($data); $i++) {
@@ -885,8 +890,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			delete_post_meta($id, $title);
 		}
 
-		$tags_input = explode(",", $_POST['tags_input']);
-				
+		if ( !class_exists('SimpleTags') )
+			$tags_input = explode(",", $_POST['tags_input']);
+							
 		foreach( $fields as $title	=> $data) {
 			for($i = 0; $i<count($data); $i++) {
 				$name = $this->sanitize_name( $title );
@@ -909,6 +915,12 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		}
 
 		if ( is_array($tags_input) ) :
+			if ( class_exists('SimpleTags') ) :
+				wp_cache_flush();
+				$taxonomy = wp_get_object_terms($id, 'post_tag', array());
+				if ( $taxonomy ) foreach($taxonomy as $val) $tags[] = $val->name;
+				if ( is_array($tags) ) $tags_input = array_merge($tags, $tags_input);
+			endif;
 			$tags_input = array_unique($tags_input);
 			wp_set_post_tags( $id, $tags_input );
 		endif;
