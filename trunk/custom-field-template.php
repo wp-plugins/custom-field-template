@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.7.2
+Version: 0.7.3
 Author URI: http://wordpressgogo.com/
 */
 
@@ -352,7 +352,7 @@ hideKey = true<br />
 <th>mediaButton</th><td></td><td></td><td></td><td></td><td>mediaButton = true</td>
 </tr>
 <tr>
-<th>code</th><td></td><td></td><td>code = 0</td><td>code = 0</td><td></td>
+<th>code</th><td></td><td>code = 0</td><td>code = 0</td><td>code = 0</td><td></td>
 </tr>
 <tr>
 <th>level</th><td>level = 1</td><td>level = 3</td><td>level = 5</td><td>level = 7</td><td>level = 9</td>
@@ -901,7 +901,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			
 				$meta_value = stripcslashes(trim($_REQUEST[ "$name" ][$i]));
 				
-				if ( $options['custom_field_template_use_wpautop'] && $data[$i]['type'] == 'textarea' )
+				if ( $options['custom_field_template_use_wpautop'] && $data[$i]['type'] == 'textarea' && !empty($meta_value) )
 					$meta_value = wpautop($meta_value);
 				if( isset( $meta_value ) && strlen( $meta_value ) ) {
 					add_post_meta( $id, $title, $meta_value );
