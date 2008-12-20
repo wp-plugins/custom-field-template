@@ -992,22 +992,24 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 									$defaults[$dkey] = trim($dval);
 							
 							$tmp = $key;
-							foreach($values as $value) {
-								$Data[$title][$key]["type"] = "checkbox";
-								$Data[$title][$key]["value"] = trim($value);
-								if ( $tmp!=$key )
-									$Data[$title][$key]["hideKey"] = true;
-								if ( is_array($defaults) )
-									if ( in_array(trim($value), $defaults) )
-										$Data[$title][$key]["checked"] = true;
-								if ( $val["level"] )
-									$Data[$title][$key]["level"] = $val["level"];
-								if ( $val["insertTag"] == true )
-									$Data[$title][$key]["insertTag"] = true;
-								if ( $val["output"] == true )
-									$Data[$title][$key]["output"] = true;
-								$key++;
-							}
+							if ( is_array($values) ) :
+								foreach($values as $value) {
+									$Data[$title][$key]["type"] = "checkbox";
+									$Data[$title][$key]["value"] = trim($value);
+									if ( $tmp!=$key )
+										$Data[$title][$key]["hideKey"] = true;
+									if ( is_array($defaults) )
+										if ( in_array(trim($value), $defaults) )
+											$Data[$title][$key]["checked"] = true;
+									if ( $val["level"] )
+										$Data[$title][$key]["level"] = $val["level"];
+									if ( $val["insertTag"] == true )
+										$Data[$title][$key]["insertTag"] = true;
+									if ( $val["output"] == true )
+										$Data[$title][$key]["output"] = true;
+									$key++;
+								}
+							endif;
 						}
 					}
 				}			
