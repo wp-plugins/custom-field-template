@@ -29,6 +29,7 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 * Adds template instruction sections.
 
 Localization
+
 * Spanish (es_ES) - Dario Ferrer
 
 If you have translated into your language, please let me know.
