@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.7.3
+Version: 0.7.4
 Author URI: http://wordpressgogo.com/
 */
 
@@ -222,13 +222,13 @@ mediaButton = true';
 	for ( $i = 0; $i < count($options['custom_fields'])+1; $i++ ) {
 ?>
 <tr><td>
-<p><strong>TEMPLATE #<?= $i ?></strong></p>
-<p><label for="custom_field_template_title[<?= $i ?>]"><?php echo sprintf(__('Template Title %d', 'custom-field-template'), $i); ?></label>:<br />
-<input type="text" name="custom_field_template_title[<?= $i ?>]" id="custom_field_template_title[<?= $i ?>]" value="<?= stripcslashes($options['custom_fields'][$i]['title']) ?>" size="60" /></p>
-<p><label for="custom_field_template_instruction[<?= $i ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Template Instruction %d', 'custom-field-template'), $i); ?></a></label>:<br />
-<textarea name="custom_field_template_instruction[<?= $i ?>]" id="custom_field_template_instruction[<?= $i ?>]" rows="5" cols="60"<?php if ( empty($options['custom_fields'][$i]['instruction']) ) : echo ' style="display:none;"'; endif; ?>><?= stripcslashes($options['custom_fields'][$i]['instruction']) ?></textarea></p>
-<p><label for="custom_field_template_content[<?= $i ?>]"><?php echo sprintf(__('Template Content %d', 'custom-field-template'), $i); ?></label>:<br />
-<textarea name="custom_field_template_content[<?= $i ?>]" id="custom_field_template_content[<?= $i ?>]" rows="10" cols="60"><?= stripcslashes($options['custom_fields'][$i]['content']) ?></textarea></p>
+<p><strong>TEMPLATE #<?php echo $i; ?></strong></p>
+<p><label for="custom_field_template_title[<?php echo $i; ?>]"><?php echo sprintf(__('Template Title %d', 'custom-field-template'), $i); ?></label>:<br />
+<input type="text" name="custom_field_template_title[<?php echo $i; ?>]" id="custom_field_template_title[<?php echo $i; ?>]" value="<?php echo stripcslashes($options['custom_fields'][$i]['title']); ?>" size="60" /></p>
+<p><label for="custom_field_template_instruction[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Template Instruction %d', 'custom-field-template'), $i); ?></a></label>:<br />
+<textarea name="custom_field_template_instruction[<?php echo $i; ?>]" id="custom_field_template_instruction[<?php echo $i; ?>]" rows="5" cols="60"<?php if ( empty($options['custom_fields'][$i]['instruction']) ) : echo ' style="display:none;"'; endif; ?>><?php echo stripcslashes($options['custom_fields'][$i]['instruction']); ?></textarea></p>
+<p><label for="custom_field_template_content[<?php echo $i; ?>]"><?php echo sprintf(__('Template Content %d', 'custom-field-template'), $i); ?></label>:<br />
+<textarea name="custom_field_template_content[<?php echo $i; ?>]" id="custom_field_template_content[<?php echo $i; ?>]" rows="10" cols="60"><?php echo stripcslashes($options['custom_fields'][$i]['content']); ?></textarea></p>
 </td></tr>
 <?php
 	}
@@ -264,7 +264,7 @@ mediaButton = true';
 <table class="form-table" style="margin-bottom:5px;">
 <tbody>
 <tr><td>
-<p><textarea name="custom_field_template_css" id="custom_field_template_css" rows="10" cols="60"><?= stripcslashes($options['css']) ?></textarea></p>
+<p><textarea name="custom_field_template_css" id="custom_field_template_css" rows="10" cols="60"><?php echo stripcslashes($options['css']); ?></textarea></p>
 </td></tr>
 <tr><td>
 <p><input type="submit" name="custom_field_template_css_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
@@ -287,9 +287,9 @@ ex. `checkbox`:<br />$values = array('dog', 'cat', 'monkey'); $defaults = array(
 <?php
 	for ($i=0;$i<count($options['php'])+1;$i++) :
 ?>
-<tr><th><strong>CODE #<?= $i ?></strong></th></tr>
+<tr><th><strong>CODE #<?php echo $i; ?></strong></th></tr>
 <tr><td>
-<p><textarea name="custom_field_template_php[]" rows="10" cols="60"><?= stripcslashes($options['php'][$i]) ?></textarea></p>
+<p><textarea name="custom_field_template_php[]" rows="10" cols="60"><?php echo stripcslashes($options['php'][$i]); ?></textarea></p>
 </td></tr>
 <?php
 	endfor;
