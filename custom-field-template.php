@@ -1188,7 +1188,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 	}
 
 	function edit_meta_value( $id ) {
-		global $wpdb;
+		global $wpdb, $wp_version;
 		$options = $this->get_custom_field_template_data();
 		
 		if( !isset( $id ) )
@@ -1244,7 +1244,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 				if ( is_array($tags) ) $tags_input = array_merge($tags, $tags_input);
 			endif;
 			$tags_input = array_unique($tags_input);
-			wp_set_post_tags( $id, $tags_input );
+			if ( substr($wp_version, 0, 3) >= '2.3' )
+				wp_set_post_tags( $id, $tags_input );
 		endif;
 			
 		$options['posts'][$id] = $_REQUEST['custom-field-template-id'];
