@@ -4,7 +4,7 @@ Donate link: http://wordpressgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
 Tested up to: 2.7
-Stable tag: 0.8
+Stable tag: 0.9
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -31,6 +31,8 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 * Adds the blank option. (`blank = true`)
 * Adds the break type. Set CSS of '#cft div'. (`type = break`)
 * Adds [cft] Shortcode Format.
+* Adds the sort option. (`sort = asc` or `sort = desc`)
+* Support for Quick Edit of custom fields. (TinyMCE and MediaButton are not supported yet)
 
 Localization
 
