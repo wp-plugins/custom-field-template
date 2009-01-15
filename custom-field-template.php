@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.8
+Version: 0.9
 Author URI: http://wordpressgogo.com/
 */
 
@@ -19,16 +19,283 @@ class custom_field_template {
 		add_action( 'init', array(&$this, 'custom_field_template_init') );
 		add_action( 'admin_menu', array(&$this, 'custom_field_template_admin_menu') );
 		add_action( 'admin_print_scripts', array(&$this, 'custom_field_template_admin_scripts') );
+		add_action( 'admin_head', array(&$this, 'custom_field_template_admin_head'), 100 );
 		
 		add_action( 'edit_post', array(&$this, 'edit_meta_value'), 100 );
 		add_action( 'save_post', array(&$this, 'edit_meta_value'), 100 );
 		add_action( 'publish_post', array(&$this, 'edit_meta_value'), 100 );
-
+		
 		add_filter( 'media_send_to_editor', array(&$this, 'media_send_to_custom_field'), 15 );
-		add_filter( 'plugin_action_links', array(&$this, 'wpaq_filter_plugin_actions'), 10, 2);
+		add_filter( 'plugin_action_links', array(&$this, 'wpaq_filter_plugin_actions'), 10, 2 );
 		
 		if ( function_exists('add_shortcode') )
 			add_shortcode( 'cft', array(&$this, 'output_custom_field_values') );
+	}
+	
+	function custom_field_template_init() {
+		global $wp_version;
+
+		if ( function_exists('load_plugin_textdomain') ) {
+			if ( !defined('WP_PLUGIN_DIR') ) {
+				load_plugin_textdomain('custom-field-template', str_replace( ABSPATH, '', dirname(__FILE__) ) );
+			} else {
+				load_plugin_textdomain('custom-field-template', false, dirname( plugin_basename(__FILE__) ) );
+			}
+		}
+		
+		if ( is_user_logged_in() && isset($_REQUEST['id']) && $_REQUEST['page'] == 'custom-field-template/custom-field-template.php' && $_REQUEST['cft_mode'] == 'ajax' ) {
+			$this->edit_meta_value();
+			exit();
+		}
+
+		
+		if ( is_user_logged_in() && isset($_REQUEST['id']) && $_REQUEST['page'] == 'custom-field-template/custom-field-template.php' ) {
+			echo $this->load_custom_field( $_REQUEST['id'] );
+			exit();
+		}
+		
+		if( strstr($_SERVER['REQUEST_URI'], 'wp-admin/plugins.php') && ((isset($_GET['activate']) && $_GET['activate'] == 'true') || (isset($_GET['activate-multi']) && $_GET['activate-multi'] == 'true') ) ) {
+			$options = $this->get_custom_field_template_data();
+			if( !$options ) {
+				$this->install_custom_field_template_data();
+				$this->install_custom_field_template_css();
+			}
+		}
+		
+		if ( substr($wp_version, 0, 3) >= '2.7' ) {
+			add_action( 'manage_posts_custom_column', array(&$this, 'add_manage_posts_custom_column'), 10, 2 );
+			add_filter( 'manage_posts_columns', array(&$this, 'add_manage_posts_columns') );
+			add_action( 'manage_pages_custom_column', array(&$this, 'add_manage_posts_custom_column'), 10, 2 );
+			add_filter( 'manage_pages_columns', array(&$this, 'add_manage_pages_columns') );
+			add_action( 'quick_edit_custom_box', array(&$this, 'add_quick_edit_custom_box'), 10, 2 );
+		}
+		
+		if ( substr($wp_version, 0, 3) < '2.5' ) {
+			add_action( 'simple_edit_form', array(&$this, 'insert_custom_field'), 1 );
+			add_action( 'edit_form_advanced', array(&$this, 'insert_custom_field'), 1 );
+			add_action( 'edit_page_form', array(&$this, 'insert_custom_field'), 1 );
+		} else {
+			require_once(ABSPATH . 'wp-admin/includes/template.php');
+			add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), 'post', 'normal', 'core');
+			add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), 'page', 'normal', 'core');
+		}
+
+	}
+	
+	function add_quick_edit_custom_box($column_name, $type) {
+		global $wp_version;
+		$options = $this->get_custom_field_template_data();
+		
+		if( $options == null)
+			return;
+
+		if ( !$options['css'] ) {
+			$this->install_custom_field_template_css();
+			$options = $this->get_custom_field_template_data();
+		}
+			
+		$out .= '<fieldset style="clear:both;">' . "\n";
+		$out .= '<div class="inline-edit-group">';
+		$out .=	'<style type="text/css">' . "\n" .
+				'<!--' . "\n";
+		$out .=	$options['css'] . "\n";
+		$out .=	'-->' . "\n" .
+				'</style>';
+		
+		if ( count($options['custom_fields'])>1 ) {
+			$out .= '<select id="custom_field_template_select" onchange="jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&id=\'+jQuery(this).val()+\'&post=\'+jQuery(this).parent().parent().parent().parent().attr(\'id\').replace(\'edit-\',\'\'), success: function(html) {jQuery(\'#cft\').html(html);}});">';
+			for ( $i=0; $i < count($options['custom_fields']); $i++ ) {
+				if ( $i == $options['posts'][$_REQUEST['post']] ) {
+					$out .= '<option value="' . $i . '" selected="selected">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
+				} else
+					$out .= '<option value="' . $i . '">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
+			}
+			$out .= '</select>';
+		}
+		
+		$out .= '<input type="hidden" name="custom-field-template-verify-key" id="custom-field-template-verify-key" value="' . wp_create_nonce('custom-field-template') . '" />';
+		$out .= '<div id="cft">';
+		$out .= '</div>';
+
+		$out .= '</div>' . "\n";
+		$out .= '</fieldset>' . "\n";
+		
+		echo $out;
+	}
+	
+	function custom_field_template_admin_head() {
+		global $wp_version;
+
+		if ( substr($wp_version, 0, 3) >= '2.7' && is_user_logged_in() && ( strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php') ) ) {
+?>
+<script type="text/javascript">
+// <![CDATA[
+	jQuery(document).ready(function() {
+		jQuery('.hide-if-no-js-cft').show();
+		jQuery('.hide-if-js-cft').hide();
+		
+		inlineEditPost.addEvents = function(r) {
+			r.each(function() {
+				var row = jQuery(this);
+				jQuery('a.editinline', row).click(function() {
+					inlineEditPost.edit(this);
+					post_id = jQuery(this).parent().parent().parent().parent().attr('id').replace('post-','');
+					inlineEditPost.cft_load(post_id);
+					return false;
+				});
+			});
+		}
+		
+		inlineEditPost.save = function(id) {
+			if( typeof(id) == 'object' )
+				id = this.getId(id);
+
+			jQuery('table.widefat .inline-edit-save .waiting').show();
+
+			var params = {
+				action: 'inline-save',
+				post_type: this.type,
+				post_ID: id,
+				edit_date: 'true'
+			};
+
+			var fields = jQuery('#edit-'+id+' :input').fieldSerialize();
+			params = fields + '&' + jQuery.param(params);
+
+			// make ajax request
+			jQuery.post('admin-ajax.php', params,
+				function(r) {
+					jQuery('table.widefat .inline-edit-save .waiting').hide();
+
+					if (r) {
+						if ( -1 != r.indexOf('<tr') ) {
+							jQuery(inlineEditPost.what+id).remove();
+							jQuery('#edit-'+id).before(r).remove();
+
+							var row = jQuery(inlineEditPost.what+id);
+							row.hide();
+
+							if ( 'draft' == jQuery('input[name="post_status"]').val() )
+								row.find('td.column-comments').hide();
+
+							row.find('.hide-if-no-js').removeClass('hide-if-no-js');
+							jQuery('.hide-if-no-js-cft').show();
+							jQuery('.hide-if-js-cft').hide();
+
+							inlineEditPost.addEvents(row);
+							row.fadeIn();
+						} else {
+							r = r.replace( /<.[^<>]*?>/g, '' );
+							jQuery('#edit-'+id+' .inline-edit-save').append('<span class="error">'+r+'</span>');
+						}
+					} else {
+						jQuery('#edit-'+id+' .inline-edit-save').append('<span class="error">'+inlineEditL10n.error+'</span>');
+					}
+				}
+			, 'html');
+			return false;
+		}
+		
+		jQuery('.editinline').click(function () {post_id = jQuery(this).parent().parent().parent().parent().attr('id').replace('post-',''); inlineEditPost.cft_load(post_id);});
+		inlineEditPost.cft_load = function (post_id) {
+			jQuery.ajax({type: 'GET', url: '?page=custom-field-template/custom-field-template.php&id=0&post='+post_id, success: function(html) {jQuery('#cft').html(html);}});
+		};
+
+		jQuery('.save').click(function () {post_id = jQuery(this).parent().parent().parent().attr('id').replace('edit-',''); inlineEditPost.cft_save(post_id);});
+		inlineEditPost.cft_save = function (post_id) {
+			var fields = jQuery('#edit-'+post_id+' #cft :input').fieldSerialize();
+			jQuery.ajax({type: 'POST', url: '?page=custom-field-template/custom-field-template.php&cft_mode=ajax&post='+post_id+'&'+fields});
+		};
+
+	});
+//-->
+</script>
+<style type="text/css">
+<!--
+	div.cft_list p.key		{ font-weight:bold; margin: 0; }
+	div.cft_list p.value	{ margin: 0 0 0 10px; }
+	.cft-actions			{ visibility: hidden; padding: 2px 0 0; }
+	tr:hover .cft-actions	{ visibility: visible; }
+	.inline-edit-row fieldset label { display:inline; }
+-->
+</style>
+<?php
+		}
+	}
+	
+	function add_manage_posts_custom_column($column_name, $post_id) {
+		$data = get_post_custom($post_id);
+		
+		if( is_array($data) ) :
+			$flag = 0;
+			foreach($data as $key => $val) :
+				if ( substr($key, 0, 1) == '_' || !$val[0] ) continue;
+				$content .= '<p class="key">' . $key . '</p>' . "\n";
+				foreach($val as $val2) :
+					$val2 = htmlspecialchars($val2, ENT_QUOTES);
+					if ( $flag ) :
+						$content .= '<p class="value">' . $val2 . '</p>' . "\n";
+					else :
+						if ( function_exists( mb_strlen ) ) :
+							if ( mb_strlen($val2) > 50 ) :
+								$before_content = mb_substr($val2, 0, 50);
+								$after_content  = mb_substr($val2, 50);
+								$content .= '<p class="value">' . $before_content . '[[[break]]]' . '<p class="value">' . $after_content . '</p>' . "\n";
+								$flag = 1;
+							else :
+								$content .= '<p class="value">' . $val2 . '</p>' . "\n";
+							endif;
+						else :
+							if ( strlen($val2) > 50 ) :
+								$before_content = substr($val2, 0, 50);
+								$after_content  = substr($val2, 50);
+								$content .= '<p class="value">' . $before_content . '[[[break]]]' . '<p class="value">' . $after_content . '</p>' . "\n";
+								$flag = 1;
+							else :
+								$content .= '<p class="value">' . $val2 . '</p>' . "\n";
+							endif;
+						endif;
+					endif;
+				endforeach;
+			endforeach;
+			if ( $content ) :
+				$content = preg_replace('/([^\n]+)\n([^\n]+)\n([^\n]+)\n([^\n]+)\n([^$]+)/', '\1\2\3\4[[[break]]]\5', $content);
+				list($before, $after) = explode('[[[break]]]', $content, 2);
+				$after = preg_replace('/\[\[\[break\]\]\]/', '', $after);
+				$output .= '<div class="cft_list">';
+				$output .= balanceTags($before, true);
+				if ( $after ) :
+					$output .= '<span class="hide-if-no-js-cft"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().show(); jQuery(this).parent().next().next().show(); jQuery(this).parent().hide();">... ' . __('read more', 'custom-field-template') . '</a></span>';
+					$output .= '<span class="hide-if-js-cft">' . balanceTags($after, true) . '</span>';
+					$output .= '<span style="display:none;"><a href="javascript:void(0);" onclick="jQuery(this).parent().prev().hide(); jQuery(this).parent().prev().prev().show(); jQuery(this).parent().hide();">[^]</a></span>';
+				endif;
+				$output .= '</div>';
+			else :
+				$output .= '&nbsp;';
+			endif;
+		endif;
+		
+		echo $output;
+	}
+	
+	function add_manage_posts_columns($columns) {
+		$new_columns = array();
+		foreach($columns as $key => $val) :
+			$new_columns[$key] = $val;
+			if ( $key == 'tags' )
+				$new_columns['custom-fields'] = __('Custom Fields', 'custom-field-template');
+		endforeach;
+		return $new_columns;
+	}
+	
+	function add_manage_pages_columns($columns) {
+		$new_columns = array();
+		foreach($columns as $key => $val) :
+			$new_columns[$key] = $val;
+			if ( $key == 'author' )
+				$new_columns['custom-fields'] = __('Custom Fields', 'custom-field-template');
+		endforeach;
+		return $new_columns;
 	}
 		
 	function media_send_to_custom_field($html) {
@@ -49,42 +316,6 @@ class custom_field_template {
 			exit();
 		}
 	}
-
-	function custom_field_template_init() {
-		global $wp_version;
-
-		if ( function_exists('load_plugin_textdomain') ) {
-			if ( !defined('WP_PLUGIN_DIR') ) {
-				load_plugin_textdomain('custom-field-template', str_replace( ABSPATH, '', dirname(__FILE__) ) );
-			} else {
-				load_plugin_textdomain('custom-field-template', false, dirname( plugin_basename(__FILE__) ) );
-			}
-		}
-		
-		if ( is_user_logged_in() && isset($_REQUEST['id']) && $_REQUEST['page'] == 'custom-field-template/custom-field-template.php' ) {
-			echo $this->load_custom_field( $_REQUEST['id'] );
-			exit();
-		}
-		
-		if( strstr($_SERVER['REQUEST_URI'], 'wp-admin/plugins.php') && ((isset($_GET['activate']) && $_GET['activate'] == 'true') || (isset($_GET['activate-multi']) && $_GET['activate-multi'] == 'true') ) ) {
-			$options = $this->get_custom_field_template_data();
-			if( !$options ) {
-				$this->install_custom_field_template_data();
-				$this->install_custom_field_template_css();
-			}
-		}
-		
-		if ( substr($wp_version, 0, 3) < '2.5' ) {
-			add_action( 'simple_edit_form', array(&$this, 'insert_custom_field'), 1 );
-			add_action( 'edit_form_advanced', array(&$this, 'insert_custom_field'), 1 );
-			add_action( 'edit_page_form', array(&$this, 'insert_custom_field'), 1 );
-		} else {
-			require_once(ABSPATH . 'wp-admin/includes/template.php');
-			add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), 'post', 'normal', 'core');
-			add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), 'page', 'normal', 'core');
-		}
-
-	}
 	
 	function wpaq_filter_plugin_actions($links, $file){
 		static $this_plugin;
@@ -99,7 +330,7 @@ class custom_field_template {
 	}
 	
 	function custom_field_template_admin_scripts() {
-		wp_enqueue_script( 'jquery');
+		wp_enqueue_script( 'jquery' );
 	}
 
 	function install_custom_field_template_data() {
@@ -365,7 +596,7 @@ type = textfield<br />
 size = 35<br />
 hideKey = true<br />
 
-<table class="form-table" style="margin-bottom:5px;">
+<table class="widefat" style="margin:10px 0 5px 0;">
 <thead>
 <tr>
 <th>type</th><th>text or textfield</th><th>checkbox</th><th>radio</th><th>select</th><th>textarea</th>
@@ -421,6 +652,9 @@ hideKey = true<br />
 </tr>
 <tr>
 <th>blank</th><td>blank = true</td><td>blank = true</td><td>blank = true</td><td>blank = true</td><td>blank = true</td>
+</tr>
+<tr>
+<th>sort</th><td>sort = asc</td><td>sort = desc</td><td>sort = asc</td><td>sort = desc</td><td>sort = asc</td>
 </tr>
 </tbody>
 </table>
@@ -691,7 +925,7 @@ jQuery(this).addClass("closed");
 		}
 		
 		$rand = rand();
-		
+
 		if( $tinyMCE == true ) {
 			$out = '<script type="text/javascript">' . "\n" .
 					'// <![CDATA[' . "\n" .
@@ -706,6 +940,8 @@ jQuery(this).addClass("closed");
 		}
 		
 		if ( substr($wp_version, 0, 3) >= '2.5' ) {
+
+		if ( !strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php') && !strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php')  ) {
 
 			if ( $mediaButton == true ) {
 				$media_upload_iframe_src = "media-upload.php";
@@ -729,7 +965,8 @@ EOF;
 				$switch .= '<a href="#toggle" onclick="switchMode(\''.$name.$rand.'\'); return false;">' . __('Toggle', 'custom-field-template') . '</a>';
 			}
 			$switch .= '</div>';
-		
+		}
+
 		}
 				
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
@@ -1117,32 +1354,38 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		), $attr));
 		
 		if ( is_numeric($format) && $output = $options['shortcode_format'][$format] ) :
-			$fields = get_post_custom($post_id);
+			$data = get_post_custom($post_id);
 
-			if( $fields == null)
+			if( $data == null)
 				return;
-			
-			foreach ( $fields as $key => $val ) :
-				if ( count($val) > 1 ) :
-					$replace_val = '<ul>';
-					foreach ( $val as $val2 ) :
-						$replace_val .= '<li>'.$val2.'</li>';
-					endforeach;
-					$replace_val .= '</ul>';
-				else :
-					$replace_val = $val[0];
-				endif;
-						
-				$output = preg_replace('/\['.$key.'\]/', $replace_val, $output); 
-			endforeach;
 
-			$fields = $this->get_custom_fields( $template );
-			foreach ( $fields as $key => $val ) :
-				$output = preg_replace('/\['.$key.'\]/', '', $output); 
-			endforeach;
+			$count = count($options['custom_fields']);
+			if ( $count ) :
+				for ($i=0;$i<$count;$i++) :
+					$fields = $this->get_custom_fields( $i );
+					foreach ( $fields as $key => $val ) :
+						if ( count($data[$key]) > 1 ) :
+							if ( $val[0]['sort'] == 'asc' )
+								sort($data[$key]);
+							elseif ( $val[0]['sort'] == 'desc' )
+								rsort($data[$key]);
+							$replace_val = '<ul>';
+							foreach ( $data[$key] as $val2 ) :
+								$replace_val .= '<li>'.$val2.'</li>';
+							endforeach;
+							$replace_val .= '</ul>';
+						elseif ( count($data[$key]) == 1 ) :
+							$replace_val = $data[$key][0];
+						else :
+							$replace_val = '';
+						endif;
+						$output = preg_replace('/\['.$key.'\]/', $replace_val, $output); 
+					endforeach;
+				endfor;
+			endif;
 		else :
 			$fields = $this->get_custom_fields( $template );
-		
+					
 			if( $fields == null)
 				return;
 
@@ -1150,6 +1393,10 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			foreach ( $fields as $key => $val ) :
 				$value = get_post_meta( $post_id, $key );
 				if ($value):
+					if ( $val[0]['sort'] == 'asc' )
+						sort($value);
+					elseif ( $val[0]['sort'] == 'desc' )
+						rsort($value);
 					foreach ( $val as $key2 => $val2 ) :
 						$hide = '';
 						if ( $val2['output'] == true ) :
@@ -1159,7 +1406,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 							if ( $val2['type'] == 'checkbox' ) :
 								if( in_array($val2['value'], $value) ) :
 									$output .= '<dt><span' . $hide . '>' . $key . '</span></dt>' . "\n";
-									$output .= '<dd>' . $val2['value'] . '</dd>' . "\n";
+									$output .= '<dd>' . $value[$key2] . '</dd>' . "\n";
 								endif;
 							else :
 								$output .= '<dt><span' . $hide . '>' . $key . '</span></dt>' . "\n";
