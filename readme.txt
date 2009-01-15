@@ -32,7 +32,7 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 * Adds the break type. Set CSS of '#cft div'. (`type = break`)
 * Adds [cft] Shortcode Format.
 * Adds the sort option. (`sort = asc` or `sort = desc`)
-* Support for Quick Edit of custom fields. (TinyMCE and MediaButton are not supported yet)
+* Support for Quick Edit of custom fields. (tinyMCE and mediaButton are not supported yet)
 
 Localization
 
