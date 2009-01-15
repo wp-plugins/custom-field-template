@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 0.9.1
+Version: 0.9.2
 Author URI: http://wordpressgogo.com/
 */
 
@@ -370,7 +370,7 @@ mediaButton = true';
 		$options['shortcode_format'][0] = '<table class="cft">
 <tbody>
 <tr>
-<th>Plan</td><td colspan="3">[Plan]</td>
+<th>Plan</th><td colspan="3">[Plan]</td>
 </tr>
 <tr>
 <th>Favorite Fruits</th><td>[Favorite Fruits]</td>
@@ -1380,6 +1380,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 						else :
 							$replace_val = '';
 						endif;
+						$key = preg_quote($key, '/');
 						$output = preg_replace('/\['.$key.'\]/', $replace_val, $output); 
 					endforeach;
 				endfor;
