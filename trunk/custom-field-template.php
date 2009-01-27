@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.0
+Version: 1.0.1
 Author URI: http://wordpressgogo.com/
 */
 
@@ -1408,16 +1408,16 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 				$name = $this->sanitize_name( $title );
 				$title = $wpdb->escape(stripcslashes(trim($title)));
 			
-				$meta_value = stripcslashes(trim($_REQUEST[ "$name" ][$i]));
+				$value = stripcslashes(trim($_REQUEST[ "$name" ][$i]));
 				
-				if ( $options['custom_field_template_use_wpautop'] && $data[$i]['type'] == 'textarea' && !empty($meta_value) )
-					$meta_value = wpautop($meta_value);
-				if( isset( $meta_value ) && strlen( $meta_value ) ) {
+				if ( $options['custom_field_template_use_wpautop'] && $data[$i]['type'] == 'textarea' && !empty($value) )
+					$value = wpautop($value);
+				if( isset( $value ) && strlen( $value ) ) {
 					if ( is_numeric($data[$i]['editCode']) ) :
 						eval(stripcslashes($options['php'][$data[$i]['editCode']]));
 					endif;
-					add_post_meta( $id, $title, $meta_value );
-					if ( $data[$i]['insertTag'] == true ) $tags_input[] = $meta_value;
+					add_post_meta( $id, $title, $value );
+					if ( $data[$i]['insertTag'] == true ) $tags_input[] = $value;
 						
 					if ( $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'] ) {
 						preg_match('/cw=[0-9]+&ch=([0-9]+)/', $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'], $matched);
