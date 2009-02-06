@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.0.3
+Version: 1.0.4
 Author URI: http://wordpressgogo.com/
 */
 
@@ -81,7 +81,8 @@ class custom_field_template {
 			add_filter( 'manage_posts_columns', array(&$this, 'add_manage_posts_columns') );
 			add_action( 'manage_pages_custom_column', array(&$this, 'add_manage_posts_custom_column'), 10, 2 );
 			add_filter( 'manage_pages_columns', array(&$this, 'add_manage_pages_columns') );
-			add_action( 'quick_edit_custom_box', array(&$this, 'add_quick_edit_custom_box'), 10, 2 );
+			if ( empty($options['custom_field_template_disable_quick_edit']) )
+				add_action( 'quick_edit_custom_box', array(&$this, 'add_quick_edit_custom_box'), 10, 2 );
 		}
 		
 		if ( substr($wp_version, 0, 3) < '2.5' ) {
@@ -469,6 +470,7 @@ mediaButton = true';
 			$options['custom_field_template_use_wpautop'] = $_POST['custom_field_template_use_wpautop'];
 			$options['custom_field_template_use_autosave'] = $_POST['custom_field_template_use_autosave'];
 			$options['custom_field_template_disable_default_custom_fields'] = $_POST['custom_field_template_disable_default_custom_fields'];
+			$options['custom_field_template_disable_quick_edit'] = $_POST['custom_field_template_disable_quick_edit'];
 			for($i=0;$i<count($_POST["custom_field_template_content"]);$i++) {
 				if( $_POST["custom_field_template_content"][$i] ) {
 					$options['custom_fields'][$j]['title']   = $_POST["custom_field_template_title"][$i];
@@ -585,6 +587,11 @@ mediaButton = true';
 <tr><td>
 <p><label for="custom_field_template_disable_default_custom_fields"><?php _e('In case that you would like to forbid to use the default custom fields.', 'custom-field-template'); ?></label>:<br />
 <input type="checkbox" name="custom_field_template_disable_default_custom_fields" id="custom_field_template_disable_default_custom_fields" value="1" <?php if ($options['custom_field_template_disable_default_custom_fields']) { echo 'checked="checked"'; } ?> /> <?php _e('Disable the default custom fields', 'custom-field-template'); ?></p>
+</td>
+</tr>
+<tr><td>
+<p><label for="custom_field_template_disable_quick_edit"><?php _e('In case that you would like to forbid to use the quick edit.', 'custom-field-template'); ?></label>:<br />
+<input type="checkbox" name="custom_field_template_disable_quick_edit" id="custom_field_template_disable_quick_edit" value="1" <?php if ($options['custom_field_template_disable_quick_edit']) { echo 'checked="checked"'; } ?> /> <?php _e('Disable the quick edit', 'custom-field-template'); ?></p>
 </td>
 </tr>
 <tr><td>
@@ -759,6 +766,9 @@ hideKey = true<br />
 </tr>
 <tr>
 <th>tinyMCE</th><td></td><td></td><td></td><td></td><td>tinyMCE = true</td>
+</tr>
+<tr>
+<th>htmlEditor</th><td></td><td></td><td></td><td></td><td>htmlEditor = true</td>
 </tr>
 <tr>
 <th>mediaButton</th><td></td><td></td><td></td><td></td><td>mediaButton = true</td>
@@ -1083,7 +1093,7 @@ jQuery(this).addClass("closed");
 		return $out;
 	}
 	
-	function make_textarea( $name, $sid, $rows, $cols, $tinyMCE, $mediaButton, $default, $hideKey, $label, $code, $class ) {
+	function make_textarea( $name, $sid, $rows, $cols, $tinyMCE, $htmlEditor, $mediaButton, $default, $hideKey, $label, $code, $class ) {
 		$options = $this->get_custom_field_template_data();
 
 		global $wp_version;
@@ -1112,9 +1122,8 @@ jQuery(this).addClass("closed");
 				$out .=	'jQuery(document).ready(function() {document.getElementById("'. $name . $rand . '").value = document.getElementById("'. $name . $rand . '").value; tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '"); tinyMCEID.push("'. $name . $rand . '");});' . "\n";
 			else:
 				$out .=	'jQuery(document).ready(function() {document.getElementById("'. $name . $rand . '").value = switchEditors.wpautop(document.getElementById("'. $name . $rand . '").value); tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '"); tinyMCEID.push("'. $name . $rand . '");});' . "\n";
-			endif;		
-				$out .= '// ]]>' . "\n" .
-						'</script>';
+			endif;
+			$out .= '// ]]>' . "\n" . '</script>';
 		}
 		
 		if ( substr($wp_version, 0, 3) >= '2.5' ) {
@@ -1148,7 +1157,10 @@ EOF;
 		}
 				
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
-		if ( !empty($class) ) $class = ' class="' . $class . '"';
+		$content_class = ' class="';
+		if ( $htmlEditor == true ) $content_class .= 'content';
+		if ( !empty($class) ) $content_class .= ' ' . $class;
+		$content_class .= '"';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -1160,8 +1172,18 @@ EOF;
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= '<textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000"' . $class . '>' . attribute_escape($value) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></dd>' .
-			'</dl>';
+		
+		if ( $htmlEditor == true ) :
+			if( $tinyMCE == true ) $quicktags_hide = ' jQuery(\'#qt_' . $name . $rand . '_qtags\').hide();';
+			$out .= '<div class="quicktags"><script type="text/javascript">' . "\n" . '// <![CDATA[' . "\n" . '
+		jQuery(document).ready(function() { qt_' . $name . $rand . ' = new QTags(\'qt_' . $name . $rand . '\', \'' . $name . $rand . '\', \'editorcontainer_' . $name . $rand . '\', \'more\'); ' . $quicktags_hide . ' });' . "\n" . '// ]]>' . "\n" . '</script>';
+			$editorcontainer_class .= ' class="editorcontainer"';
+		endif;
+		
+		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . $name . $rand . '"><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000"' . $content_class . '>' . attribute_escape($value) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
+		if ( $htmlEditor == true ) $out .= '</div>';
+		$out .= '</dd></dl>';
+		
 		return $out;
 	}
 
@@ -1216,7 +1238,7 @@ EOF;
 				else if( $data[$i]['type'] == 'textarea' ) {
 					if ( $options['tinyMCE'][$_REQUEST['post']][$this->sanitize_name($title)][$i] )  $data[$i]['rows']  = $options['tinyMCE'][$_REQUEST['post']][$this->sanitize_name($title)][$i];
 					$out .= 
-						$this->make_textarea( $title, $i, $data[$i]['rows'], $data[$i]['cols'], $data[$i]['tinyMCE'], $data[$i]['mediaButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'] );
+						$this->make_textarea( $title, $i, $data[$i]['rows'], $data[$i]['cols'], $data[$i]['tinyMCE'], $data[$i]['htmlEditor'], $data[$i]['mediaButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'] );
 				}
 			}
 		}
@@ -1309,10 +1331,10 @@ EOF;
 					'	var ed = tinyMCE.get(id);' . "\n" .
 					'	if ( ! ed || ed.isHidden() ) {' . "\n" .
 					'		document.getElementById(id).value = switchEditors.wpautop(document.getElementById(id).value);' . "\n" .
-					'		if ( ed ) ed.show();' . "\n" .
-					'		else tinyMCE.execCommand("mceAddControl", false, id);' . "\n" .
+					'		if ( ed ) { jQuery(\'#editorcontainer_\'+id).prev().hide(); ed.show(); }' . "\n" .
+					'		else {tinyMCE.execCommand("mceAddControl", false, id);}' . "\n" .
 					'	} else {' . "\n" .
-					'		ed.hide();document.getElementById(id).style.color="#000000";' . "\n" .
+					'		ed.hide(); jQuery(\'#editorcontainer_\'+id).prev().show(); document.getElementById(id).style.color="#000000";' . "\n" .
 					'	}' . "\n" .
 					'}' . "\n";
 					
@@ -1370,6 +1392,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		$out .=		'<style type="text/css">' . "\n" .
 					'<!--' . "\n";
 		$out .=		$options['css'] . "\n";
+		$out .=		'.editorcontainer { overflow:hidden; background:#FFFFFF; }
+.content { width:98%; }
+.editorcontainer .content { padding: 6px; line-height: 150%; border: 0 none; outline: none;	-moz-box-sizing: border-box;	-webkit-box-sizing: border-box;	-khtml-box-sizing: border-box; box-sizing: border-box; }
+.quicktags { border:1px solid #DFDFDF; border-collapse: separate; -moz-border-radius: 6px 6px 0 0; -webkit-border-top-right-radius: 6px; -webkit-border-top-left-radius: 6px; -khtml-border-top-right-radius: 6px; -khtml-border-top-left-radius: 6px; border-top-right-radius: 6px; border-top-left-radius: 6px; }
+.quicktags { padding: 0; margin-bottom: -1px; border-bottom-width:1px;	background-image: url("images/ed-bg.gif"); background-position: left top; background-repeat: repeat; }
+.quicktags div div { padding: 2px 4px 0; }
+.quicktags div div input { margin: 3px 1px 4px; line-height: 18px; display: inline-block; border-width: 1px; border-style: solid; min-width: 26px; padding: 2px 4px; font-size: 12px; -moz-border-radius: 3px; -khtml-border-radius: 3px; -webkit-border-radius: 3px; border-radius: 3px; background:#FFFFFF url(images/fade-butt.png) repeat-x scroll 0 -2px; overflow: visible; }' . "\n";
 		$out .=		'-->' . "\n" .
 					'</style>';
 		$body = $this->load_custom_field($init_id);
@@ -1600,8 +1629,25 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		extract(shortcode_atts(array(
 			'post_id'   => $post->ID,
 			'template'  => 0,
-			'format'     => ''
+			'format'    => '',
+			'key'   => '',
+			'single'    => false
 		), $attr));
+		
+		$metakey = $key;
+		if ( $metakey ) :
+			$metavalue = get_post_meta($post_id, $key, $single);
+			if ( is_array($metavalue) ) :
+				$output = '<ul>' . "\n";
+				foreach ( $metavalue as $val ) :
+					$output .= '<li>' . $val . '</li>' . "\n";
+				endforeach;
+				$output .= '</ul>' . "\n";
+			else :
+				$output = $metavalue;
+			endif;
+			return $output;
+		endif;
 		
 		if ( is_numeric($format) && $output = $options['shortcode_format'][$format] ) :
 			$data = get_post_custom($post_id);
