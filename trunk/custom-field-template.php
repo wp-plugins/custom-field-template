@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.0.4
+Version: 1.0.5
 Author URI: http://wordpressgogo.com/
 */
 
@@ -471,6 +471,7 @@ mediaButton = true';
 			$options['custom_field_template_use_autosave'] = $_POST['custom_field_template_use_autosave'];
 			$options['custom_field_template_disable_default_custom_fields'] = $_POST['custom_field_template_disable_default_custom_fields'];
 			$options['custom_field_template_disable_quick_edit'] = $_POST['custom_field_template_disable_quick_edit'];
+			$options['custom_field_template_replace_the_title'] = $_POST['custom_field_template_replace_the_title'];
 			for($i=0;$i<count($_POST["custom_field_template_content"]);$i++) {
 				if( $_POST["custom_field_template_content"][$i] ) {
 					$options['custom_fields'][$j]['title']   = $_POST["custom_field_template_title"][$i];
@@ -592,6 +593,11 @@ mediaButton = true';
 <tr><td>
 <p><label for="custom_field_template_disable_quick_edit"><?php _e('In case that you would like to forbid to use the quick edit.', 'custom-field-template'); ?></label>:<br />
 <input type="checkbox" name="custom_field_template_disable_quick_edit" id="custom_field_template_disable_quick_edit" value="1" <?php if ($options['custom_field_template_disable_quick_edit']) { echo 'checked="checked"'; } ?> /> <?php _e('Disable the quick edit', 'custom-field-template'); ?></p>
+</td>
+</tr>
+<tr><td>
+<p><label for="custom_field_template_replace_the_title"><?php _e('In case that you would like to replace the box title with the template title.', 'custom-field-template'); ?></label>:<br />
+<input type="checkbox" name="custom_field_template_replace_the_title" id="custom_field_template_replace_the_title" value="1" <?php if ($options['custom_field_template_replace_the_title']) { echo 'checked="checked"'; } ?> /> <?php _e('Replace the box title', 'custom-field-template'); ?></p>
 </td>
 </tr>
 <tr><td>
@@ -1370,12 +1376,24 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		$out .=		'	jQuery(\'#in-category-' . $cat_id . '\').click(function(){if(jQuery(\'#in-category-' . $cat_id . '\').attr(\'checked\') == true) { if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID = new Array();};';
 			if ( $options['custom_field_template_use_autosave'] ) :
 				$out .= 'var fields = jQuery(\'#cft :input\').fieldSerialize();';
-				$out .= 'jQuery.ajax({type: \'POST\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post=\'+jQuery(\'#post_ID\').val()+\'&custom-field-template-verify-key=\'+jQuery(\'#custom-field-template-verify-key\').val()+\'&\'+fields, success: function(){jQuery(\'#custom_field_template_select\').val(\'' . $key . '\');jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&id=' . $key . '&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {jQuery(\'#cft\').html(html);}});}});';
+				$out .= 'jQuery.ajax({type: \'POST\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post=\'+jQuery(\'#post_ID\').val()+\'&custom-field-template-verify-key=\'+jQuery(\'#custom-field-template-verify-key\').val()+\'&\'+fields, success: function(){jQuery(\'#custom_field_template_select\').val(\'' . $key . '\');jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&id=' . $key . '&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {';
+				if ( $options['custom_field_template_replace_the_title'] ) :
+					$out .= 'jQuery(\'#cftdiv h3 span\').text(\'' . $options['custom_fields'][$key]['title'] . '\');';
+				endif;
+				$out .= 'jQuery(\'#cft\').html(html);}});}});';
 			else :
-				$out .=		'	jQuery(\'#custom_field_template_select\').val(\'' . $key . '\');jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&id=' . $key . '&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {jQuery(\'#cft\').html(html);}});';
+				$out .=		'	jQuery(\'#custom_field_template_select\').val(\'' . $key . '\');jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&id=' . $key . '&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {';
+				if ( $options['custom_field_template_replace_the_title'] ) :
+					$out .= 'jQuery(\'#cftdiv h3 span\').text(\'' . $options['custom_fields'][$key]['title'] . '\');';
+				endif;
+				$out .= 'jQuery(\'#cft\').html(html);}});';
 			endif;
 
-		$out .=		'	}else{jQuery(\'#cft\').html(\'\');}});' . "\n";
+		$out .=		'	}else{ jQuery(\'#cft\').html(\'\');';
+		if ( $options['custom_field_template_replace_the_title'] ) :
+			$out .= 'jQuery(\'#cftdiv h3 span\').text(\'' . __('Custom Field Template', 'custom-field-template') . '\');';
+		endif;
+		$out .= '}});' . "\n";
 						endif;
 					endforeach;
 				endif;
@@ -1424,7 +1442,11 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 				}
 				$out .= '</select> ';
 				$out .= '<input type="button" class="button" value="' . __('Load', 'custom-field-template') . '" onclick="if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID = new Array();};';
-				$out .= 'var cftloading_select = function() {jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&id=\'+jQuery(\'#custom_field_template_select\').val()+\'&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {jQuery(\'#cft\').html(html);}});};';
+				$out .= 'var cftloading_select = function() {jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&id=\'+jQuery(\'#custom_field_template_select\').val()+\'&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {';
+				if ( $options['custom_field_template_replace_the_title'] ) :
+					$out .= 'jQuery(\'#cftdiv h3 span\').text(jQuery(\'#custom_field_template_select :selected\').text());';
+				endif;
+				$out .= 'jQuery(\'#cft\').html(html);}});};';
 				if ( $options['custom_field_template_use_autosave'] ) :
 					$out .= 'var fields = jQuery(\'#cft :input\').fieldSerialize();';
 					$out .= 'jQuery.ajax({type: \'POST\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post=\'+jQuery(\'#post_ID\').val()+\'&custom-field-template-verify-key=\'+jQuery(\'#custom-field-template-verify-key\').val()+\'&\'+fields, success: cftloading_select});';
@@ -1454,6 +1476,12 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			
 		if ( substr($wp_version, 0, 3) < '2.5' ) {
 			$out .= '</div></fieldset></div>';
+		} else {
+			if ( $body && $options['custom_field_template_replace_the_title'] ) :
+				$out .= '<script type="text/javascript">' . "\n" . '// <![CDATA[' . "\n";
+				$out .=	'jQuery(document).ready(function() {jQuery(\'#cftdiv h3 span\').text(\'' . $options['custom_fields'][$init_id]['title'] . '\');});' . "\n";
+				$out .= '// ]]>' . "\n" . '</script>';
+			endif;
 		}
 
 		echo $out;
