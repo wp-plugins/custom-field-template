@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.0.6
+Version: 1.0.7
 Author URI: http://wordpressgogo.com/
 */
 
@@ -24,6 +24,8 @@ class custom_field_template {
 		//add_action( 'edit_post', array(&$this, 'edit_meta_value'), 100 );
 		add_action( 'save_post', array(&$this, 'edit_meta_value'), 100 );
 		//add_action( 'publish_post', array(&$this, 'edit_meta_value'), 100 );
+
+		add_action( 'delete_post', array(&$this, 'custom_field_template_delete_post'), 100 );
 		
 		add_filter( 'media_send_to_editor', array(&$this, 'media_send_to_custom_field'), 15 );
 		add_filter( 'plugin_action_links', array(&$this, 'wpaq_filter_plugin_actions'), 10, 2 );
@@ -482,6 +484,7 @@ mediaButton = true';
 					$options['custom_fields'][$j]['content'] = $_POST["custom_field_template_content"][$i];
 					$options['custom_fields'][$j]['instruction'] = $_POST["custom_field_template_instruction"][$i];
 					$options['custom_fields'][$j]['category'] = $_POST["custom_field_template_category"][$i];
+					$options['custom_fields'][$j]['post_type'] = $_POST["custom_field_template_post_type"][$i];
 					$j++;
 				}
 			}			
@@ -525,6 +528,10 @@ mediaButton = true';
 			}			
 			update_option('custom_field_template_data', $options);
 			$message = __('Options updated.', 'custom-field-template');
+		elseif ($_POST['custom_field_template_rebuild_value_counts_submit']) :
+			$this->custom_field_template_rebuild_value_counts();
+			$options = $this->get_custom_field_template_data();
+			$message = __('Value Counts rebuilt.', 'custom-field-template');
 		elseif ($_POST['custom_field_template_unset_options_submit']) :
 			$this->install_custom_field_template_data();
 			$this->install_custom_field_template_css();
@@ -562,6 +569,11 @@ mediaButton = true';
 <input type="text" name="custom_field_template_title[<?php echo $i; ?>]" id="custom_field_template_title[<?php echo $i; ?>]" value="<?php echo stripcslashes($options['custom_fields'][$i]['title']); ?>" size="80" /></p>
 <p><label for="custom_field_template_instruction[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Template Instruction', 'custom-field-template'), $i); ?></a></label>:<br />
 <textarea name="custom_field_template_instruction[<?php echo $i; ?>]" id="custom_field_template_instruction[<?php echo $i; ?>]" rows="5" cols="80"<?php if ( empty($options['custom_fields'][$i]['instruction']) ) : echo ' style="display:none;"'; endif; ?>><?php echo stripcslashes($options['custom_fields'][$i]['instruction']); ?></textarea></p>
+<p><label for="custom_field_template_post_type[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Post Type', 'custom-field-template'), $i); ?></a></label>:<br />
+<span<?php if ( empty($options['custom_fields'][$i]['post_type']) ) : echo ' style="display:none;"'; endif; ?>>
+<input type="radio" name="custom_field_template_post_type[<?php echo $i; ?>]" id="custom_field_template_post_type[<?php echo $i; ?>]" value=""<?php if ( !$options['custom_fields'][$i]['post_type'] ) :  echo ' checked="checked"'; endif; ?> /> <?php _e('Both', 'custom-field-template'); ?>
+<input type="radio" name="custom_field_template_post_type[<?php echo $i; ?>]" id="custom_field_template_post_type[<?php echo $i; ?>]" value="post"<?php if ( $options['custom_fields'][$i]['post_type']=='post') : echo ' checked="checked"'; endif; ?> /> <?php _e('Post', 'custom-field-template'); ?>
+<input type="radio" name="custom_field_template_post_type[<?php echo $i; ?>]" id="custom_field_template_post_type[<?php echo $i; ?>]" value="page"<?php if ( $options['custom_fields'][$i]['post_type']=='page') : echo ' checked="checked"'; endif; ?> /> <?php _e('Page', 'custom-field-template'); ?></span></p>
 <p><label for="custom_field_template_category[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Category ID (comma-deliminated)', 'custom-field-template'), $i); ?></a></label>:<br />
 <input type="text" name="custom_field_template_category[<?php echo $i; ?>]" id="custom_field_template_category[<?php echo $i; ?>]" value="<?php echo stripcslashes($options['custom_fields'][$i]['category']); ?>" size="80"<?php if ( empty($options['custom_fields'][$i]['category']) ) : echo ' style="display:none;"'; endif; ?> /></p>
 <p><label for="custom_field_template_content[<?php echo $i; ?>]"><?php echo sprintf(__('Template Content', 'custom-field-template'), $i); ?></label>:<br />
@@ -727,6 +739,26 @@ ex. `radio` and `select`:</dt><dd>$values = array('dog', 'cat', 'monkey'); $defa
 
 <div class="postbox closed">
 <div class="handlediv" title="<?php _e('Click to toggle', 'custom-field-template'); ?>"><br /></div>
+<h3><?php _e('Rebuild Value Counts', 'custom-field-template'); ?></h3>
+<div class="inside">
+<form method="post" onsubmit="return confirm('<?php _e('Are you sure to rebuild all value counts?', 'custom-field-template'); ?>');">
+<table class="form-table" style="margin-bottom:5px;">
+<tbody>
+<tr><td>
+<p><?php _e('Value Counts are used for temporarily saving how many values in each key. Set `valueCount = true` into fields.', 'custom-field-template'); ?></p>
+<p>global $custom_field_template;<br />
+$value_count = $custom_field_template->get_value_count();<br />
+echo $value_count[$meta_key][$meta_value];</p>
+<p><input type="submit" name="custom_field_template_rebuild_value_counts_submit" value="<?php _e('Rebuild Value Counts &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
+</td></tr>
+</tbody>
+</table>
+</form>
+</div>
+</div>
+
+<div class="postbox closed">
+<div class="handlediv" title="<?php _e('Click to toggle', 'custom-field-template'); ?>"><br /></div>
 <h3><?php _e('Option List', 'custom-field-template'); ?></h3>
 <div class="inside">
 ex.<br />
@@ -814,7 +846,7 @@ hideKey = true<br />
 <th>class</th><td>class = text</td><td>class = checkbox</td><td>class = radio</td><td>class = select</td><td>class = textarea</td>
 </tr>
 <tr>
-<th>valueCount</th><td>valueCount = text</td><td>valueCount = checkbox</td><td>valueCount = radio</td><td>valueCount = select</td><td>valueCount = textarea</td>
+<th>valueCount</th><td>valueCount = true</td><td>valueCount = true</td><td>valueCount = true</td><td>valueCount = true</td><td>valueCount = true</td>
 </tr>
 </tbody>
 </table>
@@ -1212,6 +1244,13 @@ EOF;
 		if ( $fields == null )
 			return;
 			
+		if ( $options['custom_fields'][$id]['post_type'] ) :
+			if ( $options['custom_fields'][$id]['post_type'] == 'post' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php')) )
+				return;
+			if ( $options['custom_fields'][$id]['post_type'] == 'page' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php')) )
+				return;
+		endif;
+			
 		if ( $options['custom_fields'][$id]['category'] && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php')) )
 			return;
 
@@ -1529,10 +1568,10 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			$tags_input = explode(",", $_POST['tags_input']);
 							
 		foreach( $fields as $title	=> $data) {
+			$name = $this->sanitize_name( $title );
+			$title = $wpdb->escape(stripcslashes(trim($title)));
+
 			for($i = 0; $i<count($data); $i++) {
-				$name = $this->sanitize_name( $title );
-				$title = $wpdb->escape(stripcslashes(trim($title)));
-			
 				$value = stripcslashes(trim($_REQUEST[ "$name" ][$i]));
 				
 				if ( $options['custom_field_template_use_wpautop'] && $data[$i]['type'] == 'textarea' && !empty($value) )
@@ -1545,7 +1584,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 						add_post_meta( $id, $title, apply_filters('cft_'.urlencode($title), $value) );
 					if ( $data[$i]['insertTag'] == true ) $tags_input[] = $value;
 					if ( $data[$i]['valueCount'] == true ) :
-						$options['value_count'][$value] = $this->set_value_count($value);
+						$options['value_count'][$title][$value] = $this->set_value_count($title, $value);
 					endif;
 						
 					if ( $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'] ) {
@@ -1821,6 +1860,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 							$class = "";
 							switch ( $rval[0]['type'] ) :
 								case 'text':
+								case 'textfield':
 								case 'textarea':
 									if ( $rval[0]['class'] ) $class = ' class="' . $rval[0]['class'] . '"'; 
 									$replace_val[$rkey] .= '<input type="text" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($_REQUEST['cftsearch'][urlencode($key)]) . '"' . $class . ' />';
@@ -1927,6 +1967,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 						$class = "";
 						switch ( $val2['type'] ) :
 							case 'text':
+							case 'textfield':
 							case 'textarea':
 								if ( $val2['class'] ) $class = ' class="' . $val2['class'] . '"'; 
 								$output .= '<dd><input type="text" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($_REQUEST['cftsearch'][urlencode($key)]) . '"' . $class . ' /></dd>';
@@ -2083,23 +2124,97 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		return $ret;
 	}
 	
-	function set_value_count($value) {
+	function set_value_count($key, $value) {
 		global $wpdb;
 		
-		$query = $wpdb->prepare("SELECT COUNT(meta_id) FROM `". $wpdb->postmeta."` WHERE `". $wpdb->postmeta."`.meta_value = %s;", $value);
+		$query = $wpdb->prepare("SELECT COUNT(meta_id) FROM `". $wpdb->postmeta."` WHERE `". $wpdb->postmeta."`.meta_key = %s AND `". $wpdb->postmeta."`.meta_value = %s;", $key, $value);
 		$count = $wpdb->get_var($query);
 				
 		return (int)$count;
 	}
 	
-	function get_value_count($value = '') {
+	function get_value_count($key = '', $value = '') {
 		$options = $this->get_custom_field_template_data();
 		
-		if ( $value ) :
-			return $options['value_count'][$value];
+		if ( $key && $value ) :
+			return $options['value_count'][$key][$value];
 		else:
 			return $options['value_count'];
 		endif; 
+	}
+	
+	function custom_field_template_delete_post($post_id) {
+		global $wpdb;
+		$options = $this->get_custom_field_template_data();
+		$id = $options['posts'][$post_id];
+		
+		if ( is_numeric($id) ) :
+			$fields = $this->get_custom_fields($id);
+		
+			if ( $fields == null )
+				return;
+					
+			foreach( $fields as $title	=> $data) :
+				$name = $this->sanitize_name( $title );
+				$title = $wpdb->escape(stripcslashes(trim($title)));
+				for($i = 0; $i<count($data); $i++) :
+					$value = get_post_meta($post_id, $title);
+					if ( is_array($value) ) :
+						foreach ( $value as $val ) :
+							if ( $data[$i]['valueCount'] == true ) :
+								$count = $this->set_value_count($title, $val)-1;
+								if ( $count<=0 )
+									unset($options['value_count'][$title][$val]);
+								else
+									$options['value_count'][$title][$val] = $count;
+							endif;
+						endforeach;
+					else :
+						if ( $data[$i]['valueCount'] == true ) :
+							$count = $this->set_value_count($title, $value)-1;
+							if ( $count<=0 )
+								unset($options['value_count'][$title][$value]);
+							else
+								$options['value_count'][$title][$value] = $count;
+						endif;
+					endif;
+				endfor;
+			endforeach;
+		endif;
+		update_option('custom_field_template_data', $options);
+	}
+	
+	function custom_field_template_rebuild_value_counts() {
+		global $wpdb;
+		$options = $this->get_custom_field_template_data();
+		unset($options['value_count']);
+
+		if ( is_array($options['custom_fields']) ) :
+			for($j=0;$j<count($options['custom_fields']);$j++) :
+		
+				$fields = $this->get_custom_fields($j);
+		
+				if ( $fields == null )
+					return;
+					
+				foreach( $fields as $title	=> $data) :
+					$name = $this->sanitize_name( $title );
+					$title = $wpdb->escape(stripcslashes(trim($title)));
+					for($i = 0; $i<count($data); $i++) :
+						if ( $data[$i]['valueCount'] == true ) :
+							$query = $wpdb->prepare("SELECT COUNT(meta_id) as meta_count, `". $wpdb->postmeta."`.meta_value FROM `". $wpdb->postmeta."` WHERE `". $wpdb->postmeta."`.meta_key = %s GROUP BY `". $wpdb->postmeta."`.meta_value;", $title);
+							$result = $wpdb->get_results($query, ARRAY_A);
+							if ( $result ) :
+								foreach($result as $val) :
+									$options['value_count'][$title][$val['meta_value']] = $val['meta_count'];
+								endforeach;
+							endif;
+						endif;
+					endfor;
+				endforeach;
+			endfor;
+		endif;
+		update_option('custom_field_template_data', $options);
 	}
 }
 
