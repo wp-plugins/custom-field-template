@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.0.7
+Version: 1.0.8
 Author URI: http://wordpressgogo.com/
 */
 
@@ -79,6 +79,9 @@ class custom_field_template {
 				$this->install_custom_field_template_css();
 			}
 		}
+		
+		if ( $options['custom_field_template_widget_shortcode'] )
+			add_filter('widget_text', 'do_shortcode');
 		
 		if ( substr($wp_version, 0, 3) >= '2.7' ) {
 			add_action( 'manage_posts_custom_column', array(&$this, 'add_manage_posts_custom_column'), 10, 2 );
@@ -463,7 +466,7 @@ mediaButton = true';
 			endfor;
 		endif;
 		
-		return $content;
+		return stripcslashes($content);
 	}
 	
 	function custom_field_template_admin() {
@@ -478,6 +481,7 @@ mediaButton = true';
 			$options['custom_field_template_disable_default_custom_fields'] = $_POST['custom_field_template_disable_default_custom_fields'];
 			$options['custom_field_template_disable_quick_edit'] = $_POST['custom_field_template_disable_quick_edit'];
 			$options['custom_field_template_replace_the_title'] = $_POST['custom_field_template_replace_the_title'];
+			$options['custom_field_template_widget_shortcode'] = $_POST['custom_field_template_widget_shortcode'];
 			for($i=0;$i<count($_POST["custom_field_template_content"]);$i++) {
 				if( $_POST["custom_field_template_content"][$i] ) {
 					$options['custom_fields'][$j]['title']   = $_POST["custom_field_template_title"][$i];
@@ -614,6 +618,11 @@ mediaButton = true';
 <tr><td>
 <p><label for="custom_field_template_replace_the_title"><?php _e('In case that you would like to replace the box title with the template title.', 'custom-field-template'); ?></label>:<br />
 <input type="checkbox" name="custom_field_template_replace_the_title" id="custom_field_template_replace_the_title" value="1" <?php if ($options['custom_field_template_replace_the_title']) { echo 'checked="checked"'; } ?> /> <?php _e('Replace the box title', 'custom-field-template'); ?></p>
+</td>
+</tr>
+<tr><td>
+<p><label for="custom_field_template_widget_shortcode"><?php _e('In case that you would like to use the shortcode in the widget.', 'custom-field-template'); ?></label>:<br />
+<input type="checkbox" name="custom_field_template_widget_shortcode" id="custom_field_template_widget_shortcode" value="1" <?php if ($options['custom_field_template_widget_shortcode']) { echo 'checked="checked"'; } ?> /> <?php _e('Use the shortcode in the widget', 'custom-field-template'); ?></p>
 </td>
 </tr>
 <tr><td>
