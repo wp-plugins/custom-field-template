@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.0.8
+Version: 1.1
 Author URI: http://wordpressgogo.com/
 */
 
@@ -33,6 +33,8 @@ class custom_field_template {
 		add_filter( 'the_content', array(&$this, 'custom_field_template_the_content') );
 		
 		if ( $_REQUEST['cftsearch_submit'] ) :
+			if ( $_REQUEST['limit'] )
+				add_action( 'post_limits', array(&$this, 'custom_field_template_post_limits'));
 			add_filter( 'posts_join', array(&$this, 'custom_field_template_posts_join') );
 			add_filter( 'posts_where', array(&$this, 'custom_field_template_posts_where') );
 			add_filter( 'posts_orderby',  array(&$this, 'custom_field_template_posts_orderby' ) );
@@ -857,6 +859,9 @@ hideKey = true<br />
 <tr>
 <th>valueCount</th><td>valueCount = true</td><td>valueCount = true</td><td>valueCount = true</td><td>valueCount = true</td><td>valueCount = true</td>
 </tr>
+<tr>
+<th>JavaScript Event Handlers</th><td>onclick = alert('ok');</td><td>onchange = alert('ok');</td><td>onchange = alert('ok');</td><td>onchange = alert('ok');</td><td>onfocus = alert('ok');</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -949,7 +954,8 @@ jQuery(this).addClass("closed");
 		return $custom_fields;
 	}
 	
-	function make_textfield( $name, $sid, $size = 25, $default, $hideKey, $label, $code, $class ) {
+	function make_textfield( $name, $sid, $size = 25, $default, $hideKey, $label, $code, $class,
+	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
 		$title = $name;
@@ -978,6 +984,13 @@ jQuery(this).addClass("closed");
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
 		
+		$event = array('onclick' => $onclick, 'ondblclick' => $ondblclick, 'onkeydown' => $onkeydown, 'onkeypress' => $onkeypress, 'onkeyup' => $onkeyup, 'onmousedown' => $onmousedown, 'onmouseup' => $onmouseup, 'onmouseover' => $onmouseover, 'onmouseout' => $onmouseout, 'onmousemove' => $onmousemove, 'onfocus' => $onfocus, 'onblur' => $onblur, 'onchange' => $onchange, 'onselect' => $onselect);
+		$event_output = "";
+		foreach($event as $key => $val) :
+			if ( $val )
+				$event_output .= " " . $key . '="' . stripcslashes($val) . '"';
+		endforeach;
+		
 		$out .= 
 			'<dl>' .
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
@@ -985,12 +998,13 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= '<input id="' . $name . '" name="' . $name . '[]" value="' . attribute_escape($value) . '" type="text" size="' . $size . '"' . $class . ' /></dd>' .
+		$out .= '<input id="' . $name . '" name="' . $name . '[]" value="' . attribute_escape($value) . '" type="text" size="' . $size . '"' . $class . $event_output . ' /></dd>' .
 			'</dl>';
 		return $out;
 	}
 	
-	function make_checkbox( $name, $sid, $value, $valueLabel, $checked, $hideKey, $label, $code, $class ) {
+	function make_checkbox( $name, $sid, $value, $valueLabel, $checked, $hideKey, $label, $code, $class,
+	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
 		$title = $name;
@@ -1012,6 +1026,13 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
+
+		$event = array('onclick' => $onclick, 'ondblclick' => $ondblclick, 'onkeydown' => $onkeydown, 'onkeypress' => $onkeypress, 'onkeyup' => $onkeyup, 'onmousedown' => $onmousedown, 'onmouseup' => $onmouseup, 'onmouseover' => $onmouseover, 'onmouseout' => $onmouseout, 'onmousemove' => $onmousemove, 'onfocus' => $onfocus, 'onblur' => $onblur, 'onchange' => $onchange, 'onselect' => $onselect);
+		$event_output = "";
+		foreach($event as $key => $val) :
+			if ( $val )
+				$event_output .= " " . $key . '="' . stripcslashes($val) . '"';
+		endforeach;
 		
 		$out .= 
 			'<dl>' .
@@ -1020,7 +1041,7 @@ jQuery(this).addClass("closed");
 		
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .=	'<label for="' . $id . '" class="selectit"><input name="' . $name . '[' . $sid . ']" value="' . attribute_escape($value) . '" ' . $checked . ' type="checkbox"' . $class . ' /> ';
+		$out .=	'<label for="' . $id . '" class="selectit"><input name="' . $name . '[' . $sid . ']" value="' . attribute_escape($value) . '" ' . $checked . ' type="checkbox"' . $class . $event_output . ' /> ';
 		if ( $valueLabel )
 			$out .= stripcslashes($valueLabel);
 		else
@@ -1032,7 +1053,8 @@ jQuery(this).addClass("closed");
 		return $out;
 	}
 	
-	function make_radio( $name, $sid, $values, $valueLabel, $clearButton, $default, $hideKey, $label, $code, $class ) {
+	function make_radio( $name, $sid, $values, $valueLabel, $clearButton, $default, $hideKey, $label, $code, $class,
+	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
 		$title = $name;
@@ -1054,6 +1076,13 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
+
+		$event = array('onclick' => $onclick, 'ondblclick' => $ondblclick, 'onkeydown' => $onkeydown, 'onkeypress' => $onkeypress, 'onkeyup' => $onkeyup, 'onmousedown' => $onmousedown, 'onmouseup' => $onmouseup, 'onmouseover' => $onmouseover, 'onmouseout' => $onmouseout, 'onmousemove' => $onmousemove, 'onfocus' => $onfocus, 'onblur' => $onblur, 'onchange' => $onchange, 'onselect' => $onselect);
+		$event_output = "";
+		foreach($event as $key => $val) :
+			if ( $val )
+				$event_output .= " " . $key . '="' . stripcslashes($val) . '"';
+		endforeach;
 
 		$out .= 
 			'<dl>' .
@@ -1078,7 +1107,7 @@ jQuery(this).addClass("closed");
 			$checked = ( trim( $val ) == trim( $selected ) ) ? 'checked="checked"' : '';
 			
 			$out .=	
-				'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape($val) . '" ' . $checked . ' type="radio"' . $class . ' /> ';
+				'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape($val) . '" ' . $checked . ' type="radio"' . $class . $event_output . ' /> ';
 			if ( $valueLabel[$i] )
 				$out .= stripcslashes($valueLabel[$i]);
 			else
@@ -1091,7 +1120,8 @@ jQuery(this).addClass("closed");
 		return $out;			
 	}
 	
-	function make_select( $name, $sid, $values, $valueLabel, $default, $hideKey, $label, $code, $class, $selectLabel ) {
+	function make_select( $name, $sid, $values, $valueLabel, $default, $hideKey, $label, $code, $class, $selectLabel,
+	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
 		$title = $name;
@@ -1115,7 +1145,14 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
-		
+
+		$event = array('onclick' => $onclick, 'ondblclick' => $ondblclick, 'onkeydown' => $onkeydown, 'onkeypress' => $onkeypress, 'onkeyup' => $onkeyup, 'onmousedown' => $onmousedown, 'onmouseup' => $onmouseup, 'onmouseover' => $onmouseover, 'onmouseout' => $onmouseout, 'onmousemove' => $onmousemove, 'onfocus' => $onfocus, 'onblur' => $onblur, 'onchange' => $onchange, 'onselect' => $onselect);
+		$event_output = "";
+		foreach($event as $key => $val) :
+			if ( $val )
+				$event_output .= " " . $key . '="' . stripcslashes($val) . '"';
+		endforeach;
+
 		$out .= 
 			'<dl>' .
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
@@ -1123,7 +1160,7 @@ jQuery(this).addClass("closed");
 			
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .=	'<select name="' . $name . '[]"' . $class . '>';
+		$out .=	'<select name="' . $name . '[]"' . $class . $event_output . '>';
 		
 		if ( $selectLabel )
 			$out .= '<option value="" >' . stripcslashes(trim($selectLabel)) . '</option>';
@@ -1147,7 +1184,8 @@ jQuery(this).addClass("closed");
 		return $out;
 	}
 	
-	function make_textarea( $name, $sid, $rows, $cols, $tinyMCE, $htmlEditor, $mediaButton, $default, $hideKey, $label, $code, $class ) {
+	function make_textarea( $name, $sid, $rows, $cols, $tinyMCE, $htmlEditor, $mediaButton, $default, $hideKey, $label, $code, $class,
+	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
 		global $wp_version;
@@ -1218,6 +1256,13 @@ EOF;
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
+
+		$event = array('onclick' => $onclick, 'ondblclick' => $ondblclick, 'onkeydown' => $onkeydown, 'onkeypress' => $onkeypress, 'onkeyup' => $onkeyup, 'onmousedown' => $onmousedown, 'onmouseup' => $onmouseup, 'onmouseover' => $onmouseover, 'onmouseout' => $onmouseout, 'onmousemove' => $onmousemove, 'onfocus' => $onfocus, 'onblur' => $onblur, 'onchange' => $onchange, 'onselect' => $onselect);
+		$event_output = "";
+		foreach($event as $key => $val) :
+			if ( $val )
+				$event_output .= " " . $key . '="' . stripcslashes($val) . '"';
+		endforeach;
 		
 		$out .= 
 			'<dl>' .
@@ -1234,7 +1279,7 @@ EOF;
 			$editorcontainer_class .= ' class="editorcontainer"';
 		endif;
 		
-		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . $name . $rand . '"><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000"' . $content_class . '>' . attribute_escape($value) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
+		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . $name . $rand . '"><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000"' . $content_class . $event_output . '>' . attribute_escape($value) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
 		if ( $htmlEditor == true ) $out .= '</div>';
 		$out .= '</dd></dl>';
 		
@@ -1259,7 +1304,7 @@ EOF;
 			if ( $options['custom_fields'][$id]['post_type'] == 'page' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php')) )
 				return;
 		endif;
-			
+					
 		if ( $options['custom_fields'][$id]['category'] && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php')) )
 			return;
 
@@ -1284,26 +1329,31 @@ EOF;
 					$out .= '</div><div' . $class . '>';
 				}
 				else if( $data[$i]['type'] == 'textfield' || $data[$i]['type'] == 'text' ) {
-					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'] );
+					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'],
+						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'checkbox' ) {
 					$out .= 
-						$this->make_checkbox( $title, $i, $data[$i]['value'], $data[$i]['valueLabel'], $data[$i]['checked'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'] );
+						$this->make_checkbox( $title, $i, $data[$i]['value'], $data[$i]['valueLabel'], $data[$i]['checked'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'],
+						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'radio' ) {
 					$out .= 
 						$this->make_radio( 
-							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['clearButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'] );
+							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['clearButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'],
+						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'select' ) {
 					$out .= 
 						$this->make_select( 
-							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['selectLabel'] );
+							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['selectLabel'],
+						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'textarea' ) {
 					if ( $options['tinyMCE'][$_REQUEST['post']][$this->sanitize_name($title)][$i] )  $data[$i]['rows']  = $options['tinyMCE'][$_REQUEST['post']][$this->sanitize_name($title)][$i];
 					$out .= 
-						$this->make_textarea( $title, $i, $data[$i]['rows'], $data[$i]['cols'], $data[$i]['tinyMCE'], $data[$i]['htmlEditor'], $data[$i]['mediaButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'] );
+						$this->make_textarea( $title, $i, $data[$i]['rows'], $data[$i]['cols'], $data[$i]['tinyMCE'], $data[$i]['htmlEditor'], $data[$i]['mediaButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'],
+						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 			}
 		}
@@ -1559,8 +1609,11 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		if( !wp_verify_nonce($_REQUEST['custom-field-template-verify-key'], 'custom-field-template') )
 			return $id;
 		
-		if ( !isset($_REQUEST['custom-field-template-id']) )
+		if ( !isset($_REQUEST['custom-field-template-id']) ) :
+			unset($options['posts'][$id]);
+			update_option('custom_field_template_data', $options);
 			return $id;
+		endif;
 		
 		$fields = $this->get_custom_fields($_REQUEST['custom-field-template-id']);
 		
@@ -1755,10 +1808,18 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 					$fields = $this->get_custom_fields( $i );
 					foreach ( $fields as $key => $val ) :
 						if ( count($data[$key]) > 1 ) :
-							if ( $val[0]['sort'] == 'asc' )
+							if ( $val[0]['sort'] == 'asc' ) :
 								sort($data[$key]);
-							elseif ( $val[0]['sort'] == 'desc' )
+							elseif ( $val[0]['sort'] == 'desc' ) :
 								rsort($data[$key]);
+							elseif ( $val[0]['sort'] == 'order' ) :
+								$tmpdata = array();
+								for( $j=0; $j<count($val); $j++) :
+									if ( in_array($val[$j]['value'], $data[$key]) )
+										$tmpdata[] = $val[$j]['value'];
+								endfor;
+								$data[$key] = $tmpdata;
+							endif;
 							$replace_val = '<ul>';
 							foreach ( $data[$key] as $val2 ) :
 								$value = $val2;
@@ -1794,10 +1855,18 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			foreach ( $fields as $key => $val ) :
 				$values = get_post_meta( $post_id, $key );
 				if ($values):
-					if ( $val[0]['sort'] == 'asc' )
+					if ( $val[0]['sort'] == 'asc' ) :
 						sort($values);
-					elseif ( $val[0]['sort'] == 'desc' )
+					elseif ( $val[0]['sort'] == 'desc' ) :
 						rsort($values);
+					elseif ( $val[0]['sort'] == 'order' ) :
+						$tmpdata = array();
+						for( $j=0; $j<count($val); $j++) :
+							if ( in_array($val[$j]['value'], $data[$key]) )
+								$tmpdata[] = $val[$j]['value'];
+						endfor;
+						$values = $tmpdata;
+					endif;
 					foreach ( $val as $key2 => $val2 ) :
 						$hide = '';
 						if ( $val2['output'] == true ) :
@@ -1847,7 +1916,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 				for ($i=0;$i<$count;$i++) :
 					$fields = $this->get_custom_fields( $i );
 					foreach ( $fields as $key => $val ) :
-
+						unset($replace);
 						$replace[0] = $val;
 
 						$search = array();
@@ -1855,6 +1924,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 						if($val[0]['searchValue']) eval('$search["value"] =' . stripslashes($val[0]['searchValue']));
 						if($val[0]['searchOperator']) eval('$search["operator"] =' . stripslashes($val[0]['searchOperator']));
 						if($val[0]['searchValueLabel']) eval('$search["valueLabel"] =' . stripslashes($val[0]['searchValueLabel']));
+						if($val[0]['searchDefault']) eval('$search["default"] =' . stripslashes($val[0]['searchDefault']));
 						
 						foreach ( $search as $skey => $sval ) :
 							$j = 1;
@@ -1862,7 +1932,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 								$replace[$j][0][$skey] = $sval2;
 								$j++;
 							endforeach;
-						endforeach;
+						endforeach;						
 												
 						foreach( $replace as $rkey => $rval ) :				
 							$replace_val[$rkey] = "";
@@ -1872,7 +1942,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 								case 'textfield':
 								case 'textarea':
 									if ( $rval[0]['class'] ) $class = ' class="' . $rval[0]['class'] . '"'; 
-									$replace_val[$rkey] .= '<input type="text" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($_REQUEST['cftsearch'][urlencode($key)]) . '"' . $class . ' />';
+									$replace_val[$rkey] .= '<input type="text" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($_REQUEST['cftsearch'][urlencode($key)][$rkey][0]) . '"' . $class . ' />';
 									break;		
 								case 'checkbox':
 									if ( $rval[0]['class'] ) $class = ' class="' . $rval[0]['class'] . '"'; 
@@ -1885,17 +1955,30 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 									else :
 										$values = explode( '#', $rval[0]['value'] );
 										$valueLabels = explode( '#', $rval[0]['valueLabel'] );
+										$default = explode( '#', $rval[0]['default'] );
 									endif;
 									if ( count($values) > 1 ) :
 										$replace_val[$rkey] .= '<ul>';
 										$j=0;
 										foreach( $values as $metavalue ) :
-											$replace_val[$rkey] .= '<li><input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metavalue) . '"' . $class . ' /> ';			
+											$checked = '';
+											$metavalue = trim($metavalue);
+											if ( is_array($_REQUEST['cftsearch'][urlencode($key)][$rkey]) ) :
+												if ( in_array($metavalue, $_REQUEST['cftsearch'][urlencode($key)][$rkey]) )
+													$checked = ' checked="checked"';
+												else
+													$checked = '';
+											endif;
+											if ( in_array($metavalue, $default) && !$_REQUEST['cftsearch'][urlencode($key)][$rkey] )
+												$checked = ' checked="checked"';
+
+											$replace_val[$rkey] .= '<li><input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metavalue) . '"' . $class . $checked . '  /> ';			
 											if ( $valueLabels[$j] ) $replace_val[$rkey] .= stripcslashes($valueLabels[$j]);
 											else $replace_val[$rkey] .= stripcslashes($metavalue);
 											$replace_val[$rkey] .= '</li>';
 											$j++;
 										endforeach;
+										$replace_val[$rkey] .= '</ul>';
 									else :
 										$replace_val[$rkey] .= '<input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape(trim($values[0])) . '"' . $class . ' /> ';			
 										if ( $valueLabel[0] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabels[0]));
@@ -1906,17 +1989,28 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 									if ( $rval[0]['class'] ) $class = ' class="' . $rval[0]['class'] . '"'; 
 									$values = explode( '#', $rval[0]['value'] );
 									$valueLabels = explode( '#', $rval[0]['valueLabel'] );
+									$default = explode( '#', $rval[0]['default'] );
 									if ( count($values) > 1 ) :
 										$replace_val[$rkey] .= '<ul>';
 										$j=0;
-										foreach ( $values as $metaval ) :
-											$metaval = trim($metaval);
-											$replace_val[$rkey] .= '<li><input type="radio" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metaval) . '"' . $class . ' /> ';			
+										foreach ( $values as $metavalue ) :
+											$checked = '';
+											$metavalue = trim($metavalue);
+											if ( is_array($_REQUEST['cftsearch'][urlencode($key)][$rkey]) ) :
+												if ( in_array($metavalue, $_REQUEST['cftsearch'][urlencode($key)][$rkey]) )
+													$checked = ' checked="checked"';
+												else
+													$checked = '';
+											endif;
+											if ( in_array($metavalue, $default) && !$_REQUEST['cftsearch'][urlencode($key)][$rkey] )
+												$checked = ' checked="checked"';
+											$replace_val[$rkey] .= '<li><input type="radio" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metavalue) . '"' . $class . $checked . ' /> ';			
 											if ( $valueLabels[$j] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabels[$j]));
-											else $replace_val[$rkey] .= stripcslashes($metaval);
+											else $replace_val[$rkey] .= stripcslashes($metavalue);
 											$replace_val[$rkey] .= '</li>';
 											$j++;
 										endforeach;
+										$replace_val[$rkey] .= '</ul>';
 									else :
 										$replace_val[$rkey] .= '<input type="radio" name="cftsearch[' . urlencode($key) . '][]" value="' . attribute_escape(trim($values[0])) . '"' . $class . ' /> ';			
 										if ( $valueLabels[0] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabels[0]));
@@ -1927,12 +2021,16 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 									if ( $rval[0]['class'] ) $class = ' class="' . $rval[0]['class'] . '"'; 
 									$values = explode( '#', $rval[0]['value'] );
 									$valueLabels = explode( '#', $rval[0]['valueLabel'] );
+									$default = explode( '#', $rval[0]['default'] );
 									$replace_val[$rkey] .= '<select name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]"' . $class . '>';
 									$replace_val[$rkey] .= '<option value=""></option>';
 									$j=0;
 									foreach ( $values as $metaval ) :
 										$metaval = trim($metaval);
-										if ( $_REQUEST['cftsearch'][urlencode($key)] == $metaval ) $selected = ' selected="selected"';
+										if ( in_array($metavalue, $default) && !$_REQUEST['cftsearch'][urlencode($key)][$rkey] )
+												$checked = ' checked="checked"';
+
+										if ( $_REQUEST['cftsearch'][urlencode($key)][$rkey][0] == $metaval ) $selected = ' selected="selected"';
 										else $selected = "";
 										$replace_val[$rkey] .= '<option value="' . attribute_escape($metaval) . '"' . $selected . '>';			
 										if ( $valueLabels[$j] )
@@ -2105,6 +2203,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			endif;
 			$where .= " AND " . $wpdb->posts . ".post_type = 'post'"; 
 		endif;
+		
+		$where .= " AND wp_posts.post_status = 'publish'";
 				
 		return $where;
 	}
@@ -2224,6 +2324,21 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			endfor;
 		endif;
 		update_option('custom_field_template_data', $options);
+	}
+	
+	function custom_field_template_post_limits($sql_limit) {
+		global $wp_query;
+
+		if ( !$sql_limit ) return;
+		list($offset, $old_limit) = explode(',', $sql_limit);
+		$limit = (int)$_REQUEST['limit'];
+		if ( !$limit )
+			$limit = trim($old_limit);
+		$wp_query->query_vars['posts_per_page'] = $limit;
+		$offset = ($wp_query->query_vars['paged'] - 1) * $limit;
+		if ( $offset < 0 ) $offset = 0;
+
+		return ( $limit ? "LIMIT $offset, $limit" : '' );
 	}
 }
 
