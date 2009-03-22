@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.1
+Version: 1.1.1
 Author URI: http://wordpressgogo.com/
 */
 
@@ -58,12 +58,16 @@ class custom_field_template {
 			}
 		}
 		
+		if ( is_user_logged_in() && isset($_REQUEST['post']) && $_REQUEST['page'] == 'custom-field-template/custom-field-template.php' && $_REQUEST['cft_mode'] == 'selectbox' ) {
+			echo $this->custom_field_template_selectbox();
+			exit();
+		}
+		
 		if ( is_user_logged_in() && isset($_REQUEST['post']) && $_REQUEST['page'] == 'custom-field-template/custom-field-template.php' && $_REQUEST['cft_mode'] == 'ajaxsave' ) {
 			if ( $_REQUEST['post'] > 0 )
 				$this->edit_meta_value( $_REQUEST['post'] );
 			exit();
 		}
-
 		
 		if ( is_user_logged_in() && $_REQUEST['page'] == 'custom-field-template/custom-field-template.php' && $_REQUEST['cft_mode'] == 'ajaxload') {
 			if ( isset($_REQUEST['id']) )
@@ -444,24 +448,69 @@ mediaButton = true';
 			foreach( $categories as $val ) :
 				$cats[] = $val->cat_ID;
 			endforeach;
+			
+		if ( $options['custom_fields'][$id]['post_type'] ) :
+			if ( $options['custom_fields'][$id]['post_type'] == 'post' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php')) )
+				return;
+			if ( $options['custom_fields'][$id]['post_type'] == 'page' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php')) )
+				return;
+		endif;
 						
 			for ( $i=0; $i<count($options['hook']); $i++ ) :
 				if ( $options['hook'][$i]['category'] ) :
 					if ( is_category() || is_single() ) :
+						if ( $options['hook'][$i]['use_php'] ) :
+							$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
+							$options['hook'][$i]['content'] = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $options['hook'][$i]['content']);
+						endif;
 						$needle = explode(',', $options['hook'][$i]['category']);
 						foreach ( $needle as $val ) :
 							if ( in_array($val, $cats ) ) :
 								if ( $options['hook'][$i]['position'] == 0 )
 									$content .= $options['hook'][$i]['content'];
+								elseif ( $options['hook'][$i]['position'] == 2 )
+									$content = preg_replace('/\[cfthook hook='.$i.'\]/', $options['hook'][$i]['content'], $content);
 								else
 									$content = $options['hook'][$i]['content'] . $content;
 								break;
 							endif;
 						endforeach;
 					endif;
+				elseif ( $option['hook'][$i]['post_type']=='post' ) :
+					if ( is_category() || is_single() ) :
+						if ( $options['hook'][$i]['use_php'] ) :
+							$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
+							$options['hook'][$i]['content'] = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $options['hook'][$i]['content']);
+						endif;
+						if ( $options['hook'][$i]['position'] == 0 )
+							$content .= $options['hook'][$i]['content'];
+						elseif ( $options['hook'][$i]['position'] == 2 )
+							$content = preg_replace('/\[cfthook hook='.$i.'\]/', $options['hook'][$i]['content'], $content);
+						else
+							$content = $options['hook'][$i]['content'] . $content;
+					endif;		
+				elseif ( $option['hook'][$i]['post_type']=='page' ) :
+					if ( is_page() ) :
+						if ( $options['hook'][$i]['use_php'] ) :
+							$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
+							$options['hook'][$i]['content'] = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $options['hook'][$i]['content']);
+						endif;
+						if ( $options['hook'][$i]['position'] == 0 )
+							$content .= $options['hook'][$i]['content'];
+						elseif ( $options['hook'][$i]['position'] == 2 )
+							$content = preg_replace('/\[cfthook hook='.$i.'\]/', $options['hook'][$i]['content'], $content);
+						else
+							$content = $options['hook'][$i]['content'] . $content;
+					endif;
 				else :
+					if ( $options['hook'][$i]['use_php'] ) :
+						$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
+						$options['hook'][$i]['content'] = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $options['hook'][$i]['content']);
+					endif;
 					if ( $options['hook'][$i]['position'] == 0 )
 						$content .= $options['hook'][$i]['content'];
+					elseif ( $options['hook'][$i]['position'] == 2 )
+						$content = preg_replace('/\[cfthook hook='.$i.'\]/', $options['hook'][$i]['content'], $content);
 					else
 						$content = $options['hook'][$i]['content'] . $content;
 				endif;
@@ -529,6 +578,7 @@ mediaButton = true';
 					$options['hook'][$j]['content']  = $_POST["custom_field_template_hook_content"][$i];
 					$options['hook'][$j]['category'] = preg_replace('/\s/', '', $_POST["custom_field_template_hook_category"][$i]);
 					$options['hook'][$j]['use_php']  = $_POST["custom_field_template_hook_use_php"][$i];
+					$options['hook'][$j]['post_type']  = $_POST["custom_field_template_hook_post_type"][$i];
 					$j++;
 				}
 			}			
@@ -669,8 +719,8 @@ mediaButton = true';
 ?>
 <tr><th><strong>FORMAT #<?php echo $i; ?></strong></th></tr>
 <tr><td>
-<p><textarea name="custom_field_template_shortcode_format[]" rows="10" cols="80"><?php echo stripcslashes($options['shortcode_format'][$i]); ?></textarea></p>
-<p><input type="checkbox" name="custom_field_template_shortcode_format_use_php[]" id="custom_field_template_shortcode_format_use_php[]" value="1" <?php if ($options['shortcode_format_use_php'][$i]) { echo ' checked="checked"'; } ?> /> <?php _e('Use PHP', 'custom-field-template'); ?></p>
+<p><textarea name="custom_field_template_shortcode_format[<?php echo $i; ?>]" rows="10" cols="80"><?php echo stripcslashes($options['shortcode_format'][$i]); ?></textarea></p>
+<p><label><input type="checkbox" name="custom_field_template_shortcode_format_use_php[<?php echo $i; ?>]" value="1" <?php if ($options['shortcode_format_use_php'][$i]) { echo ' checked="checked"'; } ?> /> <?php _e('Use PHP', 'custom-field-template'); ?></label></p>
 </td></tr>
 <?php
 	endfor;
@@ -730,7 +780,12 @@ ex. `radio` and `select`:</dt><dd>$values = array('dog', 'cat', 'monkey'); $defa
 <p><label for="custom_field_template_hook_position[<?php echo $i; ?>]"><?php echo sprintf(__('Position', 'custom-field-template'), $i); ?></label>:<br />
 <input type="radio" name="custom_field_template_hook_position[<?php echo $i; ?>]" value="1" <?php if($options['hook'][$i]['position']==1) echo ' checked="checked"'; ?> /> <?php _e('Before the conetnt', 'custom-field-template'); ?>
 <input type="radio" name="custom_field_template_hook_position[<?php echo $i; ?>]" value="0" <?php if($options['hook'][$i]['position']==0) echo ' checked="checked"'; ?> /> <?php _e('After the conetnt', 'custom-field-template'); ?>
+<input type="radio" name="custom_field_template_hook_position[<?php echo $i; ?>]" value="2" <?php if($options['hook'][$i]['position']==2) echo ' checked="checked"'; ?> /> <?php echo sprintf(__('Inside the conetnt ([cfthook hook=%d])', 'custom-field-template'), $i); ?>
 </p>
+<p><label for="custom_field_template_hook_post_type[<?php echo $i; ?>]"><?php echo sprintf(__('Post Type', 'custom-field-template'), $i); ?></label>:<br />
+<input type="radio" name="custom_field_template_hook_post_type[<?php echo $i; ?>]" id="custom_field_template_hook_post_type[<?php echo $i; ?>]" value=""<?php if ( !$options['hook'][$i]['post_type'] ) :  echo ' checked="checked"'; endif; ?> /> <?php _e('Both', 'custom-field-template'); ?>
+<input type="radio" name="custom_field_template_hook_post_type[<?php echo $i; ?>]" id="custom_field_template_hook_post_type[<?php echo $i; ?>]" value="post"<?php if ( $options['hook'][$i]['post_type']=='post') : echo ' checked="checked"'; endif; ?> /> <?php _e('Post', 'custom-field-template'); ?>
+<input type="radio" name="custom_field_template_hook_post_type[<?php echo $i; ?>]" id="custom_field_template_hook_post_type[<?php echo $i; ?>]" value="page"<?php if ( $options['hook'][$i]['post_type']=='page') : echo ' checked="checked"'; endif; ?> /> <?php _e('Page', 'custom-field-template'); ?></p>
 <p><label for="custom_field_template_hook_category[<?php echo $i; ?>]"><?php echo sprintf(__('Category ID (comma-deliminated)', 'custom-field-template'), $i); ?></label>:<br />
 <input type="text" name="custom_field_template_hook_category[<?php echo $i; ?>]" id="custom_field_template_hook_category[<?php echo $i; ?>]" value="<?php echo stripcslashes($options['hook'][$i]['category']); ?>" size="80" /></p>
 <p><label for="custom_field_template_hook_content[<?php echo $i; ?>]"><?php echo sprintf(__('Content', 'custom-field-template'), $i); ?></label>:<br /><textarea name="custom_field_template_hook_content[<?php echo $i; ?>]" rows="5" cols="80"><?php echo stripcslashes($options['hook'][$i]['content']); ?></textarea></p>
@@ -965,7 +1020,7 @@ jQuery(this).addClass("closed");
 			eval(stripcslashes($options['php'][$code]));
 		endif;
 		
-		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 ) {
+		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 && $_REQUEST['default'] != true ) {
 			$value = get_post_meta( $_REQUEST[ 'post' ], $title );
 			if ( $value ) {
 				$value = $value[ $sid ];
@@ -998,7 +1053,7 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= '<input id="' . $name . '" name="' . $name . '[]" value="' . attribute_escape($value) . '" type="text" size="' . $size . '"' . $class . $event_output . ' /></dd>' .
+		$out .= '<input id="' . $name . $sid . '" name="' . $name . '[]" value="' . attribute_escape($value) . '" type="text" size="' . $size . '"' . $class . $event_output . ' /></dd>' .
 			'</dl>';
 		return $out;
 	}
@@ -1012,7 +1067,7 @@ jQuery(this).addClass("closed");
 
 		if ( !$value ) $value = "true";
 
-		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 ) {
+		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 && $_REQUEST['default'] != true ) {
 			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
 			if ( $selected ) {
  				if ( in_array(stripcslashes($value), $selected) ) $checked = 'checked="checked"';
@@ -1038,10 +1093,12 @@ jQuery(this).addClass("closed");
 			'<dl>' .
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
 			'<dd>';
+			
+		$id = $name . $sid . '_' . $this->sanitize_name( $value );
 		
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .=	'<label for="' . $id . '" class="selectit"><input name="' . $name . '[' . $sid . ']" value="' . attribute_escape($value) . '" ' . $checked . ' type="checkbox"' . $class . $event_output . ' /> ';
+		$out .=	'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape($value) . '" ' . $checked . ' type="checkbox"' . $class . $event_output . ' /> ';
 		if ( $valueLabel )
 			$out .= stripcslashes($valueLabel);
 		else
@@ -1064,7 +1121,7 @@ jQuery(this).addClass("closed");
 			eval(stripcslashes($options['php'][$code]));
 		endif;
 		
-		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 ) {
+		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 && $_REQUEST['default'] != true ) {
 			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
 			$selected = $selected[ $sid ];
 		} else {
@@ -1102,7 +1159,7 @@ jQuery(this).addClass("closed");
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$i = 0;
 		foreach( $values as $val ) {
-			$id = $name . '_' . $this->sanitize_name( $val );
+			$id = $name . $sid . '_' . $this->sanitize_name( $val );
 			
 			$checked = ( trim( $val ) == trim( $selected ) ) ? 'checked="checked"' : '';
 			
@@ -1131,7 +1188,7 @@ jQuery(this).addClass("closed");
 			eval(stripcslashes($options['php'][$code]));
 		endif;
 	
-		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 ) {
+		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 && $_REQUEST['default'] != true ) {
 			$selected = get_post_meta( $_REQUEST[ 'post' ], $title );
 			if ( $selected ) {
 				$selected = $selected[ $sid ];
@@ -1160,7 +1217,7 @@ jQuery(this).addClass("closed");
 			
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .=	'<select name="' . $name . '[]"' . $class . $event_output . '>';
+		$out .=	'<select id="' . $name . $sid . '" name="' . $name . '[]"' . $class . $event_output . '>';
 		
 		if ( $selectLabel )
 			$out .= '<option value="" >' . stripcslashes(trim($selectLabel)) . '</option>';
@@ -1197,7 +1254,7 @@ jQuery(this).addClass("closed");
 			eval(stripcslashes($options['php'][$code]));
 		endif;
 		
-		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 ) {
+		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 && $_REQUEST['default'] != true ) {
 			$value = get_post_meta( $_REQUEST[ 'post' ], $title );
 			$value = $value[ $sid ];
 		} else {
@@ -1314,8 +1371,11 @@ EOF;
 		if ( $_REQUEST['post'] && $options['custom_fields'][$id]['category'] && !isset($options['posts'][$_REQUEST['post']]) && $options['posts'][$_REQUEST['post']] !== $id && $_REQUEST['cft_mode'] != 'ajaxload' )
 			return;
 			
-		if ( $options['custom_fields'][$id]['instruction'] )
-			$out .= '<div id="cft_instruction">' . stripcslashes($options['custom_fields'][$id]['instruction']) . '</div>';
+		if ( $options['custom_fields'][$id]['instruction'] ) :
+			$instruction = stripcslashes($options['custom_fields'][$id]['instruction']);
+			$instruction = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $instruction);
+			$out .= '<div id="cft_instruction">' . $instruction . '</div>';
+		endif;
 
 		$out .= '<div>';
 		$out .= '<input type="hidden" name="custom-field-template-id" id="custom-field-template-id" value="' . $id . '" />';
@@ -1482,7 +1542,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 					$categories = explode(',', $val['category']);
 					foreach($categories as $cat_id) :
 						if ( is_numeric($cat_id) ) :
-		$out .=		'	jQuery(\'#in-category-' . $cat_id . '\').click(function(){if(jQuery(\'#in-category-' . $cat_id . '\').attr(\'checked\') == true) { if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID.length=0;};';
+		$out .=		'	jQuery(\'#in-category-' . $cat_id . '\').click(function(){if(jQuery(\'#in-category-' . $cat_id . '\').attr(\'checked\') == true) { if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID.length=0;}; jQuery.get(\'?page=custom-field-template/custom-field-template.php&cft_mode=selectbox&post=\'+jQuery(\'#post_ID\').val()+\'&\'+jQuery(\'#categories-all :input\').fieldSerialize(), function(html) { jQuery(\'#cft_selectbox\').html(html); });';
 			if ( $options['custom_field_template_use_autosave'] ) :
 				$out .= ' var fields = jQuery(\'#cft :input\').fieldSerialize();';
 				$out .= 'jQuery.ajax({type: \'POST\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post=\'+jQuery(\'#post_ID\').val()+\'&custom-field-template-verify-key=\'+jQuery(\'#custom-field-template-verify-key\').val()+\'&\'+fields, success: function(){jQuery(\'#custom_field_template_select\').val(\'' . $key . '\');jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&id=' . $key . '&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {';
@@ -1498,7 +1558,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 				$out .= 'jQuery(\'#cft\').html(html);}});';
 			endif;
 
-		$out .=		'	}else{ jQuery(\'#cft\').html(\'\');';
+		$out .=		'	}else{ jQuery(\'#cft\').html(\'\');jQuery.get(\'?page=custom-field-template/custom-field-template.php&cft_mode=selectbox&post=\'+jQuery(\'#post_ID\').val(), function(html) { jQuery(\'#cft_selectbox\').html(html); });';
 		if ( $options['custom_field_template_replace_the_title'] ) :
 			$out .= 'jQuery(\'#cftdiv h3 span\').text(\'' . __('Custom Field Template', 'custom-field-template') . '\');';
 		endif;
@@ -1530,10 +1590,50 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 					'</style>';
 		$body = $this->load_custom_field($init_id);
 		
+		$out .= '<div id="cft_selectbox" style="height:25px;">';
+		$out .= $this->custom_field_template_selectbox();
+		$out .= '</div>';
+		
+		$out .= '<input type="hidden" name="custom-field-template-verify-key" id="custom-field-template-verify-key" value="' . wp_create_nonce('custom-field-template') . '" />';
+		$out .= '<div id="cft">';
+		$out .= $body;
+		$out .= '</div>';
+		
+		$out .= '<div style="position:absolute; top:30px; right:5px;">';
+		$out .= '<img class="waiting" style="display:none; vertical-align:middle;" src="images/loading.gif" alt="" id="cftloading_img" /> ';
+		$out .= '<input type="button" value="' . __('Initialize', 'custom-field-template') . '" onclick="';
+		$out .= 'if(confirm(\''.__('Are you sure to reset current values? Default values will be loaded.', 'custom-field-template').'\')){if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID.length=0;};jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&default=true&id=\'+jQuery(\'#custom-field-template-id\').val()+\'&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {';
+		$out .= 'jQuery(\'#cft\').html(html);}});}';
+		$out .= '" class="button" style="vertical-align:middle;" />';
+		$out .= '<input type="button" value="' . __('Save', 'custom-field-template') . '" onclick="';
+		$out .= 'var fields = jQuery(\'#cft :input\').fieldSerialize();';
+		$out .= 'jQuery.ajax({type: \'POST\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post=\'+jQuery(\'#post_ID\').val()+\'&custom-field-template-verify-key=\'+jQuery(\'#custom-field-template-verify-key\').val()+\'&\'+fields});';
+		$out .= '" class="button" style="vertical-align:middle;" />';
+		$out .= '</div>';
+			
+		if ( substr($wp_version, 0, 3) < '2.5' ) {
+			$out .= '</div></fieldset></div>';
+		} else {
+			if ( $body && $options['custom_field_template_replace_the_title'] ) :
+				$out .= '<script type="text/javascript">' . "\n" . '// <![CDATA[' . "\n";
+				$out .=	'jQuery(document).ready(function() {jQuery(\'#cftdiv h3 span\').text(\'' . $options['custom_fields'][$init_id]['title'] . '\');});' . "\n";
+				$out .= '// ]]>' . "\n" . '</script>';
+			endif;
+		}
+
+		echo $out;
+	}
+	
+	function custom_field_template_selectbox() {
+		$options = $this->get_custom_field_template_data();
 		if ( count($options['custom_fields'])>1 ) :
 			$flag = 0;
+			$categories = get_the_category($_REQUEST['post']);
+			$cats = array();
+			if ( is_array($categories) ) foreach($categories as $category) $cats[] = $category->cat_ID; 
+			if ( $_REQUEST['post_category'] ) $cats = array_merge($cats, $_REQUEST['post_category']);
 			for ( $i=0; $i < count($options['custom_fields']); $i++ ) :
-				if ( !$options['custom_fields'][$i]['category'] ) :
+				if ( !$options['custom_fields'][$i]['category'] || in_array($options['custom_fields'][$i]['category'], $cats) ) :
 					$flag = 1;
 					break;
 				endif;
@@ -1541,10 +1641,12 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			if ( $flag ) :
 				$out .= '<select id="custom_field_template_select">';
 				for ( $i=0; $i < count($options['custom_fields']); $i++ ) {
-					if ( $i == $options['posts'][$_REQUEST['post']] && isset($_REQUEST['post']) ) :
-						$out .= '<option value="' . $i . '" selected="selected">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
+					if ( in_array($options['custom_fields'][$i]['category'], $cats) ) :
+						$out .= '<option value="' . $i . '">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
 					elseif ( $options['custom_fields'][$i]['category'] ) :
 						$out .= '';
+					elseif ( $i == $options['posts'][$_REQUEST['post']] && isset($_REQUEST['post']) ) :
+						$out .= '<option value="' . $i . '" selected="selected">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
 					else :
 						$out .= '<option value="' . $i . '">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
 					endif;
@@ -1564,36 +1666,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 				endif;
 				$out .= '" />';
 			else :
-				$out .= '<div style="height:25px;">&nbsp;</div>';
+				$out .= '&nbsp;';
 			endif;
 		else :
-			$out .= '<div style="height:25px;">&nbsp;</div>';			
+			$out .= '&nbsp;';			
 		endif;
 		
-		$out .= '<input type="hidden" name="custom-field-template-verify-key" id="custom-field-template-verify-key" value="' . wp_create_nonce('custom-field-template') . '" />';
-		$out .= '<div id="cft">';
-		$out .= $body;
-		$out .= '</div>';
-		
-		$out .= '<div style="position:absolute; top:30px; right:5px;">';
-		$out .= '<img class="waiting" style="display:none; vertical-align:middle;" src="images/loading.gif" alt="" id="cftloading_img" /> ';
-		$out .= '<input type="button" value="' . __('Save', 'custom-field-template') . '" onclick="';
-		$out .= 'var fields = jQuery(\'#cft :input\').fieldSerialize();';
-		$out .= 'jQuery.ajax({type: \'POST\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post=\'+jQuery(\'#post_ID\').val()+\'&custom-field-template-verify-key=\'+jQuery(\'#custom-field-template-verify-key\').val()+\'&\'+fields});';
-		$out .= '" class="button" style="vertical-align:middle;" />';
-		$out .= '</div>';
-			
-		if ( substr($wp_version, 0, 3) < '2.5' ) {
-			$out .= '</div></fieldset></div>';
-		} else {
-			if ( $body && $options['custom_field_template_replace_the_title'] ) :
-				$out .= '<script type="text/javascript">' . "\n" . '// <![CDATA[' . "\n";
-				$out .=	'jQuery(document).ready(function() {jQuery(\'#cftdiv h3 span\').text(\'' . $options['custom_fields'][$init_id]['title'] . '\');});' . "\n";
-				$out .= '// ]]>' . "\n" . '</script>';
-			endif;
-		}
-
-		echo $out;
+		return $out;
 	}
 
 	function edit_meta_value( $id ) {
@@ -1903,7 +1982,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		extract(shortcode_atts(array(
 			'template'    => 0,
 			'format'      => '',
-			'search_label' => __('Search &raquo;', 'custom-field-template')
+			'search_label' => __('Search &raquo;', 'custom-field-template'),
+			'button'      => true
 		), $attr));
 
 
@@ -1925,6 +2005,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 						if($val[0]['searchOperator']) eval('$search["operator"] =' . stripslashes($val[0]['searchOperator']));
 						if($val[0]['searchValueLabel']) eval('$search["valueLabel"] =' . stripslashes($val[0]['searchValueLabel']));
 						if($val[0]['searchDefault']) eval('$search["default"] =' . stripslashes($val[0]['searchDefault']));
+						if($val[0]['searchClass']) eval('$search["class"] =' . stripslashes($val[0]['searchClass']));
 						
 						foreach ( $search as $skey => $sval ) :
 							$j = 1;
@@ -1972,17 +2053,18 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 											if ( in_array($metavalue, $default) && !$_REQUEST['cftsearch'][urlencode($key)][$rkey] )
 												$checked = ' checked="checked"';
 
-											$replace_val[$rkey] .= '<li><input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metavalue) . '"' . $class . $checked . '  /> ';			
+											$replace_val[$rkey] .= '<li><label><input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metavalue) . '"' . $class . $checked . '  /> ';			
 											if ( $valueLabels[$j] ) $replace_val[$rkey] .= stripcslashes($valueLabels[$j]);
 											else $replace_val[$rkey] .= stripcslashes($metavalue);
-											$replace_val[$rkey] .= '</li>';
+											$replace_val[$rkey] .= '</label></li>';
 											$j++;
 										endforeach;
 										$replace_val[$rkey] .= '</ul>';
 									else :
-										$replace_val[$rkey] .= '<input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape(trim($values[0])) . '"' . $class . ' /> ';			
+										$replace_val[$rkey] .= '<label><input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape(trim($values[0])) . '"' . $class . ' /> ';			
 										if ( $valueLabel[0] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabels[0]));
 										else $replace_val[$rkey] .= stripcslashes(trim($values[0]));
+										$replace_val[$rkey] .= '</label>';
 									endif;
 									break;
 								case 'radio':
@@ -2004,17 +2086,18 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 											endif;
 											if ( in_array($metavalue, $default) && !$_REQUEST['cftsearch'][urlencode($key)][$rkey] )
 												$checked = ' checked="checked"';
-											$replace_val[$rkey] .= '<li><input type="radio" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metavalue) . '"' . $class . $checked . ' /> ';			
+											$replace_val[$rkey] .= '<li><label><input type="radio" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metavalue) . '"' . $class . $checked . ' /> ';			
 											if ( $valueLabels[$j] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabels[$j]));
 											else $replace_val[$rkey] .= stripcslashes($metavalue);
-											$replace_val[$rkey] .= '</li>';
+											$replace_val[$rkey] .= '</label></li>';
 											$j++;
 										endforeach;
 										$replace_val[$rkey] .= '</ul>';
 									else :
-										$replace_val[$rkey] .= '<input type="radio" name="cftsearch[' . urlencode($key) . '][]" value="' . attribute_escape(trim($values[0])) . '"' . $class . ' /> ';			
+										$replace_val[$rkey] .= '<label><input type="radio" name="cftsearch[' . urlencode($key) . '][]" value="' . attribute_escape(trim($values[0])) . '"' . $class . ' /> ';			
 										if ( $valueLabels[0] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabels[0]));
 										else $replace_val[$rkey] .= stripcslashes(trim($values[0]));
+										$replace_val[$rkey] .= '</label>';
 									endif;
 									break;
 								case 'select':
@@ -2054,7 +2137,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 				endfor;
 			endif;
 
-			$output .= '<p><input type="submit" value="' . $search_label . '" class="cftsearch_submit" /></p>' . "\n";
+			if ( $button === true )
+				$output .= '<p><input type="submit" value="' . $search_label . '" class="cftsearch_submit" /></p>' . "\n";
 			$output .= '<input type="hidden" name="cftsearch_submit" value="1" /></p>' . "\n";
 			$output .= '</form>' . "\n";
 		else :
@@ -2081,12 +2165,12 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 								break;		
 							case 'checkbox':
 								if ( $val2['class'] ) $class = ' class="' . $val2['class'] . '"'; 
-								$output .= '<dd><input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($val2['value']) . '"' . $class . ' /> ';			
+								$output .= '<dd><label><input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($val2['value']) . '"' . $class . ' /> ';			
 								if ( $val2['valueLabel'] )
 									$output .= stripcslashes($val2['valueLabel']);
 								else
 									$output .= stripcslashes($val2['value']);
-								$output .= '</dd>' . "\n";
+								$output .= '</label></dd>' . "\n";
 								break;
 							case 'radio':
 								if ( $val2['class'] ) $class = ' class="' . $val2['class'] . '"'; 
@@ -2095,13 +2179,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 								$i=0;
 								foreach ( $values as $metaval ) :
 									$metaval = trim($metaval);
-									$output .= '<dd>' . '<input type="radio" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metaval) . '"' . $class . ' /> ';			
+									$output .= '<dd><label>' . '<input type="radio" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metaval) . '"' . $class . ' /> ';			
 									if ( $val2['valueLabel'] )
 										$output .= stripcslashes(trim($valueLabels[$i]));
 									else
 										$output .= stripcslashes($metaval);
 									$i++;
-									$output .= '</dd>' . "\n";
+									$output .= '</label></dd>' . "\n";
 								endforeach;
 								break;
 							case 'select':
@@ -2130,7 +2214,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 					$output .= '</dl>' ."\n";
 				endif;
 			endforeach;
-			$output .= '<p><input type="submit" value="' . $search_label . '" class="cftsearch_submit" /></p>' . "\n";
+			if ( $button == true )
+				$output .= '<p><input type="submit" value="' . $search_label . '" class="cftsearch_submit" /></p>' . "\n";
 			$output .= '<input type="hidden" name="cftsearch_submit" value="1" /></p>' . "\n";
 			$output .= '</form>' . "\n";
 		endif;
@@ -2146,6 +2231,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		$wp_query->is_page = '';
 		$wp_query->is_singular = '';
 		
+		$original_where = $where;
+						
 		$where = '';
 
 		$count = count($options['custom_fields']);
@@ -2195,17 +2282,25 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			endforeach;
 		endif;
 
-		if ( is_array($_REQUEST['cftcategory']) ) :
-			$ids = get_objects_in_term($_REQUEST['cftcategory'], 'category');
+		if ( is_array($_REQUEST['cftcategory_in']) ) :
+			$ids = get_objects_in_term($_REQUEST['cftcategory_in'], 'category');
 			if ( is_array($ids) && count($ids) > 0 ) :
 				$in_posts = "'" . implode("', '", $ids) . "'";
 				$where .= " AND ID IN (" . $in_posts . ")";
 			endif;
 			$where .= " AND " . $wpdb->posts . ".post_type = 'post'"; 
 		endif;
+		if ( is_array($_REQUEST['cftcategory_not_in']) ) :
+			$ids = get_objects_in_term($_REQUEST['cftcategory_not_in'], 'category');
+			if ( is_array($ids) && count($ids) > 0 ) :
+				$in_posts = "'" . implode("', '", $ids) . "'";
+				$where .= " AND ID NOT IN (" . $in_posts . ")";
+			endif;
+		endif;
 		
-		$where .= " AND wp_posts.post_status = 'publish'";
-				
+		$where .= " AND `".$wpdb->posts."`.post_status = 'publish'";
+		if ( $_REQUEST['s'] ) $where .= $original_where;
+						
 		return $where;
 	}
 
@@ -2219,10 +2314,24 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 	}
 
 	function custom_field_template_posts_orderby($sql) {
-		if ( ($_REQUEST['order'] == 'ASC' || $_REQUEST['order'] == 'DESC') && $_REQUEST['orderby'] ) :
-			$sql = " meta.meta_value " . $_REQUEST['order'];
+		global $wpdb;
+
+		if ( empty($_REQUEST['order']) || ((strtoupper($_REQUEST['order']) != 'ASC') && (strtoupper($_REQUEST['order']) != 'DESC')) )
+			$_REQUEST['order'] = 'DESC';
+
+		if ( $_REQUEST['orderby'] ) :
+			if ( in_array($_REQUEST['orderby'], array('post_author', 'post_date', 'post_title', 'post_modified', 'menu_order', 'post_parent', 'ID')) ):
+				$sql = "`".$wpdb->posts."`.".$_REQUEST['orderby']." ".$_REQUEST['order'];
+			elseif ( $_REQUEST['orderby']=='rand' ):
+				$sql = "RAND()";
+			else:
+				$sql = " meta.meta_value " . $_REQUEST['order'];
+			endif;
 			return $sql;
 		endif;
+
+		$sql = "`".$wpdb->posts."`.post_date ".$_REQUEST['order'];
+		return $sql;
 	}
 	
 	function EvalBuffer($string) {
