@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.1.1
+Version: 1.1.2
 Author URI: http://wordpressgogo.com/
 */
 
@@ -844,9 +844,9 @@ hideKey = true<br />
 <th>hideKey</th><td>hideKey = true</td><td>hideKey = true</td><td>hideKey = true</td><td>hideKey = true</td><td>hideKey = true</td>
 </tr>
 <tr>
-<tr>
 <th>label</th><td>label = ABC</td><td>label = DEF</td><td>label = GHI</td><td>label = JKL</td><td>label = MNO</td>
 </tr>
+<tr>
 <th>size</th><td>size = 30</td><td></td><td></td><td></td><td></td>
 </tr>
 <tr>
@@ -1043,7 +1043,7 @@ jQuery(this).addClass("closed");
 		$event_output = "";
 		foreach($event as $key => $val) :
 			if ( $val )
-				$event_output .= " " . $key . '="' . stripcslashes($val) . '"';
+				$event_output .= " " . $key . '="' . stripcslashes(trim($val)) . '"';
 		endforeach;
 		
 		$out .= 
@@ -1053,7 +1053,7 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= '<input id="' . $name . $sid . '" name="' . $name . '[]" value="' . attribute_escape($value) . '" type="text" size="' . $size . '"' . $class . $event_output . ' /></dd>' .
+		$out .= '<input id="' . $name . $sid . '" name="' . $name . '[]" value="' . attribute_escape(trim($value)) . '" type="text" size="' . $size . '"' . $class . $event_output . ' /></dd>' .
 			'</dl>';
 		return $out;
 	}
@@ -1086,7 +1086,7 @@ jQuery(this).addClass("closed");
 		$event_output = "";
 		foreach($event as $key => $val) :
 			if ( $val )
-				$event_output .= " " . $key . '="' . stripcslashes($val) . '"';
+				$event_output .= " " . $key . '="' . stripcslashes(trim($val)) . '"';
 		endforeach;
 		
 		$out .= 
@@ -1098,11 +1098,11 @@ jQuery(this).addClass("closed");
 		
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .=	'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape($value) . '" ' . $checked . ' type="checkbox"' . $class . $event_output . ' /> ';
+		$out .=	'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape(trim($value)) . '" ' . $checked . ' type="checkbox"' . $class . $event_output . ' /> ';
 		if ( $valueLabel )
-			$out .= stripcslashes($valueLabel);
+			$out .= stripcslashes(trim($valueLabel));
 		else
-			$out .= stripcslashes($value);
+			$out .= stripcslashes(trim($value));
 		$out .= '</label><br />';
 
 		$out .= '</dd></dl>';
@@ -1138,7 +1138,7 @@ jQuery(this).addClass("closed");
 		$event_output = "";
 		foreach($event as $key => $val) :
 			if ( $val )
-				$event_output .= " " . $key . '="' . stripcslashes($val) . '"';
+				$event_output .= " " . $key . '="' . stripcslashes(trim($val)) . '"';
 		endforeach;
 
 		$out .= 
@@ -1164,11 +1164,11 @@ jQuery(this).addClass("closed");
 			$checked = ( trim( $val ) == trim( $selected ) ) ? 'checked="checked"' : '';
 			
 			$out .=	
-				'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape($val) . '" ' . $checked . ' type="radio"' . $class . $event_output . ' /> ';
+				'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape(trim($val)) . '" ' . $checked . ' type="radio"' . $class . $event_output . ' /> ';
 			if ( $valueLabel[$i] )
-				$out .= stripcslashes($valueLabel[$i]);
+				$out .= stripcslashes(trim($valueLabel[$i]));
 			else
-				$out .= stripcslashes($val);
+				$out .= stripcslashes(trim($val));
 			$out .= '</label><br />';
 			$i++;
 		}	 
@@ -1207,7 +1207,7 @@ jQuery(this).addClass("closed");
 		$event_output = "";
 		foreach($event as $key => $val) :
 			if ( $val )
-				$event_output .= " " . $key . '="' . stripcslashes($val) . '"';
+				$event_output .= " " . $key . '="' . stripcslashes(trim($val)) . '"';
 		endforeach;
 
 		$out .= 
@@ -1228,11 +1228,11 @@ jQuery(this).addClass("closed");
 		foreach( $values as $val ) {
 			$checked = ( trim( $val ) == trim( $selected ) ) ? 'selected="selected"' : '';
 		
-			$out .=	'<option value="' . attribute_escape($val) . '" ' . $checked . ' > ';
+			$out .=	'<option value="' . attribute_escape(trim($val)) . '" ' . $checked . ' > ';
 			if ( $valueLabel[$i] )
-				$out .= stripcslashes($valueLabel[$i]);
+				$out .= stripcslashes(trim($valueLabel[$i]));
 			else
-				$out .= stripcslashes($val);
+				$out .= stripcslashes(trim($val));
 			$out .= '</option>';
 			$i++;
 		}
@@ -1318,7 +1318,7 @@ EOF;
 		$event_output = "";
 		foreach($event as $key => $val) :
 			if ( $val )
-				$event_output .= " " . $key . '="' . stripcslashes($val) . '"';
+				$event_output .= " " . $key . '="' . stripcslashes(trim($val)) . '"';
 		endforeach;
 		
 		$out .= 
@@ -1336,7 +1336,7 @@ EOF;
 			$editorcontainer_class .= ' class="editorcontainer"';
 		endif;
 		
-		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . $name . $rand . '"><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000"' . $content_class . $event_output . '>' . attribute_escape($value) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
+		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . $name . $rand . '"><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000"' . $content_class . $event_output . '>' . attribute_escape(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
 		if ( $htmlEditor == true ) $out .= '</div>';
 		$out .= '</dd></dl>';
 		
@@ -1679,7 +1679,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		global $wpdb, $wp_version;
 		$options = $this->get_custom_field_template_data();
 		
-		if( !isset( $id ) )
+		if( !isset( $id ) || $_REQUEST[ 'post_ID' ] )
 			$id = $_REQUEST[ 'post_ID' ];
 		
 		if( !current_user_can('edit_post', $id) )
@@ -1699,11 +1699,11 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		if ( $fields == null )
 			return;
 	
-		foreach( $fields as $title	=> $data) {
+		/*foreach( $fields as $title	=> $data) {
 			$name = $this->sanitize_name( $title );
 			$title = $wpdb->escape(stripcslashes(trim($title)));
 			delete_post_meta($id, $title);
-		}
+		}*/
 
 		if ( !class_exists('SimpleTags') )
 			$tags_input = explode(",", $_POST['tags_input']);
@@ -1712,6 +1712,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			$name = $this->sanitize_name( $title );
 			$title = $wpdb->escape(stripcslashes(trim($title)));
 
+			unset($values);
 			for($i = 0; $i<count($data); $i++) {
 				$value = stripcslashes(trim($_REQUEST[ "$name" ][$i]));
 				
@@ -1721,8 +1722,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 					if ( is_numeric($data[$i]['editCode']) ) :
 						eval(stripcslashes($options['php'][$data[$i]['editCode']]));
 					endif;
-					if ( strlen( $value ) )
-						add_post_meta( $id, $title, apply_filters('cft_'.urlencode($title), $value) );
+					if ( strlen( $value ) ) :
+						$values[] = $value;
+					endif;
 					if ( $data[$i]['insertTag'] == true ) $tags_input[] = $value;
 					if ( $data[$i]['valueCount'] == true ) :
 						$options['value_count'][$title][$value] = $this->set_value_count($title, $value);
@@ -1732,9 +1734,29 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 						preg_match('/cw=[0-9]+&ch=([0-9]+)/', $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'], $matched);
 						$options['tinyMCE'][$id][$name][$i] = (int)($matched[1]/20);			
 					}
-				} else
-					if ( $data[$i]['blank'] == true ) add_post_meta( $id, $title, "" );
+				} else {
+					if ( $data[$i]['blank'] == true ) $values[] = "";
+				}
 			}
+			if ( count($values) == 1 ) :
+				if ( !add_post_meta( $id, $title, apply_filters('cft_'.urlencode($title), $values[0]), true ) ) :
+					update_post_meta( $id, $title, apply_filters('cft_'.urlencode($title), $values[0]) );
+				endif;
+			elseif ( count($values) > 1 ) :
+				$tmp = get_post_meta( $id, $title, false );
+				if ( count($tmp)>0 ) :
+					if ( $values != $tmp ) :
+						delete_post_meta($id, $title);
+						foreach($values as $val)
+							add_post_meta( $id, $title, apply_filters('cft_'.urlencode($title), $val) );
+					endif;
+				else :
+					foreach($values as $val)
+						add_post_meta( $id, $title, apply_filters('cft_'.urlencode($title), $val) );
+				endif;
+			else :
+				delete_post_meta($id, $title);
+			endif;
 		}
 
 		if ( is_array($tags_input) ) :
