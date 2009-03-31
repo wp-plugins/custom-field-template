@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.1.2
+Version: 1.1.3
 Author URI: http://wordpressgogo.com/
 */
 
@@ -86,6 +86,17 @@ class custom_field_template {
 			}
 		}
 		
+		if ( function_exists('current_user_can') && current_user_can('edit_plugins') ) :
+			if ( $_POST['custom_field_template_export_options_submit'] ) :
+				$filename = "cft".date('Ymd');
+				header("Accept-Ranges: none");
+				header("Content-Disposition: attachment; filename=$filename");
+				header('Content-Type: application/octet-stream');
+				echo maybe_serialize($options);
+				exit();
+			endif;
+		endif;
+				
 		if ( $options['custom_field_template_widget_shortcode'] )
 			add_filter('widget_text', 'do_shortcode');
 		
@@ -588,6 +599,17 @@ mediaButton = true';
 			$this->custom_field_template_rebuild_value_counts();
 			$options = $this->get_custom_field_template_data();
 			$message = __('Value Counts rebuilt.', 'custom-field-template');
+		elseif ($_POST['custom_field_template_import_options_submit']) :
+			if ( is_uploaded_file($_FILES['cftfile']['tmp_name']) ) :
+				ob_start();
+				readfile ($_FILES['cftfile']['tmp_name']);
+				$import = ob_get_contents();
+				ob_end_clean();
+				$import = maybe_unserialize($import);
+				update_option('custom_field_template_data', $import);
+				$message = __('Options imported.', 'custom-field-template');
+				$options = $this->get_custom_field_template_data();
+			endif;
 		elseif ($_POST['custom_field_template_unset_options_submit']) :
 			$this->install_custom_field_template_data();
 			$this->install_custom_field_template_css();
@@ -912,6 +934,12 @@ hideKey = true<br />
 <th>class</th><td>class = text</td><td>class = checkbox</td><td>class = radio</td><td>class = select</td><td>class = textarea</td>
 </tr>
 <tr>
+<th>before</th><td>before = abcde</td><td></td><td></td><td>before = abcde</td><td></td>
+</tr>
+<tr>
+<th>after</th><td>after = abcde</td><td></td><td></td><td>after = abcde</td><td></td>
+</tr>
+<tr>
 <th>valueCount</th><td>valueCount = true</td><td>valueCount = true</td><td>valueCount = true</td><td>valueCount = true</td><td>valueCount = true</td>
 </tr>
 <tr>
@@ -919,6 +947,38 @@ hideKey = true<br />
 </tr>
 </tbody>
 </table>
+</div>
+</div>
+
+<div class="postbox closed">
+<div class="handlediv" title="<?php _e('Click to toggle', 'custom-field-template'); ?>"><br /></div>
+<h3><?php _e('Export Options', 'custom-field-template'); ?></h3>
+<div class="inside">
+<form method="post">
+<table class="form-table" style="margin-bottom:5px;">
+<tbody>
+<tr><td>
+<p><input type="submit" name="custom_field_template_export_options_submit" value="<?php _e('Export Options &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
+</td></tr>
+</tbody>
+</table>
+</form>
+</div>
+</div>
+
+<div class="postbox closed">
+<div class="handlediv" title="<?php _e('Click to toggle', 'custom-field-template'); ?>"><br /></div>
+<h3><?php _e('Import Options', 'custom-field-template'); ?></h3>
+<div class="inside">
+<form method="post" enctype="multipart/form-data" onsubmit="return confirm('<?php _e('Are you sure to import options? Options you set will be overwritten.', 'custom-field-template'); ?>');">
+<table class="form-table" style="margin-bottom:5px;">
+<tbody>
+<tr><td>
+<p><input type="file" name="cftfile" /> <input type="submit" name="custom_field_template_import_options_submit" value="<?php _e('Import Options &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
+</td></tr>
+</tbody>
+</table>
+</form>
 </div>
 </div>
 
@@ -1009,7 +1069,7 @@ jQuery(this).addClass("closed");
 		return $custom_fields;
 	}
 	
-	function make_textfield( $name, $sid, $size = 25, $default, $hideKey, $label, $code, $class,
+	function make_textfield( $name, $sid, $size = 25, $default, $hideKey, $label, $code, $class, $before, $after,
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1053,7 +1113,7 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= '<input id="' . $name . $sid . '" name="' . $name . '[]" value="' . attribute_escape(trim($value)) . '" type="text" size="' . $size . '"' . $class . $event_output . ' /></dd>' .
+		$out .= trim($before).'<input id="' . $name . $sid . '" name="' . $name . '[]" value="' . attribute_escape(trim($value)) . '" type="text" size="' . $size . '"' . $class . $event_output . ' />'.trim($after).'</dd>' .
 			'</dl>';
 		return $out;
 	}
@@ -1177,7 +1237,7 @@ jQuery(this).addClass("closed");
 		return $out;			
 	}
 	
-	function make_select( $name, $sid, $values, $valueLabel, $default, $hideKey, $label, $code, $class, $selectLabel,
+	function make_select( $name, $sid, $values, $valueLabel, $default, $hideKey, $label, $code, $class, $before, $after, $selectLabel,
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1217,7 +1277,7 @@ jQuery(this).addClass("closed");
 			
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .=	'<select id="' . $name . $sid . '" name="' . $name . '[]"' . $class . $event_output . '>';
+		$out .=	trim($before).'<select id="' . $name . $sid . '" name="' . $name . '[]"' . $class . $event_output . '>';
 		
 		if ( $selectLabel )
 			$out .= '<option value="" >' . stripcslashes(trim($selectLabel)) . '</option>';
@@ -1236,7 +1296,7 @@ jQuery(this).addClass("closed");
 			$out .= '</option>';
 			$i++;
 		}
-		$out .= '</select></dd></dl>';
+		$out .= '</select>'.trim($after).'</dd></dl>';
 		
 		return $out;
 	}
@@ -1389,7 +1449,7 @@ EOF;
 					$out .= '</div><div' . $class . '>';
 				}
 				else if( $data[$i]['type'] == 'textfield' || $data[$i]['type'] == 'text' ) {
-					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'],
+					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['before'], $data[$i]['after'],
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'checkbox' ) {
@@ -1406,7 +1466,7 @@ EOF;
 				else if( $data[$i]['type'] == 'select' ) {
 					$out .= 
 						$this->make_select( 
-							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['selectLabel'],
+							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['before'], $data[$i]['after'], $data[$i]['selectLabel'],
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'textarea' ) {
@@ -1698,15 +1758,10 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		
 		if ( $fields == null )
 			return;
-	
-		/*foreach( $fields as $title	=> $data) {
-			$name = $this->sanitize_name( $title );
-			$title = $wpdb->escape(stripcslashes(trim($title)));
-			delete_post_meta($id, $title);
-		}*/
-
-		if ( !class_exists('SimpleTags') )
+			
+		if ( !class_exists('SimpleTags') && strstr($_POST['tags_input'], ',') ) {
 			$tags_input = explode(",", $_POST['tags_input']);
+		}
 							
 		foreach( $fields as $title	=> $data) {
 			$name = $this->sanitize_name( $title );
