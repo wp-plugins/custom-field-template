@@ -49,7 +49,7 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 * Adds the Initialize button.
 * Adds the attributes of before and after text. (`before = blah`, `after = blah`)
 * Adds the export and import functionality.
-* Adds the style attribute. (`style = color:#FF0000;"`)
+* Adds the style attribute. (`style = color:#FF0000;`)
 
 Localization
 
