@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.1.4
+Version: 1.1.5
 Author URI: http://wordpressgogo.com/
 */
 
@@ -934,6 +934,9 @@ hideKey = true<br />
 <th>class</th><td>class = text</td><td>class = checkbox</td><td>class = radio</td><td>class = select</td><td>class = textarea</td>
 </tr>
 <tr>
+<th>style</th><td>style = color:#FF0000;</td><td>style = color:#FF0000;</td><td>style = color:#FF0000;</td><td>style = color:#FF0000;</td><td>style = color:#FF0000;</td>
+</tr>
+<tr>
 <th>before</th><td>before = abcde</td><td></td><td></td><td>before = abcde</td><td></td>
 </tr>
 <tr>
@@ -1069,7 +1072,7 @@ jQuery(this).addClass("closed");
 		return $custom_fields;
 	}
 	
-	function make_textfield( $name, $sid, $size = 25, $default, $hideKey, $label, $code, $class, $before, $after,
+	function make_textfield( $name, $sid, $size = 25, $default, $hideKey, $label, $code, $class, $style, $before, $after,
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1095,6 +1098,7 @@ jQuery(this).addClass("closed");
 		
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		if ( !empty($class) ) $class = ' class="' . $class . '"';
+		if ( !empty($style) ) $class = ' style="' . $style . '"';
 		
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -1107,18 +1111,18 @@ jQuery(this).addClass("closed");
 		endforeach;
 		
 		$out .= 
-			'<dl>' .
+			'<dl id="dl_' . $name . $sid . '">' .
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
 			'<dd>';
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= trim($before).'<input id="' . $name . $sid . '" name="' . $name . '[]" value="' . attribute_escape(trim($value)) . '" type="text" size="' . $size . '"' . $class . $event_output . ' />'.trim($after).'</dd>' .
-			'</dl>';
+		$out .= trim($before).'<input id="' . $name . $sid . '" name="' . $name . '[]" value="' . attribute_escape(trim($value)) . '" type="text" size="' . $size . '"' . $class . $style . $event_output . ' />'.trim($after).'</dd>' .
+			'</dl>'."\n";
 		return $out;
 	}
 	
-	function make_checkbox( $name, $sid, $value, $valueLabel, $checked, $hideKey, $label, $code, $class,
+	function make_checkbox( $name, $sid, $value, $valueLabel, $checked, $hideKey, $label, $code, $class, $style, 
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1133,11 +1137,12 @@ jQuery(this).addClass("closed");
  				if ( in_array(stripcslashes($value), $selected) ) $checked = 'checked="checked"';
 			}
 		} else {
-			if( $checked == true )  $checked = 'checked="checked"';
+			if( $checked == true )  $checked = ' checked="checked"';
 		}
 		
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		if ( !empty($class) ) $class = ' class="' . $class . '"';
+		if ( !empty($style) ) $class = ' style="' . $style . '"';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -1150,7 +1155,7 @@ jQuery(this).addClass("closed");
 		endforeach;
 		
 		$out .= 
-			'<dl>' .
+			'<dl id="dl_' . $name . $sid . '">' .
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
 			'<dd>';
 			
@@ -1158,19 +1163,19 @@ jQuery(this).addClass("closed");
 		
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .=	'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape(trim($value)) . '" ' . $checked . ' type="checkbox"' . $class . $event_output . ' /> ';
+		$out .=	'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape(trim($value)) . '"' . $checked . ' type="checkbox"' . $class . $style . $event_output . ' /> ';
 		if ( $valueLabel )
 			$out .= stripcslashes(trim($valueLabel));
 		else
 			$out .= stripcslashes(trim($value));
-		$out .= '</label><br />';
+		$out .= '</label>';
 
-		$out .= '</dd></dl>';
+		$out .= '</dd></dl>'."\n";
 		
 		return $out;
 	}
 	
-	function make_radio( $name, $sid, $values, $valueLabel, $clearButton, $default, $hideKey, $label, $code, $class,
+	function make_radio( $name, $sid, $values, $valueLabel, $clearButton, $default, $hideKey, $label, $code, $class, $style, 
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1190,6 +1195,7 @@ jQuery(this).addClass("closed");
 			
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		if ( !empty($class) ) $class = ' class="' . $class . '"';
+		if ( !empty($style) ) $class = ' style="' . $style . '"';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -1202,7 +1208,7 @@ jQuery(this).addClass("closed");
 		endforeach;
 
 		$out .= 
-			'<dl>' .
+			'<dl id="dl_' . $name . $sid . '">' .
 			'<dt><span' . $hide . '>' . $title . '</span>';
 			
 		if( $clearButton == true ) {
@@ -1224,7 +1230,7 @@ jQuery(this).addClass("closed");
 			$checked = ( trim( $val ) == trim( $selected ) ) ? 'checked="checked"' : '';
 			
 			$out .=	
-				'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape(trim($val)) . '" ' . $checked . ' type="radio"' . $class . $event_output . ' /> ';
+				'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape(trim($val)) . '" ' . $checked . ' type="radio"' . $class . $style . $event_output . ' /> ';
 			if ( $valueLabel[$i] )
 				$out .= stripcslashes(trim($valueLabel[$i]));
 			else
@@ -1232,12 +1238,12 @@ jQuery(this).addClass("closed");
 			$out .= '</label><br />';
 			$i++;
 		}	 
-		$out .= '</dd></dl>';
+		$out .= '</dd></dl>'."\n";
 		
 		return $out;			
 	}
 	
-	function make_select( $name, $sid, $values, $valueLabel, $default, $hideKey, $label, $code, $class, $before, $after, $selectLabel,
+	function make_select( $name, $sid, $values, $valueLabel, $default, $hideKey, $label, $code, $class, $style, $before, $after, $selectLabel,
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1259,6 +1265,7 @@ jQuery(this).addClass("closed");
 		
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		if ( !empty($class) ) $class = ' class="' . $class . '"';
+		if ( !empty($style) ) $class = ' style="' . $style . '"';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -1271,24 +1278,24 @@ jQuery(this).addClass("closed");
 		endforeach;
 
 		$out .= 
-			'<dl>' .
+			'<dl id="dl_' . $name . $sid . '">' .
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
 			'<dd>';
 			
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .=	trim($before).'<select id="' . $name . $sid . '" name="' . $name . '[]"' . $class . $event_output . '>';
+		$out .=	trim($before).'<select id="' . $name . $sid . '" name="' . $name . '[]"' . $class . $style . $event_output . '>';
 		
 		if ( $selectLabel )
-			$out .= '<option value="" >' . stripcslashes(trim($selectLabel)) . '</option>';
+			$out .= '<option value="">' . stripcslashes(trim($selectLabel)) . '</option>';
 		else
-			$out .= '<option value="" >' . __('Select', 'custom-field-template') . '</option>';
+			$out .= '<option value="">' . __('Select', 'custom-field-template') . '</option>';
 		
 		$i = 0;
 		foreach( $values as $val ) {
 			$checked = ( trim( $val ) == trim( $selected ) ) ? 'selected="selected"' : '';
 		
-			$out .=	'<option value="' . attribute_escape(trim($val)) . '" ' . $checked . ' > ';
+			$out .=	'<option value="' . attribute_escape(trim($val)) . '" ' . $checked . '>';
 			if ( $valueLabel[$i] )
 				$out .= stripcslashes(trim($valueLabel[$i]));
 			else
@@ -1296,12 +1303,12 @@ jQuery(this).addClass("closed");
 			$out .= '</option>';
 			$i++;
 		}
-		$out .= '</select>'.trim($after).'</dd></dl>';
+		$out .= '</select>'.trim($after).'</dd></dl>'."\n";
 		
 		return $out;
 	}
 	
-	function make_textarea( $name, $sid, $rows, $cols, $tinyMCE, $htmlEditor, $mediaButton, $default, $hideKey, $label, $code, $class,
+	function make_textarea( $name, $sid, $rows, $cols, $tinyMCE, $htmlEditor, $mediaButton, $default, $hideKey, $label, $code, $class, $style, 
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1370,6 +1377,7 @@ EOF;
 		if ( $htmlEditor == true ) $content_class .= 'content';
 		if ( !empty($class) ) $content_class .= ' ' . $class;
 		$content_class .= '"';
+		if ( !empty($style) ) $class = ' style="' . $style . '"';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -1382,7 +1390,7 @@ EOF;
 		endforeach;
 		
 		$out .= 
-			'<dl>' .
+			'<dl id="dl_' . $name . $sid . '">' .
 			'<dt><span' . $hide . '>' . $title . '</span><br />' . $media . $switch . '</dt>' .
 			'<dd>';
 
@@ -1396,9 +1404,9 @@ EOF;
 			$editorcontainer_class .= ' class="editorcontainer"';
 		endif;
 		
-		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . $name . $rand . '"><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000"' . $content_class . $event_output . '>' . attribute_escape(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
+		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . $name . $rand . '"><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000"' . $content_class . $style . $event_output . '>' . attribute_escape(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
 		if ( $htmlEditor == true ) $out .= '</div>';
-		$out .= '</dd></dl>';
+		$out .= '</dd></dl>'."\n";
 		
 		return $out;
 	}
@@ -1449,30 +1457,30 @@ EOF;
 					$out .= '</div><div' . $class . '>';
 				}
 				else if( $data[$i]['type'] == 'textfield' || $data[$i]['type'] == 'text' ) {
-					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['before'], $data[$i]['after'],
+					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['before'], $data[$i]['after'],
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'checkbox' ) {
 					$out .= 
-						$this->make_checkbox( $title, $i, $data[$i]['value'], $data[$i]['valueLabel'], $data[$i]['checked'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'],
+						$this->make_checkbox( $title, $i, $data[$i]['value'], $data[$i]['valueLabel'], $data[$i]['checked'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'],
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'radio' ) {
 					$out .= 
 						$this->make_radio( 
-							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['clearButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'],
+							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['clearButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'],
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'select' ) {
 					$out .= 
 						$this->make_select( 
-							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['before'], $data[$i]['after'], $data[$i]['selectLabel'],
+							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['before'], $data[$i]['after'], $data[$i]['selectLabel'],
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'textarea' ) {
 					if ( $options['tinyMCE'][$_REQUEST['post']][$this->sanitize_name($title)][$i] )  $data[$i]['rows']  = $options['tinyMCE'][$_REQUEST['post']][$this->sanitize_name($title)][$i];
 					$out .= 
-						$this->make_textarea( $title, $i, $data[$i]['rows'], $data[$i]['cols'], $data[$i]['tinyMCE'], $data[$i]['htmlEditor'], $data[$i]['mediaButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'],
+						$this->make_textarea( $title, $i, $data[$i]['rows'], $data[$i]['cols'], $data[$i]['tinyMCE'], $data[$i]['htmlEditor'], $data[$i]['mediaButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'],
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 			}
@@ -1955,7 +1963,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		if ( is_numeric($format) && $output = $options['shortcode_format'][$format] ) :
 			$data = get_post_custom($post_id);
 			$output = stripcslashes($output);
-
+			
 			if( $data == null)
 				return;
 
@@ -1998,7 +2006,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 						if ( $options['shortcode_format_use_php'][$format] )
 							$output = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $output);
 						$key = preg_quote($key, '/');
-						$output = preg_replace('/\['.$key.'\]/', $replace_val, $output); 
+						$replace_val = str_replace('\\', '\\\\', $replace_val); 
+						$replace_val = str_replace('$', '\$', $replace_val); 
+						$output = preg_replace('/\['.$key.'\]/', $replace_val, $output);
 					endforeach;
 				endfor;
 			endif;
@@ -2028,6 +2038,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 						$hide = '';
 						if ( $val2['output'] == true ) :
 							$value = $values[$key2];
+							$value = str_replace('\\', '\\\\', $value); 
 							if ( is_numeric($val2['outputCode']) ) :
 								eval(stripcslashes($options['php'][$val2['outputCode']]));
 							endif;
@@ -2049,7 +2060,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			endforeach;
 			$output .= '</dl>' . "\n";
 		endif;
-
+		
 		return stripcslashes($output);
 	}
 	
