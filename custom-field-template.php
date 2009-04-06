@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.1.3
+Version: 1.1.4
 Author URI: http://wordpressgogo.com/
 */
 
@@ -1769,16 +1769,17 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 
 			unset($values);
 			for($i = 0; $i<count($data); $i++) {
+				unset($value);
 				$value = stripcslashes(trim($_REQUEST[ "$name" ][$i]));
 				
 				if ( $options['custom_field_template_use_wpautop'] && $data[$i]['type'] == 'textarea' && !empty($value) )
 					$value = wpautop($value);
+				if ( is_numeric($data[$i]['editCode']) ) :
+					eval(stripcslashes($options['php'][$data[$i]['editCode']]));
+				endif;
 				if( isset( $value ) && strlen( $value ) ) {
-					if ( is_numeric($data[$i]['editCode']) ) :
-						eval(stripcslashes($options['php'][$data[$i]['editCode']]));
-					endif;
 					if ( strlen( $value ) ) :
-						$values[] = $value;
+						$values[] = addslashes($value);
 					endif;
 					if ( $data[$i]['insertTag'] == true ) $tags_input[] = $value;
 					if ( $data[$i]['valueCount'] == true ) :
@@ -2333,9 +2334,10 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 				endforeach;
 			endfor;
 		endif;
-		
+				
 		if ( is_array($_REQUEST['cftsearch']) ) :
 			foreach ( $_REQUEST['cftsearch'] as $key => $val ) :
+				$key = rawurldecode($key);
 				foreach( $val as $key2 => $val2 ) :
 					foreach( $val2 as $val3 ) :
 						if ( $val3 ) :
@@ -2347,10 +2349,10 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 								case '=' :
 								case '<>' :
 								case '<=>':
-									$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM wp_postmeta WHERE  (" . $wpdb->postmeta . ".meta_key = '" . urldecode($key) . "' AND " . $wpdb->postmeta . ".meta_value " . $replace[$key][$key2][0]['operator'] . " '" . trim($val3) . "') GROUP BY post_id) ";
+									$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM wp_postmeta WHERE  (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND " . $wpdb->postmeta . ".meta_value " . $replace[$key][$key2][0]['operator'] . " " . trim($val3) . ") GROUP BY post_id) ";
 									break;
 								default :
-									$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM wp_postmeta WHERE  (" . $wpdb->postmeta . ".meta_key = '" . urldecode($key) . "' AND " . $wpdb->postmeta . ".meta_value LIKE '%" . trim($val3) . "%') GROUP BY post_id) ";
+									$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM wp_postmeta WHERE  (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND " . $wpdb->postmeta . ".meta_value LIKE '%" . trim($val3) . "%') GROUP BY post_id) ";
 									break;
 								endswitch;
 						endif;
