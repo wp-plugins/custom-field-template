@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.1.5
+Version: 1.1.6
 Author URI: http://wordpressgogo.com/
 */
 
@@ -31,6 +31,7 @@ class custom_field_template {
 		add_filter( 'plugin_action_links', array(&$this, 'wpaq_filter_plugin_actions'), 10, 2 );
 		
 		add_filter( 'the_content', array(&$this, 'custom_field_template_the_content') );
+		add_filter( 'the_content_rss', array(&$this, 'custom_field_template_the_content') );
 		
 		if ( $_REQUEST['cftsearch_submit'] ) :
 			if ( $_REQUEST['limit'] )
@@ -460,16 +461,17 @@ mediaButton = true';
 				$cats[] = $val->cat_ID;
 			endforeach;
 			
-		if ( $options['custom_fields'][$id]['post_type'] ) :
-			if ( $options['custom_fields'][$id]['post_type'] == 'post' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php')) )
-				return;
-			if ( $options['custom_fields'][$id]['post_type'] == 'page' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php')) )
-				return;
-		endif;
-						
+			if ( $options['custom_fields'][$id]['post_type'] ) :
+				if ( $options['custom_fields'][$id]['post_type'] == 'post' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php')) )
+					return;
+				if ( $options['custom_fields'][$id]['post_type'] == 'page' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php')) )
+					return;
+			endif;
+			
 			for ( $i=0; $i<count($options['hook']); $i++ ) :
+				if ( is_feed() && !$options['hook'][$i]['feed'] ) break;
 				if ( $options['hook'][$i]['category'] ) :
-					if ( is_category() || is_single() ) :
+					if ( is_category() || is_single() || is_feed() ) :
 						if ( $options['hook'][$i]['use_php'] ) :
 							$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
 							$options['hook'][$i]['content'] = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $options['hook'][$i]['content']);
@@ -589,6 +591,7 @@ mediaButton = true';
 					$options['hook'][$j]['content']  = $_POST["custom_field_template_hook_content"][$i];
 					$options['hook'][$j]['category'] = preg_replace('/\s/', '', $_POST["custom_field_template_hook_category"][$i]);
 					$options['hook'][$j]['use_php']  = $_POST["custom_field_template_hook_use_php"][$i];
+					$options['hook'][$j]['feed']  = $_POST["custom_field_template_hook_feed"][$i];
 					$options['hook'][$j]['post_type']  = $_POST["custom_field_template_hook_post_type"][$i];
 					$j++;
 				}
@@ -811,7 +814,8 @@ ex. `radio` and `select`:</dt><dd>$values = array('dog', 'cat', 'monkey'); $defa
 <p><label for="custom_field_template_hook_category[<?php echo $i; ?>]"><?php echo sprintf(__('Category ID (comma-deliminated)', 'custom-field-template'), $i); ?></label>:<br />
 <input type="text" name="custom_field_template_hook_category[<?php echo $i; ?>]" id="custom_field_template_hook_category[<?php echo $i; ?>]" value="<?php echo stripcslashes($options['hook'][$i]['category']); ?>" size="80" /></p>
 <p><label for="custom_field_template_hook_content[<?php echo $i; ?>]"><?php echo sprintf(__('Content', 'custom-field-template'), $i); ?></label>:<br /><textarea name="custom_field_template_hook_content[<?php echo $i; ?>]" rows="5" cols="80"><?php echo stripcslashes($options['hook'][$i]['content']); ?></textarea></p>
-<p><input type="checkbox" name="custom_field_template_hook_use_php[]" id="custom_field_template_hook_use_php[]" value="1" <?php if ($options['hook'][$i]['use_php']) { echo ' checked="checked"'; } ?> /> <?php _e('Use PHP', 'custom-field-template'); ?></p>
+<p><input type="checkbox" name="custom_field_template_hook_use_php[<?php echo $i; ?>]" id="custom_field_template_hook_use_php[<?php echo $i; ?>]" value="1" <?php if ($options['hook'][$i]['use_php']) { echo ' checked="checked"'; } ?> /> <?php _e('Use PHP', 'custom-field-template'); ?></p>
+<p><input type="checkbox" name="custom_field_template_hook_feed[<?php echo $i; ?>]" id="custom_field_template_hook_feed[<?php echo $i; ?>]" value="1" <?php if ($options['hook'][$i]['feed']) { echo ' checked="checked"'; } ?> /> <?php _e('Apply to feeds', 'custom-field-template'); ?></p>
 </td></tr>
 <?php
 	endfor;
@@ -1112,7 +1116,7 @@ jQuery(this).addClass("closed");
 		
 		$out .= 
 			'<dl id="dl_' . $name . $sid . '">' .
-			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
+			'<dt><span' . $hide . '><label for="' . $name . $sid . '">' . $title . '</label></span></dt>' .
 			'<dd>';
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
@@ -1279,7 +1283,7 @@ jQuery(this).addClass("closed");
 
 		$out .= 
 			'<dl id="dl_' . $name . $sid . '">' .
-			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
+			'<dt><span' . $hide . '><label for="' . $name . $sid . '">' . $title . '</label></span></dt>' .
 			'<dd>';
 			
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
@@ -1391,7 +1395,7 @@ EOF;
 		
 		$out .= 
 			'<dl id="dl_' . $name . $sid . '">' .
-			'<dt><span' . $hide . '>' . $title . '</span><br />' . $media . $switch . '</dt>' .
+			'<dt><span' . $hide . '><label for="' . $name . $sid . '">' . $title . '</label></span><br />' . $media . $switch . '</dt>' .
 			'<dd>';
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
