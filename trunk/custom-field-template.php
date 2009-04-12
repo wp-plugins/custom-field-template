@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.1.6
+Version: 1.1.7
 Author URI: http://wordpressgogo.com/
 */
 
@@ -1076,7 +1076,7 @@ jQuery(this).addClass("closed");
 		return $custom_fields;
 	}
 	
-	function make_textfield( $name, $sid, $size = 25, $default, $hideKey, $label, $code, $class, $style, $before, $after,
+	function make_textfield( $name, $sid, $size = 25, $default, $hideKey, $label, $code, $class, $style, $before, $after, $maxlength,
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1102,7 +1102,8 @@ jQuery(this).addClass("closed");
 		
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		if ( !empty($class) ) $class = ' class="' . $class . '"';
-		if ( !empty($style) ) $class = ' style="' . $style . '"';
+		if ( !empty($style) ) $style = ' style="' . $style . '"';
+		if ( !empty($maxlength) ) $maxlength = ' maxlength="' . $maxlength . '"';
 		
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -1121,7 +1122,7 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= trim($before).'<input id="' . $name . $sid . '" name="' . $name . '[]" value="' . attribute_escape(trim($value)) . '" type="text" size="' . $size . '"' . $class . $style . $event_output . ' />'.trim($after).'</dd>' .
+		$out .= trim($before).'<input id="' . $name . $sid . '" name="' . $name . '[]" value="' . attribute_escape(trim($value)) . '" type="text" size="' . $size . '"' . $class . $style . $maxlength . $event_output . ' />'.trim($after).'</dd>' .
 			'</dl>'."\n";
 		return $out;
 	}
@@ -1146,7 +1147,7 @@ jQuery(this).addClass("closed");
 		
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		if ( !empty($class) ) $class = ' class="' . $class . '"';
-		if ( !empty($style) ) $class = ' style="' . $style . '"';
+		if ( !empty($style) ) $style = ' style="' . $style . '"';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -1199,7 +1200,7 @@ jQuery(this).addClass("closed");
 			
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		if ( !empty($class) ) $class = ' class="' . $class . '"';
-		if ( !empty($style) ) $class = ' style="' . $style . '"';
+		if ( !empty($style) ) $style = ' style="' . $style . '"';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -1269,7 +1270,7 @@ jQuery(this).addClass("closed");
 		
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		if ( !empty($class) ) $class = ' class="' . $class . '"';
-		if ( !empty($style) ) $class = ' style="' . $style . '"';
+		if ( !empty($style) ) $style = ' style="' . $style . '"';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -1381,7 +1382,7 @@ EOF;
 		if ( $htmlEditor == true ) $content_class .= 'content';
 		if ( !empty($class) ) $content_class .= ' ' . $class;
 		$content_class .= '"';
-		if ( !empty($style) ) $class = ' style="' . $style . '"';
+		if ( !empty($style) ) $style = ' style="' . $style . '"';
 
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -1461,7 +1462,7 @@ EOF;
 					$out .= '</div><div' . $class . '>';
 				}
 				else if( $data[$i]['type'] == 'textfield' || $data[$i]['type'] == 'text' ) {
-					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['before'], $data[$i]['after'],
+					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['before'], $data[$i]['after'], $data[$i]['maxlength'],
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'checkbox' ) {
