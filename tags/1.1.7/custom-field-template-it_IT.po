@@ -1,0 +1,406 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Custom Field Template in italiano\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-03-31 19:57+0900\n"
+"PO-Revision-Date: 2009-04-01 00:48+0100\n"
+"Last-Translator: Gianni Diurno (aka gidibao) <gidibao@gmail.com>\n"
+"Language-Team: Gianni Diurno | http://gidibao.net/ <gidibao@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Italian\n"
+"X-Poedit-Country: ITALY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;_c\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-SearchPath-0: custom-field-template\n"
+
+#: custom-field-template/custom-field-template.php:118
+#: custom-field-template/custom-field-template.php:119
+#: custom-field-template/custom-field-template.php:449
+#: custom-field-template/custom-field-template.php:629
+#: custom-field-template/custom-field-template.php:1503
+#: custom-field-template/custom-field-template.php:1623
+msgid "Custom Field Template"
+msgstr "Custom Field Template"
+
+#: custom-field-template/custom-field-template.php:158
+#: custom-field-template/custom-field-template.php:1715
+msgid "Load"
+msgstr "Carica"
+
+#: custom-field-template/custom-field-template.php:307
+msgid "read more"
+msgstr "prosegui"
+
+#: custom-field-template/custom-field-template.php:325
+#: custom-field-template/custom-field-template.php:335
+msgid "Custom Fields"
+msgstr "Campi personalizzati"
+
+#: custom-field-template/custom-field-template.php:365
+msgid "Settings"
+msgstr "Impostazioni"
+
+#: custom-field-template/custom-field-template.php:377
+msgid "Default Template"
+msgstr "Template predefinito"
+
+#: custom-field-template/custom-field-template.php:558
+#: custom-field-template/custom-field-template.php:562
+#: custom-field-template/custom-field-template.php:574
+#: custom-field-template/custom-field-template.php:582
+#: custom-field-template/custom-field-template.php:597
+msgid "Options updated."
+msgstr "Le opzioni sono state aggiornate."
+
+#: custom-field-template/custom-field-template.php:601
+msgid "Value Counts rebuilt."
+msgstr "Value Counts rigenerati. "
+
+#: custom-field-template/custom-field-template.php:610
+msgid "Options imported."
+msgstr "Le opzioni sono state importate."
+
+#: custom-field-template/custom-field-template.php:617
+msgid "Options resetted."
+msgstr "Le opzioni sono state ripristinate."
+
+#: custom-field-template/custom-field-template.php:621
+msgid "Options deleted."
+msgstr "Le opzioni sini state cancellate:"
+
+#: custom-field-template/custom-field-template.php:635
+#: custom-field-template/custom-field-template.php:712
+#: custom-field-template/custom-field-template.php:731
+#: custom-field-template/custom-field-template.php:760
+#: custom-field-template/custom-field-template.php:791
+#: custom-field-template/custom-field-template.php:829
+#: custom-field-template/custom-field-template.php:849
+#: custom-field-template/custom-field-template.php:954
+#: custom-field-template/custom-field-template.php:970
+#: custom-field-template/custom-field-template.php:986
+#: custom-field-template/custom-field-template.php:1002
+#: custom-field-template/custom-field-template.php:1018
+msgid "Click to toggle"
+msgstr "Clicca per commutare"
+
+#: custom-field-template/custom-field-template.php:636
+msgid "Custom Field Template Options"
+msgstr "Opzioni template campi personalizzati"
+
+#: custom-field-template/custom-field-template.php:646
+msgid "Template Title"
+msgstr "Nome del template:"
+
+#: custom-field-template/custom-field-template.php:648
+msgid "Template Instruction"
+msgstr "Allestimento template"
+
+#: custom-field-template/custom-field-template.php:650
+#: custom-field-template/custom-field-template.php:807
+msgid "Post Type"
+msgstr "Tipo di articolo"
+
+#: custom-field-template/custom-field-template.php:652
+#: custom-field-template/custom-field-template.php:808
+msgid "Both"
+msgstr "Entrambi"
+
+#: custom-field-template/custom-field-template.php:653
+#: custom-field-template/custom-field-template.php:809
+msgid "Post"
+msgstr "Articolo"
+
+#: custom-field-template/custom-field-template.php:654
+#: custom-field-template/custom-field-template.php:810
+msgid "Page"
+msgstr "Pagina"
+
+#: custom-field-template/custom-field-template.php:655
+#: custom-field-template/custom-field-template.php:811
+msgid "Category ID (comma-deliminated)"
+msgstr "ID categoria (separa con una virgola)"
+
+#: custom-field-template/custom-field-template.php:657
+msgid "Template Content"
+msgstr "Contenuti template"
+
+#: custom-field-template/custom-field-template.php:664
+msgid "In case that you would like to insert multiple images at once in use of the custom field media buttons"
+msgstr "Nel caso in cui desiderassi inserire più immagini contemporaneamente utilizza i pulsanti media del campo personalizzato"
+
+#: custom-field-template/custom-field-template.php:665
+msgid "Use multiple image inset"
+msgstr "Inserisci più immagini contemporaneamente"
+
+#: custom-field-template/custom-field-template.php:665
+msgid "Caution:"
+msgstr "Attenzione:"
+
+#: custom-field-template/custom-field-template.php:665
+msgid "You need to edit `wp-admin/includes/media.php`. Delete or comment out the code in the function media_send_to_editor."
+msgstr "E' necessario modificare `wp-admin/includes/media.php`. Cancella o disabilita il codice nella funzione media_send_to_editor."
+
+#: custom-field-template/custom-field-template.php:669
+msgid "In case that you would like to replace custom keys by labels if `label` is set"
+msgstr "Nel caso in cui desiderassi sostituire le chiavi personalizzate con le etichette qualora fosse stato impostato `label`"
+
+#: custom-field-template/custom-field-template.php:670
+msgid "Use labels in place of custom keys"
+msgstr "Utilizza le etichette al posto delle chiavi personalizzate"
+
+#: custom-field-template/custom-field-template.php:673
+msgid "In case that you would like to add p and br tags in textareas automatically"
+msgstr "Nel caso in cui desiderassi aggiungere automaticamente i tag p e br nell'area di testo"
+
+#: custom-field-template/custom-field-template.php:674
+msgid "Use wpautop function"
+msgstr "Usa funzione wpautop"
+
+#: custom-field-template/custom-field-template.php:678
+msgid "In case that you would like to save values automatically in switching templates"
+msgstr "Nel caso in cui desiderassi salvare automaticamente i valori durante il cambio dei template"
+
+#: custom-field-template/custom-field-template.php:679
+msgid "Use the auto save in switching templates"
+msgstr "Salva in automatico al cambio dei template"
+
+#: custom-field-template/custom-field-template.php:683
+msgid "In case that you would like to forbid to use the default custom fields."
+msgstr "Nel caso in cui desiderassi impedire l'utilizzo dei campi personalizzati predefiniti."
+
+#: custom-field-template/custom-field-template.php:684
+msgid "Disable the default custom fields"
+msgstr "Disattiva i campi personalizzati predefiniti"
+
+#: custom-field-template/custom-field-template.php:688
+msgid "In case that you would like to forbid to use the quick edit."
+msgstr "Nel caso in cui desiderassi impedire l'utilizzo dell'editor veloce."
+
+#: custom-field-template/custom-field-template.php:689
+msgid "Disable the quick edit"
+msgstr "Disattiva l'editor veloce"
+
+#: custom-field-template/custom-field-template.php:693
+msgid "In case that you would like to replace the box title with the template title."
+msgstr "Nel caso in cui desiderassi sostituire il titolo della casella con il titolo del template."
+
+#: custom-field-template/custom-field-template.php:694
+msgid "Replace the box title"
+msgstr "Sostituisci il titolo della casella"
+
+#: custom-field-template/custom-field-template.php:698
+msgid "In case that you would like to use the shortcode in the widget."
+msgstr "Nel caso in cui desiderassi utilizzare lo shortcode nel widget"
+
+#: custom-field-template/custom-field-template.php:699
+msgid "Use the shortcode in the widget"
+msgstr "Utilizza lo shortcode nel widget"
+
+#: custom-field-template/custom-field-template.php:703
+#: custom-field-template/custom-field-template.php:722
+#: custom-field-template/custom-field-template.php:751
+#: custom-field-template/custom-field-template.php:782
+#: custom-field-template/custom-field-template.php:820
+msgid "Update Options &raquo;"
+msgstr "Aggiorna le opzioni &raquo;"
+
+#: custom-field-template/custom-field-template.php:713
+msgid "ADMIN CSS"
+msgstr "CSS AMMINISTRAZIONE"
+
+#: custom-field-template/custom-field-template.php:732
+msgid "[cft] and [cftsearch] Shortcode Format"
+msgstr "Formato Shortcode [cft] e [cftsearch]"
+
+#: custom-field-template/custom-field-template.php:735
+msgid "For [cft], [key] will be converted into the value of [key]."
+msgstr "[key] verrà convertito nel valore di [key]."
+
+#: custom-field-template/custom-field-template.php:736
+msgid "For [cftsearch], [key] will be converted into the input field."
+msgstr "[cftsearch], [key] verrà convertito nell'input del campo."
+
+#: custom-field-template/custom-field-template.php:745
+#: custom-field-template/custom-field-template.php:814
+msgid "Use PHP"
+msgstr "Usa PHP"
+
+#: custom-field-template/custom-field-template.php:761
+msgid "PHP CODE (Experimental Option)"
+msgstr "CODICE PHP CODE (opzione sperimentale)"
+
+#: custom-field-template/custom-field-template.php:763
+msgid "Are you sure to save PHP codes? Please do it at your own risk."
+msgstr "Sei certo di volere salvare dei codici PHP? Se sì, fallo a tuo rischio."
+
+#: custom-field-template/custom-field-template.php:764
+msgid "For `text` and `textarea`, you must set $value as an string."
+msgstr "`text` e `textarea`, dovrai impostare come stringa $value."
+
+#: custom-field-template/custom-field-template.php:766
+msgid "For `checkbox`, `radio`, and `select`, you must set $values as an array."
+msgstr "`checkbox`, `radio`, e `select`, dovrai impostare come array $values."
+
+#: custom-field-template/custom-field-template.php:792
+msgid "Auto Hook of `the_content()` (Experimental Option)"
+msgstr "Hook automatico di `the_content()` (opzione sperimentale)"
+
+#: custom-field-template/custom-field-template.php:802
+msgid "Position"
+msgstr "Posizione"
+
+#: custom-field-template/custom-field-template.php:803
+msgid "Before the conetnt"
+msgstr "Davanti ai contenuti"
+
+#: custom-field-template/custom-field-template.php:804
+msgid "After the conetnt"
+msgstr "A seguire i contenuti"
+
+#: custom-field-template/custom-field-template.php:805
+#, php-format
+msgid "Inside the conetnt ([cfthook hook=%d])"
+msgstr "Dentro il contenuto ([cfthook hook=%d])"
+
+#: custom-field-template/custom-field-template.php:813
+msgid "Content"
+msgstr "Contenuti"
+
+#: custom-field-template/custom-field-template.php:830
+msgid "Rebuild Value Counts"
+msgstr "Rigenera Value Counts"
+
+#: custom-field-template/custom-field-template.php:832
+msgid "Are you sure to rebuild all value counts?"
+msgstr "Sei certo di volere rigenerare tutti i value counts?"
+
+#: custom-field-template/custom-field-template.php:836
+msgid "Value Counts are used for temporarily saving how many values in each key. Set `valueCount = true` into fields."
+msgstr "I Value Counts sono utilizzati per il salvataggio temporaneo dei valori per ogni chiave. Imposta dentro ai campi `valueCount = true`."
+
+#: custom-field-template/custom-field-template.php:840
+msgid "Rebuild Value Counts &raquo;"
+msgstr "Rigenera Value Counts &raquo;"
+
+#: custom-field-template/custom-field-template.php:850
+msgid "Option List"
+msgstr "Lista opzione"
+
+#: custom-field-template/custom-field-template.php:955
+msgid "Export Options"
+msgstr "Esporta le opzioni"
+
+#: custom-field-template/custom-field-template.php:961
+msgid "Export Options &raquo;"
+msgstr "Esporta le opzioni &raquo;"
+
+#: custom-field-template/custom-field-template.php:971
+msgid "Import Options"
+msgstr "Importa le opzioni"
+
+#: custom-field-template/custom-field-template.php:973
+msgid "Are you sure to import options? Options you set will be overwritten."
+msgstr "Sei certo di volere cancellare le opzioni? Le opzioni personalizzate in precedenza verranno cancellate."
+
+#: custom-field-template/custom-field-template.php:977
+msgid "Import Options &raquo;"
+msgstr "Importa le opzioni &raquo;"
+
+#: custom-field-template/custom-field-template.php:987
+msgid "Reset Options"
+msgstr "Ripristina le opzioni"
+
+#: custom-field-template/custom-field-template.php:989
+msgid "Are you sure to reset options? Options you set will be reset to the default settings."
+msgstr "Sei certo di volere ripristinare le opzioni? Le opzioni personalizzate verranno ripristinate alle predefinite."
+
+#: custom-field-template/custom-field-template.php:993
+msgid "Unset Options &raquo;"
+msgstr "Procedi &raquo;"
+
+#: custom-field-template/custom-field-template.php:1003
+msgid "Delete Options"
+msgstr "Cancella le opzioni"
+
+#: custom-field-template/custom-field-template.php:1005
+msgid "Are you sure to delete options? Options you set will be deleted."
+msgstr "Sei certo di volere cancellare le opzioni? Le opzioni personalizzate verranno cancellate."
+
+#: custom-field-template/custom-field-template.php:1009
+msgid "Delete Options &raquo;"
+msgstr "Cancella le opzioni &raquo;"
+
+#: custom-field-template/custom-field-template.php:1019
+msgid "Donation"
+msgstr "Fai una donazione"
+
+#: custom-field-template/custom-field-template.php:1021
+msgid "If you liked this plugin, please make a donation via paypal! Any amount is welcome. Your support is much appreciated."
+msgstr "Qualora avesi gradito questo plugin, effettua una donazione via paypal! Grazie."
+
+#: custom-field-template/custom-field-template.php:1210
+msgid "Clear"
+msgstr "Pulisci"
+
+#: custom-field-template/custom-field-template.php:1285
+msgid "Select"
+msgstr "Seleziona"
+
+#: custom-field-template/custom-field-template.php:1344
+msgid "Add Media"
+msgstr "Aggiungi media"
+
+#: custom-field-template/custom-field-template.php:1346
+msgid "Add an Image"
+msgstr "Aggiungi immagine"
+
+#: custom-field-template/custom-field-template.php:1348
+msgid "Add Video"
+msgstr "Aggiungi video"
+
+#: custom-field-template/custom-field-template.php:1350
+msgid "Add Audio"
+msgstr "Aggiungi audio"
+
+#: custom-field-template/custom-field-template.php:1361
+msgid "Toggle"
+msgstr "Commuta"
+
+#: custom-field-template/custom-field-template.php:1664
+msgid "Initialize"
+msgstr "Inizializza"
+
+#: custom-field-template/custom-field-template.php:1665
+msgid "Are you sure to reset current values? Default values will be loaded."
+msgstr "Sei certo di volere ripristinare le impostazioni? Verranno ricaricate le predefinite."
+
+#: custom-field-template/custom-field-template.php:1668
+msgid "Save"
+msgstr "Salva"
+
+#: custom-field-template/custom-field-template.php:2062
+msgid "Search &raquo;"
+msgstr "Cerca &raquo;"
+
+#~ msgid "CSS"
+#~ msgstr "CSS"
+#~ msgid "Quick Edit"
+#~ msgstr "Modifica veloce"
+#~ msgid "Recent Posts Ext"
+#~ msgstr "最近の投稿 Ext"
+#~ msgid "camera"
+#~ msgstr "機種"
+#~ msgid "aperture"
+#~ msgstr "絞り値"
+#~ msgid "focal_length"
+#~ msgstr "焦点距離"
+#~ msgid "ISO"
+#~ msgstr "ISO"
+#~ msgid "shutter_speed"
+#~ msgstr "シャッタースピード"
+#~ msgid "created_timestamp"
+#~ msgstr "撮影日時"
+
