@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.1.7
+Version: 1.2
 Author URI: http://wordpressgogo.com/
 */
 
@@ -602,6 +602,9 @@ mediaButton = true';
 			$this->custom_field_template_rebuild_value_counts();
 			$options = $this->get_custom_field_template_data();
 			$message = __('Value Counts rebuilt.', 'custom-field-template');
+		elseif ($_POST['custom_field_template_rebuild_tags_submit']) :
+			$options = $this->get_custom_field_template_data();
+			$message = __('Tags rebuilt.', 'custom-field-template');
 		elseif ($_POST['custom_field_template_import_options_submit']) :
 			if ( is_uploaded_file($_FILES['cftfile']['tmp_name']) ) :
 				ob_start();
@@ -849,6 +852,24 @@ echo $value_count[$meta_key][$meta_value];</p>
 </div>
 </div>
 
+<!--
+<div class="postbox closed">
+<div class="handlediv" title="<?php _e('Click to toggle', 'custom-field-template'); ?>"><br /></div>
+<h3><?php _e('Rebuild Tags', 'custom-field-template'); ?></h3>
+<div class="inside">
+<form method="post" onsubmit="return confirm('<?php _e('Are you sure to rebuild tags?', 'custom-field-template'); ?>');">
+<table class="form-table" style="margin-bottom:5px;">
+<tbody>
+<tr><td>
+<p><input type="submit" name="custom_field_template_rebuild_tags_submit" value="<?php _e('Rebuild Tags &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
+</td></tr>
+</tbody>
+</table>
+</form>
+</div>
+</div>
+//-->
+
 <div class="postbox closed">
 <div class="handlediv" title="<?php _e('Click to toggle', 'custom-field-template'); ?>"><br /></div>
 <h3><?php _e('Option List', 'custom-field-template'); ?></h3>
@@ -924,6 +945,18 @@ hideKey = true<br />
 </tr>
 <tr>
 <th>outputCode</th><td>outputCode = 0</td><td>outputCode = 0</td><td>outputCode = 0</td><td>outputCode = 0</td><td>outputCode = 0</td>
+</tr>
+<tr>
+<th>multiple</th><td>multiple = true</td><td></td><td>multiple = true</td><td>multiple = true</td><td>multiple = true</td>
+</tr>
+<tr>
+<th>startNum</th><td>startNum = 5</td><td></td><td>startNum = 5</td><td>startNum = 5</td><td>startNum = 5</td>
+</tr>
+<tr>
+<th>endNum</th><td>endNum = 10</td><td></td><td>endNum = 10</td><td>endNum = 10</td><td>endNum = 10</td>
+</tr>
+<tr>
+<th>multipleButton</th><td>multipleButton = true</td><td></td><td>multipleButton = true</td><td>multipleButton = true</td><td></td>
 </tr>
 <tr>
 <th>blank</th><td>blank = true</td><td>blank = true</td><td>blank = true</td><td>blank = true</td><td>blank = true</td>
@@ -1076,7 +1109,7 @@ jQuery(this).addClass("closed");
 		return $custom_fields;
 	}
 	
-	function make_textfield( $name, $sid, $size = 25, $default, $hideKey, $label, $code, $class, $style, $before, $after, $maxlength,
+	function make_textfield( $name, $sid, $size = 25, $default, $hideKey, $label, $code, $class, $style, $before, $after, $maxlength, $multipleButton,
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1115,9 +1148,15 @@ jQuery(this).addClass("closed");
 				$event_output .= " " . $key . '="' . stripcslashes(trim($val)) . '"';
 		endforeach;
 		
+		if ( $multipleButton == true && $sid == 0 ) :
+			$addfield .= '<div>';
+			$addfield .= '<a href="#clear" onclick="jQuery(this).parent().parent().parent().clone().insertBefore(jQuery(this).parent().parent().parent()).find('."'input'".').val('."''".');jQuery(this).parent().css('."'visibility','hidden'".');jQuery(this).parent().prev().css('."'visibility','hidden'".'); return false;">' . __('Add New', 'custom-field-template') . '</a>';
+			$addfield .= '</div>';
+		endif;
+				
 		$out .= 
 			'<dl id="dl_' . $name . $sid . '">' .
-			'<dt><span' . $hide . '><label for="' . $name . $sid . '">' . $title . '</label></span></dt>' .
+			'<dt><span' . $hide . '><label for="' . $name . $sid . '">' . $title . '</label></span>'.$addfield.'</dt>' .
 			'<dd>';
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
@@ -1180,7 +1219,7 @@ jQuery(this).addClass("closed");
 		return $out;
 	}
 	
-	function make_radio( $name, $sid, $values, $valueLabel, $clearButton, $default, $hideKey, $label, $code, $class, $style, 
+	function make_radio( $name, $sid, $values, $valueLabel, $clearButton, $default, $hideKey, $label, $code, $class, $style, $multipleButton, 
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1212,9 +1251,15 @@ jQuery(this).addClass("closed");
 				$event_output .= " " . $key . '="' . stripcslashes(trim($val)) . '"';
 		endforeach;
 
+		if ( $multipleButton == true && $sid == 0 ) :
+			$addfield .= '<div>';
+			$addfield .= '<a href="#clear" onclick="jQuery(this).parent().parent().parent().clone().insertBefore(jQuery(this).parent().parent().parent()).find('."'input'".').attr('."'checked',false".');jQuery(this).parent().css('."'visibility','hidden'".');jQuery(this).parent().prev().css('."'visibility','hidden'".'); return false;">' . __('Add New', 'custom-field-template') . '</a>';
+			$addfield .= '</div>';
+		endif;		
+
 		$out .= 
 			'<dl id="dl_' . $name . $sid . '">' .
-			'<dt><span' . $hide . '>' . $title . '</span>';
+			'<dt><span' . $hide . '>' . $title . '</span>'.$addfield;
 			
 		if( $clearButton == true ) {
 			$out .= '<div>';
@@ -1248,7 +1293,7 @@ jQuery(this).addClass("closed");
 		return $out;			
 	}
 	
-	function make_select( $name, $sid, $values, $valueLabel, $default, $hideKey, $label, $code, $class, $style, $before, $after, $selectLabel,
+	function make_select( $name, $sid, $values, $valueLabel, $default, $hideKey, $label, $code, $class, $style, $before, $after, $selectLabel, $multipleButton,
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1281,10 +1326,16 @@ jQuery(this).addClass("closed");
 			if ( $val )
 				$event_output .= " " . $key . '="' . stripcslashes(trim($val)) . '"';
 		endforeach;
+		
+		if ( $multipleButton == true && $sid == 0 ) :
+			$addfield .= '<div>';
+			$addfield .= '<a href="#clear" onclick="jQuery(this).parent().parent().parent().clone().insertBefore(jQuery(this).parent().parent().parent()).find('."'option'".').attr('."'selected',false".');jQuery(this).parent().css('."'visibility','hidden'".');jQuery(this).parent().prev().css('."'visibility','hidden'".'); return false;">' . __('Add New', 'custom-field-template') . '</a>';
+			$addfield .= '</div>';
+		endif;		
 
 		$out .= 
 			'<dl id="dl_' . $name . $sid . '">' .
-			'<dt><span' . $hide . '><label for="' . $name . $sid . '">' . $title . '</label></span></dt>' .
+			'<dt><span' . $hide . '><label for="' . $name . $sid . '">' . $title . '</label></span>'.$addfield.'</dt>' .
 			'<dd>';
 			
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
@@ -1462,7 +1513,7 @@ EOF;
 					$out .= '</div><div' . $class . '>';
 				}
 				else if( $data[$i]['type'] == 'textfield' || $data[$i]['type'] == 'text' ) {
-					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['before'], $data[$i]['after'], $data[$i]['maxlength'],
+					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['before'], $data[$i]['after'], $data[$i]['maxlength'], $data[$i]['multipleButton'], 
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'checkbox' ) {
@@ -1473,13 +1524,13 @@ EOF;
 				else if( $data[$i]['type'] == 'radio' ) {
 					$out .= 
 						$this->make_radio( 
-							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['clearButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'],
+							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['clearButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['multipleButton'], 
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'select' ) {
 					$out .= 
 						$this->make_select( 
-							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['before'], $data[$i]['after'], $data[$i]['selectLabel'],
+							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['before'], $data[$i]['after'], $data[$i]['selectLabel'], $data[$i]['multipleButton'], 
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'textarea' ) {
@@ -1890,6 +1941,27 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 						break;
 				}
 			} while ($Temp = strtok("\r\n"));
+
+				foreach($Data as $title => $data) :
+					foreach($data as $key => $val) :
+						if ( $val['multiple'] == true && $val['type'] != 'checkbox' ) :
+							$counter = count($_REQUEST[$this->sanitize_name($title)]);
+							if ( !$counter ) :
+								$counter = count(get_post_meta( $_REQUEST['post'], $title, false ));
+								$counter++;
+							endif;							
+							if ( is_numeric($val['startNum']) && $val['startNum']>$counter ) $counter = $val['startNum'];
+							if ( is_numeric($val['endNum']) && $val['endNum']<$counter  ) $counter = $val['endNum'];
+						endif;
+						if ( $counter ) :
+							for($i=1;$i<$counter; $i++) :
+								$Data[$title][$i] =  $Data[$title][0];
+								$Data[$title][$i]["hideKey"] = true;
+							endfor;							
+						endif;
+						unset($counter);
+					endforeach;
+				endforeach;
 				
 				foreach($Data as $title => $data) {
 					foreach($data as $key => $val) {
@@ -2365,15 +2437,28 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 								case '=' :
 								case '<>' :
 								case '<=>':
-									$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM wp_postmeta WHERE  (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND " . $wpdb->postmeta . ".meta_value " . $replace[$key][$key2][0]['operator'] . " " . trim($val3) . ") GROUP BY post_id) ";
+									$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM wp_postmeta WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND " . $wpdb->postmeta . ".meta_value " . $replace[$key][$key2][0]['operator'] . " " . trim($val3) . ") GROUP BY post_id) ";
 									break;
 								default :
-									$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM wp_postmeta WHERE  (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND " . $wpdb->postmeta . ".meta_value LIKE '%" . trim($val3) . "%') GROUP BY post_id) ";
+									$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM wp_postmeta WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND " . $wpdb->postmeta . ".meta_value LIKE '%" . trim($val3) . "%') GROUP BY post_id) ";
 									break;
 								endswitch;
 						endif;
 					endforeach;
 				endforeach;
+			endforeach;
+		endif;
+		
+		if ( $_REQUEST['s'] ) :
+			if ( function_exists('mb_split') ) :
+				$s = mb_split('\s', $_REQUEST['s']);
+			else:
+				$s = split('\s', $_REQUEST['s']);
+			endif;
+			foreach ( $s as $v ) :
+				if ( !empty($v) ) :
+					$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM wp_postmeta WHERE (" . $wpdb->postmeta . ".meta_value LIKE '%" . trim($v) . "%') GROUP BY post_id) ";
+				endif;
 			endforeach;
 		endif;
 
@@ -2394,7 +2479,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 		endif;
 		
 		$where .= " AND `".$wpdb->posts."`.post_status = 'publish'";
-		if ( $_REQUEST['s'] ) $where .= $original_where;
+		//if ( $_REQUEST['s'] ) $where .= $original_where;
 						
 		return $where;
 	}
@@ -2427,6 +2512,21 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 
 		$sql = "`".$wpdb->posts."`.post_date ".$_REQUEST['order'];
 		return $sql;
+	}
+	
+	function custom_field_template_post_limits($sql_limit) {
+		global $wp_query;
+
+		if ( !$sql_limit ) return;
+		list($offset, $old_limit) = explode(',', $sql_limit);
+		$limit = (int)$_REQUEST['limit'];
+		if ( !$limit )
+			$limit = trim($old_limit);
+		$wp_query->query_vars['posts_per_page'] = $limit;
+		$offset = ($wp_query->query_vars['paged'] - 1) * $limit;
+		if ( $offset < 0 ) $offset = 0;
+
+		return ( $limit ? "LIMIT $offset, $limit" : '' );
 	}
 	
 	function EvalBuffer($string) {
@@ -2528,21 +2628,6 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			endfor;
 		endif;
 		update_option('custom_field_template_data', $options);
-	}
-	
-	function custom_field_template_post_limits($sql_limit) {
-		global $wp_query;
-
-		if ( !$sql_limit ) return;
-		list($offset, $old_limit) = explode(',', $sql_limit);
-		$limit = (int)$_REQUEST['limit'];
-		if ( !$limit )
-			$limit = trim($old_limit);
-		$wp_query->query_vars['posts_per_page'] = $limit;
-		$offset = ($wp_query->query_vars['paged'] - 1) * $limit;
-		if ( $offset < 0 ) $offset = 0;
-
-		return ( $limit ? "LIMIT $offset, $limit" : '' );
 	}
 }
 
