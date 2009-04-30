@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.2
+Version: 1.2.1
 Author URI: http://wordpressgogo.com/
 */
 
@@ -14,6 +14,7 @@ I appreciate your efforts, Joshua.
 */
 
 class custom_field_template {
+	var $is_excerpt;
 
 	function custom_field_template() {
 		add_action( 'init', array(&$this, 'custom_field_template_init') );
@@ -30,6 +31,7 @@ class custom_field_template {
 		add_filter( 'media_send_to_editor', array(&$this, 'media_send_to_custom_field'), 15 );
 		add_filter( 'plugin_action_links', array(&$this, 'wpaq_filter_plugin_actions'), 10, 2 );
 		
+		add_filter( 'get_the_excerpt', array(&$this, 'custom_field_template_get_the_excerpt'), 1 );
 		add_filter( 'the_content', array(&$this, 'custom_field_template_the_content') );
 		add_filter( 'the_content_rss', array(&$this, 'custom_field_template_the_content') );
 		
@@ -75,6 +77,8 @@ class custom_field_template {
 				$id = $_REQUEST['id'];			
 			elseif ( isset($options['posts'][$_REQUEST['post']]) )
 				$id = $options['posts'][$_REQUEST['post']];
+			else
+				$id = 0;
 			echo $this->load_custom_field( $id );
 			exit();
 		}
@@ -450,9 +454,19 @@ mediaButton = true';
 		add_options_page(__('Custom Field Template', 'custom-field-template'), __('Custom Field Template', 'custom-field-template'), 8, basename(__FILE__), array(&$this, 'custom_field_template_admin'));
 	}
 	
+	
+	function custom_field_template_get_the_excerpt() {
+		$this->is_excerpt = true;
+	}
+	
 	function custom_field_template_the_content($content) {
 		global $wp_query, $post;
 		$options = $this->get_custom_field_template_data();
+		
+		if ( $this->is_excerpt ) :
+			$this->is_excerpt = false;
+			return;
+		endif;
 		
 		if ( count($options['hook']) > 0 ) :
 			$categories = get_the_category();
@@ -2151,8 +2165,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			'search_label' => __('Search &raquo;', 'custom-field-template'),
 			'button'      => true
 		), $attr));
-
-
+		
 		if ( is_numeric($format) && $output = $options['shortcode_format'][$format] ) :
 			$output = stripcslashes($output);
 			$output = '<form method="get" action="/" id="cftsearch'.(int)$format.'">' . "\n" . $output;
@@ -2293,12 +2306,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 									break;
 							endswitch;			
 						endforeach;
-												
+																		
 						if ( $options['shortcode_format_use_php'][$format] )
 							$output = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $output);
 						$key = preg_quote($key, '/');
 						$output = preg_replace('/\['.$key.'\](?!\[[0-9]+\])/', $replace_val[0], $output); 
 						$output = preg_replace('/\['.$key.'\]\[([0-9]+)\](?!\[\])/e', '$replace_val[${1}]', $output);
+						
 					endforeach;
 				endfor;
 			endif;
@@ -2478,7 +2492,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			endif;
 		endif;
 		
-		$where .= " AND `".$wpdb->posts."`.post_status = 'publish'";
+		$where .= " AND `".$wpdb->posts."`.post_status = 'publish' GROUP BY wp_posts.ID";
 		//if ( $_REQUEST['s'] ) $where .= $original_where;
 						
 		return $where;
@@ -2505,7 +2519,11 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 			elseif ( $_REQUEST['orderby']=='rand' ):
 				$sql = "RAND()";
 			else:
-				$sql = " meta.meta_value " . $_REQUEST['order'];
+				if ( in_array($_REQUEST['cast'], array('binary', 'char', 'date', 'datetime', 'signed', 'time', 'unsigned')) ) :
+					$sql = " CAST(meta.meta_value AS " . $_REQUEST['cast'] . ") " . $_REQUEST['order'];
+				else :
+					$sql = " meta.meta_value " . $_REQUEST['order'];
+				endif;
 			endif;
 			return $sql;
 		endif;
