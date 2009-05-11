@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.2.3
+Version: 1.2.4
 Author URI: http://wordpressgogo.com/
 */
 
@@ -749,7 +749,7 @@ mediaButton = true';
 </div>
 
 <div class="postbox closed">
-<div class="handlediv" title="<?php _e('Click to toggle', 'meta-ext'); ?>"><br /></div>
+<div class="handlediv" title="<?php _e('Click to toggle', 'custom-field-template'); ?>"><br /></div>
 <h3><?php _e('[cft] and [cftsearch] Shortcode Format', 'custom-field-template'); ?></h3>
 <div class="inside">
 <form method="post">
@@ -778,7 +778,7 @@ mediaButton = true';
 </div>
 
 <div class="postbox closed">
-<div class="handlediv" title="<?php _e('Click to toggle', 'meta-ext'); ?>"><br /></div>
+<div class="handlediv" title="<?php _e('Click to toggle', 'custom-field-template'); ?>"><br /></div>
 <h3><?php _e('PHP CODE (Experimental Option)', 'custom-field-template'); ?></h3>
 <div class="inside">
 <form method="post" onsubmit="return confirm('<?php _e('Are you sure to save PHP codes? Please do it at your own risk.', 'custom-field-template'); ?>');">
@@ -809,7 +809,7 @@ ex. `radio` and `select`:</dt><dd>$values = array('dog', 'cat', 'monkey'); $defa
 </div>
 
 <div class="postbox closed">
-<div class="handlediv" title="<?php _e('Click to toggle', 'meta-ext'); ?>"><br /></div>
+<div class="handlediv" title="<?php _e('Click to toggle', 'custom-field-template'); ?>"><br /></div>
 <h3><?php _e('Auto Hook of `the_content()` (Experimental Option)', 'custom-field-template'); ?></h3>
 <div class="inside">
 <form method="post">
@@ -1663,8 +1663,8 @@ EOF;
 							for($i = 0; $i<count($data); $i++) :
 								if( $data[$i][ 'type' ] == 'textarea' && $data[$i][ 'tinyMCE' ] ) :
 									if ( substr($wp_version, 0, 3) >= '2.7' ) :
-		$out .=		'	if ( getUserSetting( "editor" ) == "html" ) {
-jQuery("#edButtonPreview").trigger("click"); }' . "\n";
+		/*$out .=		'	if ( getUserSetting( "editor" ) == "html" ) {
+jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 									else :
 		$out .=		'	if(wpTinyMCEConfig) if(wpTinyMCEConfig.defaultEditor == "html") { jQuery("#edButtonPreview").trigger("click"); }' . "\n";
 									endif;
