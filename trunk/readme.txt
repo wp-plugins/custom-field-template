@@ -4,7 +4,7 @@ Donate link: http://wordpressgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
 Tested up to: 2.7.1
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -55,8 +55,10 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 
 Localization
 
+* Belorussian (by_BY) - [Marcis Gasuns](http://www.fatcow.com/)
 * German (de_DE) - F J Kaiser
 * Spanish (es_ES) - Dario Ferrer
+* French (fr_FR) - Nicolas Lemoine
 * Italian (it_IT) - [Gianni Diurno](http://gidibao.net/)
 * Japanese (ja) - [Hiroaki Miyashita](http://wordpressgogo.com/)
 * Russian (ru_RU) - [Sonika](http://www.sonika.ru/blog/)
