@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.2.5
+Version: 1.2.6
 Author URI: http://wordpressgogo.com/
 */
 
@@ -1289,20 +1289,22 @@ jQuery(this).addClass("closed");
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$i = 0;
-		foreach( $values as $val ) {
-			$id = $name . $sid . '_' . $this->sanitize_name( $val );
+		if ( is_array($values) ) :
+			foreach( $values as $val ) {
+				$id = $name . $sid . '_' . $this->sanitize_name( $val );
 			
-			$checked = ( trim( $val ) == trim( $selected ) ) ? 'checked="checked"' : '';
+				$checked = ( trim( $val ) == trim( $selected ) ) ? 'checked="checked"' : '';
 			
-			$out .=	
-				'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape(trim($val)) . '" ' . $checked . ' type="radio"' . $class . $style . $event_output . ' /> ';
-			if ( $valueLabel[$i] )
-				$out .= stripcslashes(trim($valueLabel[$i]));
-			else
-				$out .= stripcslashes(trim($val));
-			$out .= '</label><br />';
-			$i++;
-		}	 
+				$out .=	
+					'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . ']" value="' . attribute_escape(trim($val)) . '" ' . $checked . ' type="radio"' . $class . $style . $event_output . ' /> ';
+				if ( $valueLabel[$i] )
+					$out .= stripcslashes(trim($valueLabel[$i]));
+				else
+					$out .= stripcslashes(trim($val));
+				$out .= '</label><br />';
+				$i++;
+			}
+		endif;	 
 		$out .= '</dd></dl>'."\n";
 		
 		return $out;			
@@ -1363,17 +1365,19 @@ jQuery(this).addClass("closed");
 			$out .= '<option value="">' . __('Select', 'custom-field-template') . '</option>';
 		
 		$i = 0;
-		foreach( $values as $val ) {
-			$checked = ( trim( $val ) == trim( $selected ) ) ? 'selected="selected"' : '';
+		if ( is_array($values) ) :
+			foreach( $values as $val ) {
+				$checked = ( trim( $val ) == trim( $selected ) ) ? 'selected="selected"' : '';
 		
-			$out .=	'<option value="' . attribute_escape(trim($val)) . '" ' . $checked . '>';
-			if ( $valueLabel[$i] )
-				$out .= stripcslashes(trim($valueLabel[$i]));
-			else
-				$out .= stripcslashes(trim($val));
-			$out .= '</option>';
-			$i++;
-		}
+				$out .=	'<option value="' . attribute_escape(trim($val)) . '" ' . $checked . '>';
+				if ( $valueLabel[$i] )
+					$out .= stripcslashes(trim($valueLabel[$i]));
+				else
+					$out .= stripcslashes(trim($val));
+				$out .= '</option>';
+				$i++;
+			}
+		endif;
 		$out .= '</select>'.trim($after).'</dd></dl>'."\n";
 		
 		return $out;
@@ -1585,11 +1589,12 @@ EOF;
 <div class="dbx-content">';
         }
 		
-		$out .= '<script type="text/javascript">' . "\n" .
-					'// <![CDATA[' . "\n" .
-					'function send_to_custom_field(h) {' . "\n" .
+		$out .= 	'<script type="text/javascript">' . "\n" .
+					'// <![CDATA[' . "\n";
+		$out .= 	'function send_to_custom_field(h) {' . "\n" .
 					'	if ( tmpFocus ) ed = tmpFocus;' . "\n" .
-					'	else {ed = tinyMCE.get("content"); if(ed) {if(!ed.isHidden()) isTinyMCE = true;}}' . "\n" .
+					'	else if ( typeof tinyMCE == "undefined" ) ed = document.getElementById("content");' . "\n" .
+					'	else { ed = tinyMCE.get("content"); if(ed) {if(!ed.isHidden()) isTinyMCE = true;}}' . "\n" .
 					'	if ( typeof tinyMCE != "undefined" && isTinyMCE && !ed.isHidden() ) {' . "\n" .
 					'		ed.focus();' . "\n" .
 					'		//if (tinymce.isIE)' . "\n" .
@@ -1617,7 +1622,9 @@ EOF;
 					'var tmpFocus;' . "\n" .
 					'function focusTextArea(id) {' . "\n" . 
 					'	jQuery(document).ready(function() {' . "\n" .
-					'		var elm = tinyMCE.get(id);' . "\n" .
+					'		if ( typeof tinyMCE != "undefined" ) {' . "\n" .
+					'			var elm = tinyMCE.get(id);' . "\n" .
+					'		}' . "\n" .
 					'		if ( ! elm || elm.isHidden() ) {' . "\n" .
 					'			elm = document.getElementById(id);' . "\n" .
 					'			isTinyMCE = false;' . "\n" .
@@ -1633,14 +1640,6 @@ EOF;
 					'		}' . "\n" .
 					'	});' . "\n" .
 					'}' . "\n" .
-					'function thickbox(link) {' . "\n" .
-					'	var t = link.title || link.name || null;' . "\n" .
-					'	var a = link.href || link.alt;' . "\n" .
-					'	var g = link.rel || false;' . "\n" .
-					'	tb_show(t,a,g);' . "\n" .
-					'	link.blur();' . "\n" .
-					'	return false;' . "\n" .
-					'}' . "\n" .
 					'function switchMode(id) {' . "\n" .
 					'	var ed = tinyMCE.get(id);' . "\n" .
 					'	if ( ! ed || ed.isHidden() ) {' . "\n" .
@@ -1650,6 +1649,15 @@ EOF;
 					'	} else {' . "\n" .
 					'		ed.hide(); jQuery(\'#editorcontainer_\'+id).prev().show(); document.getElementById(id).style.color="#000000";' . "\n" .
 					'	}' . "\n" .
+					'}' . "\n";
+					
+		$out .=		'function thickbox(link) {' . "\n" .
+					'	var t = link.title || link.name || null;' . "\n" .
+					'	var a = link.href || link.alt;' . "\n" .
+					'	var g = link.rel || false;' . "\n" .
+					'	tb_show(t,a,g);' . "\n" .
+					'	link.blur();' . "\n" .
+					'	return false;' . "\n" .
 					'}' . "\n";
 					
 					if(count($options['custom_fields'])>$options['posts'][$_REQUEST['post']] && $options['posts'][$_REQUEST['post']]) $init_id = $options['posts'][$_REQUEST['post']];
