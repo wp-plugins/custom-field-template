@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.2.6
+Version: 1.2.7
 Author URI: http://wordpressgogo.com/
 */
 
@@ -567,6 +567,7 @@ mediaButton = true';
 					$options['custom_fields'][$j]['content'] = $_POST["custom_field_template_content"][$i];
 					$options['custom_fields'][$j]['instruction'] = $_POST["custom_field_template_instruction"][$i];
 					$options['custom_fields'][$j]['category'] = $_POST["custom_field_template_category"][$i];
+					$options['custom_fields'][$j]['post'] = $_POST["custom_field_template_post"][$i];
 					$options['custom_fields'][$j]['post_type'] = $_POST["custom_field_template_post_type"][$i];
 					$j++;
 				}
@@ -673,6 +674,8 @@ mediaButton = true';
 <input type="radio" name="custom_field_template_post_type[<?php echo $i; ?>]" id="custom_field_template_post_type[<?php echo $i; ?>]" value=""<?php if ( !$options['custom_fields'][$i]['post_type'] ) :  echo ' checked="checked"'; endif; ?> /> <?php _e('Both', 'custom-field-template'); ?>
 <input type="radio" name="custom_field_template_post_type[<?php echo $i; ?>]" id="custom_field_template_post_type[<?php echo $i; ?>]" value="post"<?php if ( $options['custom_fields'][$i]['post_type']=='post') : echo ' checked="checked"'; endif; ?> /> <?php _e('Post', 'custom-field-template'); ?>
 <input type="radio" name="custom_field_template_post_type[<?php echo $i; ?>]" id="custom_field_template_post_type[<?php echo $i; ?>]" value="page"<?php if ( $options['custom_fields'][$i]['post_type']=='page') : echo ' checked="checked"'; endif; ?> /> <?php _e('Page', 'custom-field-template'); ?></span></p>
+<p><label for="custom_field_template_post[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Post ID (comma-deliminated)', 'custom-field-template'), $i); ?></a></label>:<br />
+<input type="text" name="custom_field_template_post[<?php echo $i; ?>]" id="custom_field_template_post[<?php echo $i; ?>]" value="<?php echo stripcslashes($options['custom_fields'][$i]['post']); ?>" size="80"<?php if ( empty($options['custom_fields'][$i]['post']) ) : echo ' style="display:none;"'; endif; ?> /></p>
 <p><label for="custom_field_template_category[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Category ID (comma-deliminated)', 'custom-field-template'), $i); ?></a></label>:<br />
 <input type="text" name="custom_field_template_category[<?php echo $i; ?>]" id="custom_field_template_category[<?php echo $i; ?>]" value="<?php echo stripcslashes($options['custom_fields'][$i]['category']); ?>" size="80"<?php if ( empty($options['custom_fields'][$i]['category']) ) : echo ' style="display:none;"'; endif; ?> /></p>
 <p><label for="custom_field_template_content[<?php echo $i; ?>]"><?php echo sprintf(__('Template Content', 'custom-field-template'), $i); ?></label>:<br />
@@ -1513,7 +1516,13 @@ EOF;
 		
 		if ( $_REQUEST['post'] && $options['custom_fields'][$id]['category'] && !isset($options['posts'][$_REQUEST['post']]) && $options['posts'][$_REQUEST['post']] !== $id && $_REQUEST['cft_mode'] != 'ajaxload' )
 			return;
-			
+
+		if ( $options['custom_fields'][$id]['post'] ) :
+			$post_ids = explode(',', $options['custom_fields'][$id]['post']);
+			if ( !in_array($_REQUEST['post'], $post_ids) )
+				return;
+		endif;
+					
 		if ( $options['custom_fields'][$id]['instruction'] ) :
 			$instruction = stripcslashes($options['custom_fields'][$id]['instruction']);
 			$instruction = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $instruction);
@@ -1780,16 +1789,44 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			if ( is_array($categories) ) foreach($categories as $category) $cats[] = $category->cat_ID; 
 			if ( $_REQUEST['post_category'] ) $cats = array_merge($cats, $_REQUEST['post_category']);
 			for ( $i=0; $i < count($options['custom_fields']); $i++ ) :
-				if ( !$options['custom_fields'][$i]['category'] || in_array($options['custom_fields'][$i]['category'], $cats) ) :
+				$post_ids = explode(',', $options['custom_fields'][$i]['post']);
+				if ( !$options['custom_fields'][$i]['post'] || in_array($_REQUEST['post'], $post_ids) ) :
 					$flag = 1;
 					break;
+				endif;
+				if ( !$options['custom_fields'][$i]['category'] && !$options['custom_fields'][$i]['post'] ) :
+					$flag = 1;
+					break;
+				else :
+					$cat_ids = explode(',', $options['custom_fields'][$i]['category']);
+					foreach ( $cat_ids as $cat_id ) :
+						if (in_array($cat_id, $cats) ) :
+							$flag = 1;
+							break;
+						endif;
+					endforeach;
 				endif;
 			endfor;
 			if ( $flag ) :
 				$out .= '<select id="custom_field_template_select">';
 				for ( $i=0; $i < count($options['custom_fields']); $i++ ) {
-					if ( in_array($options['custom_fields'][$i]['category'], $cats) ) :
+					$post_ids = explode(',', $options['custom_fields'][$i]['post']);
+					$catflag = "";
+					if ( $options['custom_fields'][$i]['category'] ) :
+						$cat_ids = explode(',', $options['custom_fields'][$i]['category']);
+						foreach ( $cat_ids as $cat_id ) :
+							if (in_array($cat_id, $cats) ) :
+								$catflag = 1;
+								break;
+							endif;
+						endforeach;
+					endif;
+					if ( in_array($_REQUEST['post'], $post_ids) ) :
 						$out .= '<option value="' . $i . '">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
+					elseif ( $catflag ) :
+						$out .= '<option value="' . $i . '">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
+					elseif ( $options['custom_fields'][$i]['post'] ) :
+						$out .= '';
 					elseif ( $options['custom_fields'][$i]['category'] ) :
 						$out .= '';
 					elseif ( $i == $options['posts'][$_REQUEST['post']] && isset($_REQUEST['post']) ) :
@@ -1846,8 +1883,14 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		if ( $fields == null )
 			return;
 			
-		if ( !class_exists('SimpleTags') && strstr($_POST['tags_input'], ',') ) {
-			$tags_input = explode(",", $_POST['tags_input']);
+		if ( substr($wp_version, 0, 3) >= '2.8' ) {
+			if ( !class_exists('SimpleTags') && $_POST['tax_input']['post_tag'] ) {
+				$tags_input = explode(",", $_POST['tax_input']['post_tag']);
+			}
+		} else {
+			if ( !class_exists('SimpleTags') && $_POST['tags_input'] ) {
+				$tags_input = explode(",", $_POST['tags_input']);
+			}
 		}
 							
 		foreach( $fields as $title	=> $data) {
@@ -2177,7 +2220,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		
 		if ( is_numeric($format) && $output = $options['shortcode_format'][$format] ) :
 			$output = stripcslashes($output);
-			$output = '<form method="get" action="/" id="cftsearch'.(int)$format.'">' . "\n" . $output;
+			$output = '<form method="get" action="'.get_option('home').'/" id="cftsearch'.(int)$format.'">' . "\n" . $output;
 
 			$count = count($options['custom_fields']);
 			if ( $count ) :
@@ -2336,7 +2379,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			if ( $fields == null )
 				return;
 	
-			$output = '<form method="get" action="/" id="cftsearch'.(int)$format.'">' . "\n";
+			$output = '<form method="get" action="'.get_option('home').'/" id="cftsearch'.(int)$format.'">' . "\n";
 			foreach( $fields as $key => $val) :
 				if ( $val[0]['search'] == true ) :
 					if ( !empty($val[0]['label']) && $options['custom_field_template_replace_keys_by_labels'] )
