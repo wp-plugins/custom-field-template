@@ -3,8 +3,8 @@ Contributors: Hiroaki Miyashita
 Donate link: http://wordpressgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
-Tested up to: 2.8 Bata 2
-Stable tag: 1.2.7
+Tested up to: 2.8
+Stable tag: 1.3.0
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -52,6 +52,8 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 * Adds the style attribute. (`style = color:#FF0000;`)
 * Adds the maxlength attribute. (`maxlength = 10`)
 * Adds the attributes of multiple fields. (`multiple = true`, `startNum = 5`, `endNum = 10`, `multipleButton = true`)
+* Adds the attributes of the date picker in `text` type. (`date = true`, `dateFirstDayOfWeek = 0`, `dateFormat = yyyy/mm/dd`)
+* Adds the filter of page template file names (Thanks, Joel Pittet).
 
 Localization
 
