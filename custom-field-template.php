@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.3.2
+Version: 1.3.3
 Author URI: http://wordpressgogo.com/
 */
 
@@ -471,8 +471,11 @@ mediaButton = true';
 	
 	
 	function custom_field_template_get_the_excerpt($excerpt) {
+		$options = $this->get_custom_field_template_data();
+
 		$this->is_excerpt = true;
-		return $excerpt;
+		if ( $options['custom_field_template_excerpt_shortcode'] ) return do_shortcode($excerpt);
+		else return $excerpt;
 	}
 	
 	function custom_field_template_the_content($content) {
@@ -481,6 +484,7 @@ mediaButton = true';
 		
 		if ( $this->is_excerpt ) :
 			$this->is_excerpt = false;
+						
 			return $post->post_excerpt ? $post->post_excerpt : strip_shortcodes($content);
 		endif;
 		
@@ -576,6 +580,7 @@ mediaButton = true';
 			$options['custom_field_template_disable_quick_edit'] = $_POST['custom_field_template_disable_quick_edit'];
 			$options['custom_field_template_replace_the_title'] = $_POST['custom_field_template_replace_the_title'];
 			$options['custom_field_template_widget_shortcode'] = $_POST['custom_field_template_widget_shortcode'];
+			$options['custom_field_template_excerpt_shortcode'] = $_POST['custom_field_template_excerpt_shortcode'];
 			for($i=0;$i<count($_POST["custom_field_template_content"]);$i++) {
 				if( $_POST["custom_field_template_content"][$i] ) {
 					$options['custom_fields'][$j]['title']   = $_POST["custom_field_template_title"][$i];
@@ -739,6 +744,11 @@ mediaButton = true';
 <tr><td>
 <p><label for="custom_field_template_widget_shortcode"><?php _e('In case that you would like to use the shortcode in the widget.', 'custom-field-template'); ?></label>:<br />
 <input type="checkbox" name="custom_field_template_widget_shortcode" id="custom_field_template_widget_shortcode" value="1" <?php if ($options['custom_field_template_widget_shortcode']) { echo 'checked="checked"'; } ?> /> <?php _e('Use the shortcode in the widget', 'custom-field-template'); ?></p>
+</td>
+</tr>
+<tr><td>
+<p><label for="custom_field_template_excerpt_shortcode"><?php _e('In case that you would like to use the shortcode in the excerpt.', 'custom-field-template'); ?></label>:<br />
+<input type="checkbox" name="custom_field_template_excerpt_shortcode" id="custom_field_template_excerpt_shortcode" value="1" <?php if ($options['custom_field_template_excerpt_shortcode']) { echo 'checked="checked"'; } ?> /> <?php _e('Use the shortcode in the excerpt', 'custom-field-template'); ?></p>
 </td>
 </tr>
 <tr><td>
