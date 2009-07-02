@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.3.3
+Version: 1.3.4
 Author URI: http://wordpressgogo.com/
 */
 
@@ -1533,7 +1533,7 @@ EOF;
 			$editorcontainer_class .= ' class="editorcontainer"';
 		endif;
 		
-		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . $name . $rand . '"><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" rows="' .$rows. '" cols="' . $cols . '" style="color:#000000"' . $content_class . $style . $event_output . '>' . attribute_escape(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
+		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . $name . $rand . '"><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . ']" rows="' .$rows. '" cols="' . $cols . '"' . $content_class . $style . $event_output . '>' . attribute_escape(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
 		if ( $htmlEditor == true ) $out .= '</div>';
 		$out .= '</dd></dl>'."\n";
 		
