@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.3.4
+Version: 1.3.5
 Author URI: http://wordpressgogo.com/
 */
 
@@ -472,8 +472,8 @@ mediaButton = true';
 	
 	function custom_field_template_get_the_excerpt($excerpt) {
 		$options = $this->get_custom_field_template_data();
-
-		$this->is_excerpt = true;
+		
+		if ( empty($excerpt) ) $this->is_excerpt = true;
 		if ( $options['custom_field_template_excerpt_shortcode'] ) return do_shortcode($excerpt);
 		else return $excerpt;
 	}
@@ -484,7 +484,7 @@ mediaButton = true';
 		
 		if ( $this->is_excerpt ) :
 			$this->is_excerpt = false;
-						
+									
 			return $post->post_excerpt ? $post->post_excerpt : strip_shortcodes($content);
 		endif;
 		
