@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.3.5
+Version: 1.3.6
 Author URI: http://wordpressgogo.com/
 */
 
@@ -653,7 +653,7 @@ mediaButton = true';
 				$message = __('Options imported.', 'custom-field-template');
 				$options = $this->get_custom_field_template_data();
 			endif;
-		elseif ($_POST['custom_field_template_unset_options_submit']) :
+		elseif ($_POST['custom_field_template_reset_options_submit']) :
 			$this->install_custom_field_template_data();
 			$this->install_custom_field_template_css();
 			$options = $this->get_custom_field_template_data();
@@ -1085,7 +1085,7 @@ hideKey = true<br />
 <table class="form-table" style="margin-bottom:5px;">
 <tbody>
 <tr><td>
-<p><input type="submit" name="custom_field_template_unset_options_submit" value="<?php _e('Unset Options &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
+<p><input type="submit" name="custom_field_template_reset_options_submit" value="<?php _e('Reset Options &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
 </td></tr>
 </tbody>
 </table>
@@ -2186,6 +2186,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 									if ( is_array($defaults) )
 										if ( in_array(trim($value), $defaults) )
 											$Data[$title][$key]["checked"] = true;
+									if ( $val["class"] )
+										$Data[$title][$key]["class"] = $val["class"];
 									if ( $val["level"] )
 										$Data[$title][$key]["level"] = $val["level"];
 									if ( $val["insertTag"] == true )
