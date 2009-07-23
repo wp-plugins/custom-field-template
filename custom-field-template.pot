@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Custom Field Template\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-06-30 10:08+0900\n"
-"PO-Revision-Date: 2009-06-30 10:08+0900\n"
+"POT-Creation-Date: 2009-07-23 09:24+0900\n"
+"PO-Revision-Date: 2009-07-23 09:24+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -352,7 +352,7 @@ msgid "Are you sure to reset options? Options you set will be reset to the defau
 msgstr ""
 
 #: custom-field-template/custom-field-template.php:1088
-msgid "Unset Options &raquo;"
+msgid "Reset Options &raquo;"
 msgstr ""
 
 #: custom-field-template/custom-field-template.php:1098
@@ -421,7 +421,7 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:2346
+#: custom-field-template/custom-field-template.php:2348
 msgid "Search &raquo;"
 msgstr ""
 

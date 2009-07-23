@@ -3,8 +3,8 @@ Contributors: Hiroaki Miyashita
 Donate link: http://wordpressgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
-Tested up to: 2.8.1
-Stable tag: 1.3.5
+Tested up to: 2.8.2
+Stable tag: 1.3.6
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -75,8 +75,6 @@ If you have translated into your language, please let me know.
 3. Edit the options in `Settings` > `Custom Field Template`
 4. That's it! :)
 
-== Known Issues / Bugs ==
-
 == Frequently Asked Questions ==
 
 = How can I use this plugin? =
@@ -84,10 +82,142 @@ If you have translated into your language, please let me know.
 The template format is basically same as the one of the rc:custom_field_gui plugin.
 See the default template and modify it.
 
+= How can I display the custom fields? =
+
+1. Use the cft shortcode. In the edit post, write down just `[cft]`. If you would like to specify the post ID, `[cft post_id=15]`. You can also set the template ID like `[cft template=1]`.
+2. Do you want to insert a particular key value? Use `[cft key=Key_Name]`.
+3. If you set the format of the custom fields, use `[cft format=0]`.
+4. Auto Hook of `the_content()` in the option page of this plugin may help you do this. You can use [cft] shortcodes here. You can switch the cft formats in each category.
+
+== Changelog ==
+
+= 1.3.6 =
+* Changelog.
+
+= 1.3.3 =
+* Exerpt Shortcode option.
+
+= 1.3 =
+* Attributes of the date picker in `text` type. ex) `date = true`, `dateFirstDayOfWeek = 0`, `dateFormat = yyyy/mm/dd`
+* Filter of page template file names (Thanks, Joel Pittet).
+
+= 1.2.7 =
+* Post ID options.
+
+= 1.2.5 =
+* French and Belorussian.
+
+= 1.2 =
+* Attributes of multiple fields. ex) `multiple = true`, `startNum = 5`, `endNum = 10`, `multipleButton = true`
+
+= 1.1.7 =
+* Maxlength attribute. ex) `maxlength = 10`
+
+= 1.1.5 =
+* Style attribute.
+
+= 1.1.3 =   
+* Attributes of before and after text. ex) `before = blah`, `after = blah`
+* Export and import functionality.
+
+= 1.1.1 =   
+* Initialize button.
+* Auto hook inside the content. ex) `[cfthook hook=0]`
+
+= 1.1 =   
+* Attributes of JavaScript Event Handlers. (`onclick = alert('ok');`) Event Handlers: onclick, ondblclick, onkeydown, onkeypress, onkeyup, onmousedown, onmouseup, onmouseover, onmouseout, onmousemove, onfocus, onblur, onchange, onselect 
+
+= 1.0.8 =   
+* Option to use the shortcode in the widhet.
+
+= 1.0.7 =   
+* Select option of the post type.
+* Value count option.
+
+= 1.0.5 =   
+* Box title replacement option.
+
+= 1.0.4 =   
+* Option to disable the quick edit.
+* Attribute of HTML Editor in the textarea. ex) `htmlEditor = true`
+* Italian (it_IT) - Gianni Diurno
+
+= 1.0.3 =   
+* Option to disable the default custom fields.
+
+= 1.0=
+* Custom field search. (only shows the attributes which have `search = true`.)
+* [cftsearch] Shortcode Format.
+* PHP codes for the output value. ex) `outputCode = 0`
+* PHP codes before saving the values. ex) `editCode = 0`
+* Save functionality.
+* Class option. ex) `class = text`
+* Auto hook of `the_content()`.
+* German (de_DE) - F J Kaiser
+* Turkish (tr_TR) - Omer Faruk
+
+= 0.9 =
+* Sort option. ex) `sort = asc` or `sort = desc`
+* Quick Edit of custom fields.
+
+= 0.8 =
+* The value label option for the case that values are diffrent from viewed values. (`valueLabel = apples # oranges # bananas`).
+* Blank option. ex) `blank = true`
+* Break type. Set CSS of '#cft div'. ex) `type = break` | #cft div { width:50%; float:left; }
+* [cft] Shortcode Format.
+* Russian (ru_RU) - Sonika
+
+= 0.7.3 =
+* Spanish (es_ES) - Dario Ferrer.
+
+= 0.7.2 =
+* PHP codes for `checkbox`.
+
+= 0.7.1 =
+* Template Instruction.
+
+= 0.7 =
+* Inserting custom field values into tags automatically. ex) `insertTag = true`
+* [cft] Shortcode to display the custom field template. (only shows the attributes which have `output = true`).
+
+= 0.6.5 =
+* User level in each field. ex) `level = 2`
+
+= 0.6.4 =
+* PHP codes in order to set values of `radio` and `select` types. ex) `code = 0`
+
+= 0.6 =
+* `type = text`, which is same as `type = textfield`.
+* Option to replace custom keys by labels
+
+= 0.5 =
+* Full option list.
+* `clearButton = true` in radios.
+* Keeps tinyMCE height after resizing the textarea and saving the post.
+
+= 0.4.4 =
+* Multiple checkboxes.
+
+= 0.4 =
+* Multiple fields with the same key.
+* hideKey options. ex) `hideKey = true`
+* The default of media buttons is false. ex) `mediaButton = true`
+
+= 0.3.1 =
+* Media buttons in the textarea.
+
+= 0.2 =
+* TinyMCE in the textarea.
+
+= 0.1 =
+* Initial release.
+
 == Screenshots ==
 
 1. Custom Field Template - Settings
 2. Custom Field Template
+
+== Known Issues / Bugs ==
 
 == Uninstall ==
 
