@@ -4,7 +4,7 @@ Donate link: http://wordpressgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
 Tested up to: 2.8.2
-Stable tag: 1.3.6
+Stable tag: 1.3.7
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -54,12 +54,15 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 * Adds the attributes of multiple fields. (`multiple = true`, `startNum = 5`, `endNum = 10`, `multipleButton = true`)
 * Adds the attributes of the date picker in `text` type. (`date = true`, `dateFirstDayOfWeek = 0`, `dateFormat = yyyy/mm/dd`)
 * Adds the filter of page template file names (Thanks, Joel Pittet).
+* Adds the attribute of `shortCode` in order to output the shortcode filtered values. (`shortCode = true`)
+* Adds the attribute of `outputNone` in case there is no data to output. (`outputNone = No Data`)
+* Adds the attribute of `singleList` attribute in order to output with `<ul><li>` if the value is single. ex) `singleList = true`
 
 Localization
 
 * Belorussian (by_BY) - [Marcis Gasuns](http://www.fatcow.com/)
 * German (de_DE) - F J Kaiser
-* Spanish (es_ES) - Dario Ferrer
+* Spanish (es_ES) - [Dario Ferrer](http://www.darioferrer.com/)
 * French (fr_FR) - Nicolas Lemoine
 * Italian (it_IT) - [Gianni Diurno](http://gidibao.net/)
 * Japanese (ja) - [Hiroaki Miyashita](http://wordpressgogo.com/)
@@ -90,6 +93,13 @@ See the default template and modify it.
 4. Auto Hook of `the_content()` in the option page of this plugin may help you do this. You can use [cft] shortcodes here. You can switch the cft formats in each category.
 
 == Changelog ==
+
+= 1.3.7 =
+* Bugfix: class attribute of `text` type.
+* `shortCode` attribute in order to output the shortcode filtered values. ex) `shortCode = true`
+* `outputNone` attribute in case there is no data to output. ex) `outputNone = No Data`
+* `singleList` attribute in order to output with `<ul><li>` if the value is single. ex) `singleList = true`
+* Option not to display the custom field column on the edit post list page.
 
 = 1.3.6 =
 * Changelog.

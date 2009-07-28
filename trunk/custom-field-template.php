@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.3.6
+Version: 1.3.7
 Author URI: http://wordpressgogo.com/
 */
 
@@ -106,10 +106,12 @@ class custom_field_template {
 			add_filter('widget_text', 'do_shortcode');
 		
 		if ( substr($wp_version, 0, 3) >= '2.7' ) {
-			add_action( 'manage_posts_custom_column', array(&$this, 'add_manage_posts_custom_column'), 10, 2 );
-			add_filter( 'manage_posts_columns', array(&$this, 'add_manage_posts_columns') );
-			add_action( 'manage_pages_custom_column', array(&$this, 'add_manage_posts_custom_column'), 10, 2 );
-			add_filter( 'manage_pages_columns', array(&$this, 'add_manage_pages_columns') );
+			if ( empty($options['custom_field_template_disable_custom_field_column']) ) :
+				add_action( 'manage_posts_custom_column', array(&$this, 'add_manage_posts_custom_column'), 10, 2 );
+				add_filter( 'manage_posts_columns', array(&$this, 'add_manage_posts_columns') );
+				add_action( 'manage_pages_custom_column', array(&$this, 'add_manage_posts_custom_column'), 10, 2 );
+				add_filter( 'manage_pages_columns', array(&$this, 'add_manage_pages_columns') );
+			endif;
 			if ( empty($options['custom_field_template_disable_quick_edit']) )
 				add_action( 'quick_edit_custom_box', array(&$this, 'add_quick_edit_custom_box'), 10, 2 );
 		}
@@ -577,7 +579,8 @@ mediaButton = true';
 			$options['custom_field_template_use_wpautop'] = $_POST['custom_field_template_use_wpautop'];
 			$options['custom_field_template_use_autosave'] = $_POST['custom_field_template_use_autosave'];
 			$options['custom_field_template_disable_default_custom_fields'] = $_POST['custom_field_template_disable_default_custom_fields'];
-			$options['custom_field_template_disable_quick_edit'] = $_POST['custom_field_template_disable_quick_edit'];
+			$options['custom_field_template_disable_quick_edit'] = $_POST['custom_field_template_disable_quick_edit'];						
+			$options['custom_field_template_disable_custom_field_column'] = $_POST['custom_field_template_disable_custom_field_column'];
 			$options['custom_field_template_replace_the_title'] = $_POST['custom_field_template_replace_the_title'];
 			$options['custom_field_template_widget_shortcode'] = $_POST['custom_field_template_widget_shortcode'];
 			$options['custom_field_template_excerpt_shortcode'] = $_POST['custom_field_template_excerpt_shortcode'];
@@ -734,6 +737,11 @@ mediaButton = true';
 <tr><td>
 <p><label for="custom_field_template_disable_quick_edit"><?php _e('In case that you would like to forbid to use the quick edit.', 'custom-field-template'); ?></label>:<br />
 <input type="checkbox" name="custom_field_template_disable_quick_edit" id="custom_field_template_disable_quick_edit" value="1" <?php if ($options['custom_field_template_disable_quick_edit']) { echo 'checked="checked"'; } ?> /> <?php _e('Disable the quick edit', 'custom-field-template'); ?></p>
+</td>
+</tr>
+<tr><td>
+<p><label for="custom_field_template_disable_custom_field_column"><?php _e('In case that you would like to forbid to display the custom field column on the edit post list page.', 'custom-field-template'); ?></label>:<br />
+<input type="checkbox" name="custom_field_template_disable_custom_field_column" id="custom_field_template_disable_custom_field_column" value="1" <?php if ($options['custom_field_template_disable_custom_field_column']) { echo 'checked="checked"'; } ?> /> <?php _e('Disable the custom field column (The quick edit also does not work.)', 'custom-field-template'); ?></p>
 </td>
 </tr>
 <tr><td>
@@ -1002,6 +1010,15 @@ hideKey = true<br />
 <th>outputCode</th><td>outputCode = 0</td><td>outputCode = 0</td><td>outputCode = 0</td><td>outputCode = 0</td><td>outputCode = 0</td>
 </tr>
 <tr>
+<th>outputNone</th><td>outputNone = No Data</td><td>outputNone = No Data</td><td>outputNone = No Data</td><td>outputNone = No Data</td><td>outputNone = No Data</td>
+</tr>
+<tr>
+<th>singleList</th><td>singleList = true</td><td>singleList = true</td><td>singleList = true</td><td>singleList = true</td><td>singleList = true</td>
+</tr>
+<tr>
+<th>shortCode</th><td>shortCode = true</td><td>shortCode = true</td><td>shortCode = true</td><td>shortCode = true</td><td>shortCode = true</td>
+</tr>
+<tr>
 <th>multiple</th><td>multiple = true</td><td></td><td>multiple = true</td><td>multiple = true</td><td>multiple = true</td>
 </tr>
 <tr>
@@ -1191,6 +1208,7 @@ jQuery(this).addClass("closed");
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		if ( !empty($class) && $date == true ) $class = ' class="' . $class . ' datePicker"';
 		elseif ( empty($class) && $date == true ) $class = ' class="datePicker"';
+		elseif ( !empty($class) ) $class = ' class="' . $class . '"';
 		if ( !empty($style) ) $style = ' style="' . $style . '"';
 		if ( !empty($maxlength) ) $maxlength = ' maxlength="' . $maxlength . '"';
 		
@@ -2265,6 +2283,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 								if ( is_numeric($val[0]['outputCode']) ) :
 									eval(stripcslashes($options['php'][$val[0]['outputCode']]));
 								endif;
+								if ( $val[0]['shortCode'] == true ) $value = do_shortcode($value);
 								$replace_val .= '<li>'.$value.'</li>';
 							endforeach;
 							$replace_val .= '</ul>';
@@ -2273,9 +2292,14 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 							if ( is_numeric($val[0]['outputCode']) ) :
 								eval(stripcslashes($options['php'][$val[0]['outputCode']]));
 							endif;
+							if ( $val[0]['shortCode'] == true ) $value = do_shortcode($value);
 							$replace_val = $value;
+							if ( $val[0]['singleList'] == true ) :
+								$replace_val = '<ul><li>' . $replace_val . '</li></ul>';
+							endif;
 						else :
-							$replace_val = '';
+							if ( $val[0]['outputNone'] ) $replace_val = $val[0]['outputNone'];
+							else $replace_val = '';
 						endif;
 						if ( $options['shortcode_format_use_php'][$format] )
 							$output = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $output);
@@ -2316,6 +2340,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 							if ( is_numeric($val2['outputCode']) ) :
 								eval(stripcslashes($options['php'][$val2['outputCode']]));
 							endif;
+							if ( empty($value) && $val2['outputNone'] ) $value = $val2['outputNone'];
+							if ( $val2['shortCode'] == true ) $value = do_shortcode($value);			
 							if ( $val2['hideKey'] == true ) $hide = ' class="hideKey"';
 							if ( !empty($val2['label']) && $options['custom_field_template_replace_keys_by_labels'] )
 								$key = stripcslashes($val2['label']);
@@ -2389,16 +2415,19 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 									break;		
 								case 'checkbox':
 									if ( $rval[0]['class'] ) $class = ' class="' . $rval[0]['class'] . '"'; 
-									$values = $valueLabels = array();
+									$values = $valueLabel = array();
 									if ( $rkey == 0 ) :
 										foreach( $rval as $rval2 ) :
 											$values[] = $rval2['value'];
-											$valueLabels[] = $rval2['valueLabel'];
+											$valueLabel[] = $rval2['valueLabel'];
 										endforeach;
 									else :
 										$values = explode( '#', $rval[0]['value'] );
-										$valueLabels = explode( '#', $rval[0]['valueLabel'] );
+										$valueLabel = explode( '#', $rval[0]['valueLabel'] );
 										$default = explode( '#', $rval[0]['default'] );
+									endif;
+									if ( is_numeric($rval[0]['code']) ) :
+										eval(stripcslashes($options['php'][$rval[0]['code']]));
 									endif;
 									if ( count($values) > 1 ) :
 										$replace_val[$rkey] .= '<ul>';
@@ -2416,7 +2445,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 												$checked = ' checked="checked"';
 
 											$replace_val[$rkey] .= '<li><label><input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metavalue) . '"' . $class . $checked . '  /> ';			
-											if ( $valueLabels[$j] ) $replace_val[$rkey] .= stripcslashes($valueLabels[$j]);
+											if ( $valueLabel[$j] ) $replace_val[$rkey] .= stripcslashes($valueLabel[$j]);
 											else $replace_val[$rkey] .= stripcslashes($metavalue);
 											$replace_val[$rkey] .= '</label></li>';
 											$j++;
@@ -2424,7 +2453,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										$replace_val[$rkey] .= '</ul>';
 									else :
 										$replace_val[$rkey] .= '<label><input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape(trim($values[0])) . '"' . $class . ' /> ';			
-										if ( $valueLabel[0] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabels[0]));
+										if ( $valueLabel[0] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabel[0]));
 										else $replace_val[$rkey] .= stripcslashes(trim($values[0]));
 										$replace_val[$rkey] .= '</label>';
 									endif;
@@ -2432,8 +2461,11 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 								case 'radio':
 									if ( $rval[0]['class'] ) $class = ' class="' . $rval[0]['class'] . '"'; 
 									$values = explode( '#', $rval[0]['value'] );
-									$valueLabels = explode( '#', $rval[0]['valueLabel'] );
+									$valueLabel = explode( '#', $rval[0]['valueLabel'] );
 									$default = explode( '#', $rval[0]['default'] );
+									if ( is_numeric($rval[0]['code']) ) :
+										eval(stripcslashes($options['php'][$rval[0]['code']]));
+									endif;
 									if ( count($values) > 1 ) :
 										$replace_val[$rkey] .= '<ul>';
 										$j=0;
@@ -2449,7 +2481,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 											if ( in_array($metavalue, $default) && !$_REQUEST['cftsearch'][urlencode($key)][$rkey] )
 												$checked = ' checked="checked"';
 											$replace_val[$rkey] .= '<li><label><input type="radio" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metavalue) . '"' . $class . $checked . ' /> ';			
-											if ( $valueLabels[$j] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabels[$j]));
+											if ( $valueLabel[$j] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabel[$j]));
 											else $replace_val[$rkey] .= stripcslashes($metavalue);
 											$replace_val[$rkey] .= '</label></li>';
 											$j++;
@@ -2457,7 +2489,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										$replace_val[$rkey] .= '</ul>';
 									else :
 										$replace_val[$rkey] .= '<label><input type="radio" name="cftsearch[' . urlencode($key) . '][]" value="' . attribute_escape(trim($values[0])) . '"' . $class . ' /> ';			
-										if ( $valueLabels[0] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabels[0]));
+										if ( $valueLabel[0] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabel[0]));
 										else $replace_val[$rkey] .= stripcslashes(trim($values[0]));
 										$replace_val[$rkey] .= '</label>';
 									endif;
@@ -2465,8 +2497,12 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 								case 'select':
 									if ( $rval[0]['class'] ) $class = ' class="' . $rval[0]['class'] . '"'; 
 									$values = explode( '#', $rval[0]['value'] );
-									$valueLabels = explode( '#', $rval[0]['valueLabel'] );
+									$valueLabel = explode( '#', $rval[0]['valueLabel'] );
 									$default = explode( '#', $rval[0]['default'] );
+
+									if ( is_numeric($rval[0]['code']) ) :
+										eval(stripcslashes($options['php'][$rval[0]['code']]));
+									endif;
 									$replace_val[$rkey] .= '<select name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]"' . $class . '>';
 									$replace_val[$rkey] .= '<option value=""></option>';
 									$j=0;
@@ -2478,8 +2514,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										if ( $_REQUEST['cftsearch'][urlencode($key)][$rkey][0] == $metaval ) $selected = ' selected="selected"';
 										else $selected = "";
 										$replace_val[$rkey] .= '<option value="' . attribute_escape($metaval) . '"' . $selected . '>';			
-										if ( $valueLabels[$j] )
-											$replace_val[$rkey] .= stripcslashes(trim($valueLabels[$j]));
+										if ( $valueLabel[$j] )
+											$replace_val[$rkey] .= stripcslashes(trim($valueLabel[$j]));
 										else
 											$replace_val[$rkey] .= stripcslashes($metaval);
 										$replace_val[$rkey] .= '</option>' . "\n";
@@ -2538,13 +2574,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 							case 'radio':
 								if ( $val2['class'] ) $class = ' class="' . $val2['class'] . '"'; 
 								$values = explode( '#', $val2['value'] );
-								$valueLabels = explode( '#', $val2['valueLabel'] );
+								$valueLabel = explode( '#', $val2['valueLabel'] );
 								$i=0;
 								foreach ( $values as $metaval ) :
 									$metaval = trim($metaval);
 									$output .= '<dd><label>' . '<input type="radio" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape($metaval) . '"' . $class . ' /> ';			
 									if ( $val2['valueLabel'] )
-										$output .= stripcslashes(trim($valueLabels[$i]));
+										$output .= stripcslashes(trim($valueLabel[$i]));
 									else
 										$output .= stripcslashes($metaval);
 									$i++;
@@ -2554,7 +2590,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 							case 'select':
 								if ( $val2['class'] ) $class = ' class="' . $val2['class'] . '"'; 
 								$values = explode( '#', $val2['value'] );
-								$valueLabels = explode( '#', $val2['valueLabel'] );
+								$valueLabel = explode( '#', $val2['valueLabel'] );
 								$output .= '<dd><select name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]"' . $class . '>';
 								$output .= '<option value=""></option>';
 								$i=0;
@@ -2564,7 +2600,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 									else $selected = "";
 									$output .= '<option value="' . attribute_escape($metaval) . '"' . $selected . '>';			
 									if ( $val2['valueLabel'] )
-										$output .= stripcslashes(trim($valueLabels[$i]));
+										$output .= stripcslashes(trim($valueLabel[$i]));
 									else
 										$output .= stripcslashes($metaval);
 									$output .= '</option>' . "\n";
@@ -2678,7 +2714,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 				$where .= " AND ID NOT IN (" . $in_posts . ")";
 			endif;
 		endif;
-		
+				
 		if ( $_REQUEST['no_is_search'] ) :
 			$where .= " AND `".$wpdb->posts."`.post_status = 'publish'";
 		else :
