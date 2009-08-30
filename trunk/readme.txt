@@ -1,10 +1,10 @@
 === Custom Field Template ===
 Contributors: Hiroaki Miyashita
-Donate link: http://wordpressgogo.com/development/custom-field-template.html
+Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
-Tested up to: 2.8.2
-Stable tag: 1.3.7
+Tested up to: 2.8.4
+Stable tag: 1.3.8
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -65,7 +65,7 @@ Localization
 * Spanish (es_ES) - [Dario Ferrer](http://www.darioferrer.com/)
 * French (fr_FR) - Nicolas Lemoine
 * Italian (it_IT) - [Gianni Diurno](http://gidibao.net/)
-* Japanese (ja) - [Hiroaki Miyashita](http://wordpressgogo.com/)
+* Japanese (ja) - [Hiroaki Miyashita](http://wpgogo.com/)
 * Russian (ru_RU) - [Sonika](http://www.sonika.ru/blog/)
 * Turkish (tr_TR) - [Omer Faruk](http://ramerta.com/)
 
@@ -93,6 +93,11 @@ See the default template and modify it.
 4. Auto Hook of `the_content()` in the option page of this plugin may help you do this. You can use [cft] shortcodes here. You can switch the cft formats in each category.
 
 == Changelog ==
+
+= 1.3.8 =
+* `readOnly` attribute. ex) `readOnly = true`
+* `startDate` and `endDate` attributes for the date picker. ex) `startDate = '1970/01/01'` and `endDate = (new Date()).asString()`
+* `mediaOffImage`, `mediaOffVideo`, `mediaOffAudio`, and `mediaOffMedia` attributes. ex) `mediaOffImage = true`
 
 = 1.3.7 =
 * Bugfix: class attribute of `text` type.
@@ -155,7 +160,7 @@ See the default template and modify it.
 = 1.0.3 =   
 * Option to disable the default custom fields.
 
-= 1.0=
+= 1.0 =
 * Custom field search. (only shows the attributes which have `search = true`.)
 * [cftsearch] Shortcode Format.
 * PHP codes for the output value. ex) `outputCode = 0`

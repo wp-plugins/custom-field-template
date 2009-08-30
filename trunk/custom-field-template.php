@@ -4,8 +4,8 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wordpressgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.3.7
-Author URI: http://wordpressgogo.com/
+Version: 1.3.8
+Author URI: http://wpgogo.com/
 */
 
 /*
@@ -989,7 +989,28 @@ hideKey = true<br />
 <th>dateFormat</th><td>dateFormat = yyyy/mm/dd</td><td></td><td></td><td></td><td></td>
 </tr>
 <tr>
+<th>startDate</th><td>startDate = '1970/01/01'</td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+<th>endDate</th><td>endDate = (new Date()).asString()</td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
+<th>readOnly</th><td>readOnly = true</td><td></td><td></td><td></td><td></td>
+</tr>
+<tr>
 <th>mediaButton</th><td></td><td></td><td></td><td></td><td>mediaButton = true</td>
+</tr>
+<tr>
+<th>mediaOffImage</th><td></td><td></td><td></td><td></td><td>mediaOffImage = true</td>
+</tr>
+<tr>
+<th>mediaOffVideo</th><td></td><td></td><td></td><td></td><td>mediaOffVideo = true</td>
+</tr>
+<tr>
+<th>mediaOffAudio</th><td></td><td></td><td></td><td></td><td>mediaOffAudio = true</td>
+</tr>
+<tr>
+<th>mediaOffMedia</th><td></td><td></td><td></td><td></td><td>mediaOffMedia = true</td>
 </tr>
 <tr>
 <th>code</th><td>code = 0</td><td>code = 0</td><td>code = 0</td><td>code = 0</td><td>code = 0</td>
@@ -1181,7 +1202,7 @@ jQuery(this).addClass("closed");
 		return $custom_fields;
 	}
 	
-	function make_textfield( $name, $sid, $size = 25, $default, $hideKey, $label, $code, $class, $style, $before, $after, $maxlength, $multipleButton, $date, $dateFirstDayOfWeek, $dateFormat, 
+	function make_textfield( $name, $sid, $size = 25, $default, $hideKey, $label, $code, $class, $style, $before, $after, $maxlength, $multipleButton, $date, $dateFirstDayOfWeek, $dateFormat, $startDate, $endDate, $readOnly,
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1211,6 +1232,7 @@ jQuery(this).addClass("closed");
 		elseif ( !empty($class) ) $class = ' class="' . $class . '"';
 		if ( !empty($style) ) $style = ' style="' . $style . '"';
 		if ( !empty($maxlength) ) $maxlength = ' maxlength="' . $maxlength . '"';
+		if ( !empty($readOnly) ) $readOnly = ' readonly="readonly"';
 		
 		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
 			$title = stripcslashes($label);
@@ -1235,14 +1257,18 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= trim($before).'<input id="' . $name . $sid . '" name="' . $name . '[]" value="' . attribute_escape(trim($value)) . '" type="text" size="' . $size . '"' . $class . $style . $maxlength . $event_output . ' />'.trim($after);
+		$out .= trim($before).'<input id="' . $name . $sid . '" name="' . $name . '[]" value="' . attribute_escape(trim($value)) . '" type="text" size="' . $size . '"' . $class . $style . $maxlength . $event_output . $readOnly . ' />'.trim($after);
 		
 		if ( $date == true ) :
 			$out .= '<script type="text/javascript">' . "\n" .
 					'// <![CDATA[' . "\n";
-			if ( is_numeric($dateFirstDayOfWeek) ) $out .= 'Date.firstDayOfWeek = ' . trim($dateFirstDayOfWeek) . ";\n";
-			if ( $dateFormat ) $out .= 'Date.format = "' . trim($dateFormat) . '"' . ";\n";
-			$out .=	'jQuery(document).ready(function() { jQuery(".datePicker").css("float", "left"); jQuery(".datePicker").datePicker(); });' . "\n" .
+			if ( is_numeric($dateFirstDayOfWeek) ) $out .= 'Date.firstDayOfWeek = ' . stripcslashes(trim($dateFirstDayOfWeek)) . ";\n";
+			if ( $dateFormat ) $out .= 'Date.format = "' . stripcslashes(trim($dateFormat)) . '"' . ";\n";
+			$out .=	'jQuery(document).ready(function() { jQuery(".datePicker").css("float", "left"); jQuery(".datePicker").datePicker({';
+			if ( $startDate ) $out .= "startDate: " . stripcslashes(trim($startDate));
+			if ( $startDate && $endDate ) $out .= ",";
+			if ( $endDate ) $out .= "endDate: " . stripcslashes(trim($endDate)) . "";
+			$out .= '}); });' . "\n" .
 					'// ]]>' . "\n" .
 					'</script>';
 		endif;
@@ -1305,7 +1331,7 @@ jQuery(this).addClass("closed");
 		return $out;
 	}
 	
-	function make_radio( $name, $sid, $values, $valueLabel, $clearButton, $default, $hideKey, $label, $code, $class, $style, $multipleButton, 
+	function make_radio( $name, $sid, $values, $valueLabel, $clearButton, $default, $hideKey, $label, $code, $class, $style, $multipleButton,
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1454,7 +1480,7 @@ jQuery(this).addClass("closed");
 		return $out;
 	}
 	
-	function make_textarea( $name, $sid, $rows, $cols, $tinyMCE, $htmlEditor, $mediaButton, $default, $hideKey, $label, $code, $class, $style, 
+	function make_textarea( $name, $sid, $rows, $cols, $tinyMCE, $htmlEditor, $mediaButton, $default, $hideKey, $label, $code, $class, $style, $mediaOffMedia, $mediaOffImage, $mediaOffVideo, $mediaOffAudio,
 	$onclick, $ondblclick, $onkeydown, $onkeypress, $onkeyup, $onmousedown, $onmouseup, $onmouseover, $onmouseout, $onmousemove, $onfocus, $onblur, $onchange, $onselect ) {
 		$options = $this->get_custom_field_template_data();
 
@@ -1493,22 +1519,29 @@ jQuery(this).addClass("closed");
 
 		if ( !strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php') && !strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php')  ) {
 
-			if ( $mediaButton == true ) {
+			if ( $mediaButton == true ) :
 				$media_upload_iframe_src = "media-upload.php";
-				$media_title = __('Add Media');
-				$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src?type=image");
-				$image_title = __('Add an Image');
-				$video_upload_iframe_src = apply_filters('video_upload_iframe_src', "$media_upload_iframe_src?type=video");
-				$video_title = __('Add Video');
-				$audio_upload_iframe_src = apply_filters('audio_upload_iframe_src', "$media_upload_iframe_src?type=audio");
-				$audio_title = __('Add Audio');
-				$media = <<<EOF
-<a href="{$image_upload_iframe_src}&TB_iframe=true" id="add_image{$rand}" title='$image_title' onclick="focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);"><img src='images/media-button-image.gif' alt='$image_title' /></a>
-<a href="{$video_upload_iframe_src}&amp;TB_iframe=true" id="add_video{$rand}" title='$video_title' onclick="focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);"><img src='images/media-button-video.gif' alt='$video_title' /></a>
-<a href="{$audio_upload_iframe_src}&amp;TB_iframe=true" id="add_audio{$rand}" title='$audio_title' onclick="focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);"><img src='images/media-button-music.gif' alt='$audio_title' /></a>
-<a href="{$media_upload_iframe_src}?TB_iframe=true" id="add_media{$rand}" title='$media_title' onclick="focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);"><img src='images/media-button-other.gif' alt='$media_title' /></a>
-EOF;
-			}
+
+				if ( !$mediaOffImage ) :
+					$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src?type=image");
+					$image_title = __('Add an Image');
+					$media .= "<a href=\"{$image_upload_iframe_src}&TB_iframe=true\" id=\"add_image{$rand}\" title='$image_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-image.gif' alt='$image_title' /></a> ";
+				endif;
+				if ( !$mediaOffVideo ) :
+					$video_upload_iframe_src = apply_filters('video_upload_iframe_src', "$media_upload_iframe_src?type=video");
+					$video_title = __('Add Video');
+					$media .= "<a href=\"{$video_upload_iframe_src}&amp;TB_iframe=true\" id=\"add_video{$rand}\" title='$video_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-video.gif' alt='$video_title' /></a> ";
+				endif;
+				if ( !$mediaOffAudio ) :
+					$audio_upload_iframe_src = apply_filters('audio_upload_iframe_src', "$media_upload_iframe_src?type=audio");
+					$audio_title = __('Add Audio');
+					$media .= "<a href=\"{$audio_upload_iframe_src}&amp;TB_iframe=true\" id=\"add_audio{$rand}\" title='$audio_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-music.gif' alt='$audio_title' /></a> ";
+				endif;
+				if ( !$mediaOffMedia ) :
+					$media_title = __('Add Media');
+					$media .= "<a href=\"{$media_upload_iframe_src}?TB_iframe=true\" id=\"add_media{$rand}\" title='$media_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-other.gif' alt='$media_title' /></a>";
+				endif;
+			endif;
 
 			$switch = '<div>';
 			if( $tinyMCE == true && user_can_richedit() ) {
@@ -1632,7 +1665,7 @@ EOF;
 					$out .= '</div><div' . $class . '>';
 				}
 				else if( $data[$i]['type'] == 'textfield' || $data[$i]['type'] == 'text' ) {
-					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['before'], $data[$i]['after'], $data[$i]['maxlength'], $data[$i]['multipleButton'], $data[$i]['date'], $data[$i]['dateFirstDayOfWeek'], $data[$i]['dateFormat'], 
+					$out .= $this->make_textfield( $title, $i, $data[$i]['size'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['before'], $data[$i]['after'], $data[$i]['maxlength'], $data[$i]['multipleButton'], $data[$i]['date'], $data[$i]['dateFirstDayOfWeek'], $data[$i]['dateFormat'], $data[$i]['startDate'], $data[$i]['endDate'], $data[$i]['readOnly'],
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'checkbox' ) {
@@ -1643,7 +1676,7 @@ EOF;
 				else if( $data[$i]['type'] == 'radio' ) {
 					$out .= 
 						$this->make_radio( 
-							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['clearButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['multipleButton'], 
+							$title, $i, explode( '#', $data[$i]['value'] ), explode( '#', $data[$i]['valueLabel'] ), $data[$i]['clearButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['multipleButton'],  
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 				else if( $data[$i]['type'] == 'select' ) {
@@ -1655,7 +1688,7 @@ EOF;
 				else if( $data[$i]['type'] == 'textarea' ) {
 					if ( $options['tinyMCE'][$_REQUEST['post']][$this->sanitize_name($title)][$i] )  $data[$i]['rows']  = $options['tinyMCE'][$_REQUEST['post']][$this->sanitize_name($title)][$i];
 					$out .= 
-						$this->make_textarea( $title, $i, $data[$i]['rows'], $data[$i]['cols'], $data[$i]['tinyMCE'], $data[$i]['htmlEditor'], $data[$i]['mediaButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'],
+						$this->make_textarea( $title, $i, $data[$i]['rows'], $data[$i]['cols'], $data[$i]['tinyMCE'], $data[$i]['htmlEditor'], $data[$i]['mediaButton'], $data[$i]['default'], $data[$i]['hideKey'], $data[$i]['label'], $data[$i]['code'], $data[$i]['class'], $data[$i]['style'], $data[$i]['mediaOffMedia'], $data[$i]['mediaOffImage'], $data[$i]['mediaOffVideo'], $data[$i]['mediaOffAudio'],
 						$data[$i]['onclick'], $data[$i]['ondblclick'], $data[$i]['onkeydown'], $data[$i]['onkeypress'], $data[$i]['onkeyup'], $data[$i]['onmousedown'], $data[$i]['onmouseup'], $data[$i]['onmouseover'], $data[$i]['onmouseout'], $data[$i]['onmousemove'], $data[$i]['onfocus'], $data[$i]['onblur'], $data[$i]['onchange'], $data[$i]['onselect'] );
 				}
 			}
@@ -2381,10 +2414,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 
 			$count = count($options['custom_fields']);
 			if ( $count ) :
-				for ($i=0;$i<$count;$i++) :
-					$fields = $this->get_custom_fields( $i );
+				for ($t=0;$t<$count;$t++) :
+					$fields = $this->get_custom_fields( $t );
 					foreach ( $fields as $key => $val ) :
-						unset($replace);
 						$replace[0] = $val;
 
 						$search = array();
@@ -2394,6 +2426,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 						if($val[0]['searchValueLabel']) eval('$search["valueLabel"] =' . stripslashes($val[0]['searchValueLabel']));
 						if($val[0]['searchDefault']) eval('$search["default"] =' . stripslashes($val[0]['searchDefault']));
 						if($val[0]['searchClass']) eval('$search["class"] =' . stripslashes($val[0]['searchClass']));
+						if($val[0]['searchSelectLabel']) eval('$search["selectLabel"] =' . stripslashes($val[0]['searchSelectLabel']));
+						
 						
 						foreach ( $search as $skey => $sval ) :
 							$j = 1;
@@ -2426,8 +2460,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										$valueLabel = explode( '#', $rval[0]['valueLabel'] );
 										$default = explode( '#', $rval[0]['default'] );
 									endif;
-									if ( is_numeric($rval[0]['code']) ) :
-										eval(stripcslashes($options['php'][$rval[0]['code']]));
+									if ( is_numeric($rval[0]['searchCode']) ) :
+										eval(stripcslashes($options['php'][$rval[0]['searchCode']]));
 									endif;
 									if ( count($values) > 1 ) :
 										$replace_val[$rkey] .= '<ul>';
@@ -2452,7 +2486,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										endforeach;
 										$replace_val[$rkey] .= '</ul>';
 									else :
-										$replace_val[$rkey] .= '<label><input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape(trim($values[0])) . '"' . $class . ' /> ';			
+										if ( $_REQUEST['cftsearch'][urlencode($key)][$rkey][0] == attribute_escape(trim($values[0])) )
+											$checked = ' checked="checked"';
+										$replace_val[$rkey] .= '<label><input type="checkbox" name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]" value="' . attribute_escape(trim($values[0])) . '"' . $class . $checked . ' /> ';			
 										if ( $valueLabel[0] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabel[0]));
 										else $replace_val[$rkey] .= stripcslashes(trim($values[0]));
 										$replace_val[$rkey] .= '</label>';
@@ -2463,8 +2499,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 									$values = explode( '#', $rval[0]['value'] );
 									$valueLabel = explode( '#', $rval[0]['valueLabel'] );
 									$default = explode( '#', $rval[0]['default'] );
-									if ( is_numeric($rval[0]['code']) ) :
-										eval(stripcslashes($options['php'][$rval[0]['code']]));
+									if ( is_numeric($rval[0]['searchCode']) ) :
+										eval(stripcslashes($options['php'][$rval[0]['searchCode']]));
 									endif;
 									if ( count($values) > 1 ) :
 										$replace_val[$rkey] .= '<ul>';
@@ -2488,7 +2524,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										endforeach;
 										$replace_val[$rkey] .= '</ul>';
 									else :
-										$replace_val[$rkey] .= '<label><input type="radio" name="cftsearch[' . urlencode($key) . '][]" value="' . attribute_escape(trim($values[0])) . '"' . $class . ' /> ';			
+										if ( $_REQUEST['cftsearch'][urlencode($key)][$rkey][0] == attribute_escape(trim($values[0])) )
+											$checked = ' checked="checked"';
+										$replace_val[$rkey] .= '<label><input type="radio" name="cftsearch[' . urlencode($key) . '][]" value="' . attribute_escape(trim($values[0])) . '"' . $class . $checked . ' /> ';			
 										if ( $valueLabel[0] ) $replace_val[$rkey] .= stripcslashes(trim($valueLabel[0]));
 										else $replace_val[$rkey] .= stripcslashes(trim($values[0]));
 										$replace_val[$rkey] .= '</label>';
@@ -2499,12 +2537,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 									$values = explode( '#', $rval[0]['value'] );
 									$valueLabel = explode( '#', $rval[0]['valueLabel'] );
 									$default = explode( '#', $rval[0]['default'] );
+									$selectLabel= $rval[0]['selectLabel'];
 
-									if ( is_numeric($rval[0]['code']) ) :
-										eval(stripcslashes($options['php'][$rval[0]['code']]));
+									if ( is_numeric($rval[0]['searchCode']) ) :
+										eval(stripcslashes($options['php'][$rval[0]['searchCode']]));
 									endif;
 									$replace_val[$rkey] .= '<select name="cftsearch[' . urlencode($key) . '][' . $rkey . '][]"' . $class . '>';
-									$replace_val[$rkey] .= '<option value=""></option>';
+									$replace_val[$rkey] .= '<option value="">'.$selectLabel.'</option>';
 									$j=0;
 									foreach ( $values as $metaval ) :
 										$metaval = trim($metaval);
@@ -2525,13 +2564,12 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 									break;
 							endswitch;			
 						endforeach;
-																		
+						
 						if ( $options['shortcode_format_use_php'][$format] )
 							$output = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $output);
 						$key = preg_quote($key, '/');
 						$output = preg_replace('/\['.$key.'\](?!\[[0-9]+\])/', $replace_val[0], $output); 
 						$output = preg_replace('/\['.$key.'\]\[([0-9]+)\](?!\[\])/e', '$replace_val[${1}]', $output);
-						
 					endforeach;
 				endfor;
 			endif;
@@ -2663,26 +2701,30 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		if ( is_array($_REQUEST['cftsearch']) ) :
 			foreach ( $_REQUEST['cftsearch'] as $key => $val ) :
 				$key = rawurldecode($key);
-				foreach( $val as $key2 => $val2 ) :
-					foreach( $val2 as $val3 ) :
-						if ( $val3 ) :
-							switch( $replace[$key][$key2][0]['operator'] ) :
-								case '<=' :
-								case '>=' :
-								case '<' :
-								case '>' :
-								case '=' :
-								case '<>' :
-								case '<=>':
-									$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2][0]['operator'] . " " . trim($val3) . ") GROUP BY post_id) ";
-									break;
-								default :
-									$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value LIKE '%" . trim($val3) . "%') GROUP BY post_id) ";
-									break;
-								endswitch;
+				if ( is_array($val) ) :
+					foreach( $val as $key2 => $val2 ) :
+						if ( is_array($val2) ) :
+							foreach( $val2 as $val3 ) :
+								if ( $val3 ) :
+									switch( $replace[$key][$key2][0]['operator'] ) :
+										case '<=' :
+										case '>=' :
+										case '<' :
+										case '>' :
+										case '=' :
+										case '<>' :
+										case '<=>':
+											$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2][0]['operator'] . " " . trim($val3) . ") GROUP BY post_id) ";
+											break;
+										default :
+											$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value LIKE '%" . trim($val3) . "%') GROUP BY post_id) ";
+											break;
+									endswitch;
+								endif;
+							endforeach;
 						endif;
 					endforeach;
-				endforeach;
+				endif;
 			endforeach;
 		endif;
 		
