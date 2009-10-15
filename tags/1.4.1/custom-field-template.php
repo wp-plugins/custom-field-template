@@ -2718,7 +2718,10 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 									case 'checkbox':
 										if ( $rval['class'] ) $class = ' class="' . $rval['class'] . '"'; 
 										$values = $valueLabel = array();
-										$values = explode( '#', $rval['originalValue'] );
+										if ( $rkey != 0 )
+											$values = explode( '#', $rval['value'] );
+										else
+											$values = explode( '#', $rval['originalValue'] );
 										$valueLabel = explode( '#', $rval['valueLabel'] );
 										$default = explode( '#', $rval['default'] );
 										if ( is_numeric($rval['searchCode']) ) :
