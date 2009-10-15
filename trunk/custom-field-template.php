@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.4
+Version: 1.4.1
 Author URI: http://wpgogo.com/
 */
 
@@ -2991,7 +2991,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										case '=' :
 										case '<>' :
 										case '<=>':
-											$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " " . trim($val3) . ") GROUP BY post_id) ";
+											$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " '" . trim($val3) . "') GROUP BY post_id) ";
 											break;
 										default :
 											$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value LIKE '%" . trim($val3) . "%') GROUP BY post_id) ";
@@ -3042,7 +3042,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			$where .= " AND `".$wpdb->posts."`.post_status = 'publish' GROUP BY `".$wpdb->posts."`.ID";
 		endif;
 		//if ( $_REQUEST['s'] ) $where .= $original_where;
-								
+		
 		return $where;
 	}
 
