@@ -4,7 +4,7 @@ Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
 Tested up to: 2.8.4
-Stable tag: 1.4
+Stable tag: 1.4.1
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -98,9 +98,12 @@ See the default template and modify it.
 
 == Changelog ==
 
+= 1.4.1 =
+* Bugfix: search functionality.
+
 = 1.4 =
 * `file` type in order to upload images. If you set `relation = true` with `type = file`, the image you upload will be related to the post you are editing. The image id will be saved as the meta value. You can use the `multiple = true` and `multipleButton = true`.
-* The group functionality. The attributes between `type = fieldset_open` and `type = fieldset_close` will be enclosed in the fieldset. The key name of the `fieldset_open` and `fieldset_close` must be same. You can use `multipleButton = true` with `type = fieldset_open`. You can also use the `legend = blah` attribute. 
+* The group functionality. The fields between `type = fieldset_open` and `type = fieldset_close` will be enclosed in the fieldset. The key name of the `fieldset_open` and `fieldset_close` must be same. You can use `multipleButton = true` with `type = fieldset_open`. You can also use the `legend = blah` attribute. 
 * Revision of the interpretation of the template codes.
 * Bugfix: loading templates in switching catgories.
 * Hangarian and Uzbek.
