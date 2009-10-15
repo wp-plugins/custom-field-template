@@ -4,7 +4,7 @@ Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
 Tested up to: 2.8.4
-Stable tag: 1.3.8
+Stable tag: 1.4
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -57,6 +57,8 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 * Adds the attribute of `shortCode` in order to output the shortcode filtered values. (`shortCode = true`)
 * Adds the attribute of `outputNone` in case there is no data to output. (`outputNone = No Data`)
 * Adds the attribute of `singleList` attribute in order to output with `<ul><li>` if the value is single. ex) `singleList = true`
+* Adds the file upload type. (`type = file`)
+* Adds the fieldset type. (`type = fieldset_open`, `type = fieldset_close`)
 
 Localization
 
@@ -64,10 +66,12 @@ Localization
 * German (de_DE) - F J Kaiser
 * Spanish (es_ES) - [Dario Ferrer](http://www.darioferrer.com/)
 * French (fr_FR) - Nicolas Lemoine
+* Hangarian (hu_HU) - [Balazs Kovacs](http://www.netpok.hu)
 * Italian (it_IT) - [Gianni Diurno](http://gidibao.net/)
 * Japanese (ja) - [Hiroaki Miyashita](http://wpgogo.com/)
 * Russian (ru_RU) - [Sonika](http://www.sonika.ru/blog/)
 * Turkish (tr_TR) - [Omer Faruk](http://ramerta.com/)
+* Uzbek (uz_UZ) - [Alexandra Bolshova](http://www.comfi.com/)
 
 If you have translated into your language, please let me know.
 
@@ -93,6 +97,13 @@ See the default template and modify it.
 4. Auto Hook of `the_content()` in the option page of this plugin may help you do this. You can use [cft] shortcodes here. You can switch the cft formats in each category.
 
 == Changelog ==
+
+= 1.4 =
+* `file` type in order to upload images. If you set `relation = true` with `type = file`, the image you upload will be related to the post you are editing. The image id will be saved as the meta value. You can use the `multiple = true` and `multipleButton = true`.
+* The group functionality. The attributes between `type = fieldset_open` and `type = fieldset_close` will be enclosed in the fieldset. The key name of the `fieldset_open` and `fieldset_close` must be same. You can use `multipleButton = true` with `type = fieldset_open`. You can also use the `legend = blah` attribute. 
+* Revision of the interpretation of the template codes.
+* Bugfix: loading templates in switching catgories.
+* Hangarian and Uzbek.
 
 = 1.3.8 =
 * `readOnly` attribute. ex) `readOnly = true`
