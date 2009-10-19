@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.4.2
+Version: 1.4.3
 Author URI: http://wpgogo.com/
 */
 
@@ -1295,7 +1295,7 @@ jQuery(this).addClass("closed");
 				$value = $value[ $cftnum ];
 			}
 		} else {
-			$value = $default;
+			$value = stripslashes($default);
 		}
 		if ( empty($ct_value) ) $ct_value = 1;
 		
@@ -1424,7 +1424,7 @@ jQuery(this).addClass("closed");
 			$ct_value = count($selected);
 			$selected = $selected[ $cftnum ];
 		} else {
-			$selected = $default;
+			$selected = stripslashes($default);
 		}
 		if ( empty($ct_value) ) $ct_value = 1;
 			
@@ -1469,7 +1469,7 @@ jQuery(this).addClass("closed");
 			foreach( $values as $val ) {
 				$id = $name . $sid . '_' . $this->sanitize_name( $val );
 			
-				$checked = ( trim( $val ) == trim( $selected ) ) ? 'checked="checked"' : '';
+				$checked = ( stripcslashes(trim( $val )) == trim( $selected ) ) ? 'checked="checked"' : '';
 			
 				$out .=	
 					'<label for="' . $id . '" class="selectit"><input name="' . $name . '[' . $sid . '][' . $cftnum . ']" value="' . attribute_escape(trim($val)) . '" ' . $checked . ' type="radio"' . $class . $style . $event_output . ' /> ';
@@ -1504,7 +1504,7 @@ jQuery(this).addClass("closed");
 				$selected = $selected[ $cftnum ];
 			}
 		} else {
-			$selected = $default;
+			$selected = stripslashes($default);
 		}
 		if ( empty($ct_value) ) $ct_value = 1;
 		
@@ -1545,7 +1545,7 @@ jQuery(this).addClass("closed");
 		$i = 0;
 		if ( is_array($values) ) :
 			foreach( $values as $val ) {
-				$checked = ( trim( $val ) == trim( $selected ) ) ? 'selected="selected"' : '';
+				$checked = ( stripcslashes(trim( $val )) == trim( $selected ) ) ? 'selected="selected"' : '';
 		
 				$out .=	'<option value="' . attribute_escape(trim($val)) . '" ' . $checked . '>';
 				if ( $valueLabel[$i] )
@@ -1578,7 +1578,7 @@ jQuery(this).addClass("closed");
 			$value = $this->get_post_meta( $_REQUEST[ 'post' ], $title );
 			$value = $value[ $cftnum ];
 		} else {
-			$value = $default;
+			$value = stripslashes($default);
 		}
 		
 		$rand = rand();
@@ -1822,7 +1822,7 @@ jQuery(this).addClass("closed");
 							$addfield .= ' <span>';
 							$addbutton = $this->get_post_meta( $_REQUEST['post'], $title, true )-1;
 							if ( $addbutton<=0 ) $addbutton = 0;
-							if ( $data['cftnum']/2 == $addbutton ) :
+							if ( $data['cftnum'] == $addbutton ) :
 								$addfield .= ' <a href="#clear" onclick="var tmp = jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent());tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''".');tmp.find('."'select'".').val('."''".');tmp.find('."'textarea'".').val('."''".');tmp.find('."'input'".').attr('."'checked',false".');if(tmp.find('."'input[type=radio]'".').attr('."'name'".').match(/\[([0-9]+)\]$/)) { matchval = RegExp.$1; matchval++;tmp.find('."'input[type=radio]'".').attr('."'name',".'tmp.find('."'input[type=radio]'".').attr('."'name'".').replace(/\[([0-9]+)\]$/, \'[\'+matchval+\']\'));}jQuery(this).parent().css('."'visibility','hidden'".');return false;">' . __('Add New', 'custom-field-template') . '</a>';
 							else :
 								$addfield .= ' <a href="#clear" onclick="jQuery(this).parent().parent().parent().remove();return false;">' . __('Delete', 'custom-field-template') . '</a>';
@@ -1830,7 +1830,7 @@ jQuery(this).addClass("closed");
 							$addfield .= '</span>';
 						endif;
 		
-						if ( !empty($data['legend']) ) $out .= '<legend>' . stripcslashes(trim($data['legend'])) . $addfield . '</legend>';
+						$out .= '<legend>' . stripcslashes(trim($data['legend'])) . $addfield . '</legend>';
 					}
 					else if( $data['type'] == 'fieldset_close' ) {
 						$out .= '</fieldset>';
@@ -2424,7 +2424,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			$gap = 0;
 			foreach( $Data as $Data_key => $Data_val ) :
 				foreach( $Data_val as $title => $data) :
-					$tmp_parentSN = count($returndata);
+					if ( isset($cftisexist[$title]) ) $tmp_parentSN = $cftisexist[$title];
+					else $tmp_parentSN = count($returndata);
 					switch ( $data["type"]) :
 						case 'checkbox' :
 							if ( is_numeric($data["code"]) ) :
@@ -2506,7 +2507,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 									$gap += ($org_counter - $counter);
 								endif;
 							else :
-								$Data[$Data_key][$title]['parentSN'] = $tmp_parentSN+$gap;
+								if ( !isset($cftisexist[$title]) ) $Data[$Data_key][$title]['parentSN'] = $tmp_parentSN+$gap;
+								else $Data[$Data_key][$title]['parentSN'] = $tmp_parentSN;
 								$returndata[] = $Data[$Data_key];
 								if ( is_array($fieldset) ) :
 									$Data[$Data_key][$title]['parentSN'] = $tmp_parentSN2[$title];
@@ -2525,6 +2527,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 							endif;
 							unset($counter);
 					endswitch;
+					if ( !isset($cftisexist[$title]) ) $cftisexist[$title] = $Data[$Data_key][$title]['parentSN'];
 				endforeach;
 			endforeach;
 			
