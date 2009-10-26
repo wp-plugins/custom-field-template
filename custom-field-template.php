@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.4.4
+Version: 1.4.5
 Author URI: http://wpgogo.com/
 */
 
@@ -137,7 +137,7 @@ class custom_field_template {
 	}
 	
 	function custom_field_template_add_enctype($buffer) {
-		$buffer = preg_replace('/<form/', '<form enctype="multipart/form-data"', $buffer);
+		$buffer = preg_replace('/<form name="post"/', '<form enctype="multipart/form-data" name="post"', $buffer);
 		return $buffer;
 	}
 	
@@ -1394,7 +1394,7 @@ jQuery(this).addClass("closed");
 			
 		$id = $name . $sid . '_' . $this->sanitize_name( $value );
 		
-		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
+		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] && $cftnum == 0 )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$out .=	'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . '][' . $cftnum . ']" value="' . attribute_escape(trim($value)) . '"' . $checked . ' type="checkbox"' . $class . $style . $event_output . ' /> ';
 		if ( $valueLabel )
@@ -2290,7 +2290,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 						if ( is_numeric($data['editCode']) ) :
 							eval(stripcslashes($options['php'][$data['editCode']]));
 						endif;
-						if( isset( $value ) && strlen( $value ) && $data['type'] != 'file' ) {
+						if( isset( $value ) && strlen( $value ) && $data['type'] != 'file' ) :
 							if ( $data['insertTag'] == true ) $tags_input[] = $value;
 							if ( $data['valueCount'] == true ) :
 								$options['value_count'][$title][$value] = $this->set_value_count($title, $value);
@@ -2301,9 +2301,12 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 								$options['tinyMCE'][$id][$name][$i] = (int)($matched[1]/20);			
 							}
 							$save_value[$title][] = $value;
-						} else if ( $data['blank'] == true ) {
-							$save_value[$title][] = $value;
-						}
+						elseif ( $data['blank'] == true ) :
+							$save_value[$title][] = '';
+						else :
+							$value = $this->get_post_meta( $id, $title, false );
+							delete_post_meta($id, $title, $value[$data['cftnum']]);
+						endif;
 					
 						if ( $data['type'] == 'file' ) :
 							if ( $_REQUEST[$name.'_delete'][$field_key][$data['cftnum']] ) :
