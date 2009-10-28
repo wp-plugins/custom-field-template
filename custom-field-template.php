@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.4.5
+Version: 1.4.6
 Author URI: http://wpgogo.com/
 */
 
@@ -1386,13 +1386,13 @@ jQuery(this).addClass("closed");
 			if ( $val )
 				$event_output .= " " . $key . '="' . stripcslashes(trim($val)) . '"';
 		endforeach;
-		
+
+		$id = $name . $sid . '_' . $cftnum . '_' . $this->sanitize_name( $value );
+
 		$out .= 
-			'<dl id="dl_' . $name . $sid . '">' .
+			'<dl id="dl_' . $id . '">' .
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
 			'<dd>';
-			
-		$id = $name . $sid . '_' . $this->sanitize_name( $value );
 		
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] && $cftnum == 0 )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
@@ -2273,7 +2273,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		unset($_FILES);
 		
 		foreach( $fields as $field_key => $field_val) :
-			foreach( $field_val as $title	=> $data) :
+			foreach( $field_val as $title => $data) :
 				if ( is_numeric($data['parentSN']) ) $field_key = $data['parentSN'];
 				$name = $this->sanitize_name( $title );
 				$title = $wpdb->escape(stripcslashes(trim($title)));
@@ -2304,8 +2304,12 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 						elseif ( $data['blank'] == true ) :
 							$save_value[$title][] = '';
 						else :
-							$value = $this->get_post_meta( $id, $title, false );
-							delete_post_meta($id, $title, $value[$data['cftnum']]);
+							$tmp_value = $this->get_post_meta( $id, $title, false );
+							if ( $data['type'] == 'checkbox' ) :
+								delete_post_meta($id, $title, $data['value']);
+							else :
+								delete_post_meta($id, $title, $tmp_value[$data['cftnum']]);
+							endif;
 						endif;
 					
 						if ( $data['type'] == 'file' ) :
@@ -2734,7 +2738,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 											eval(stripcslashes($options['php'][$rval['searchCode']]));
 										endif;
 										if ( count($values) > 1 ) :
-											$replace_val[$rkey] .= '<ul>';
+											$replace_val[$rkey] .= '<ul' . $class . '>';
 											$j=0;
 											foreach( $values as $metavalue ) :
 												$checked = '';
@@ -2773,7 +2777,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 											eval(stripcslashes($options['php'][$rval['searchCode']]));
 										endif;
 										if ( count($values) > 1 ) :
-											$replace_val[$rkey] .= '<ul>';
+											$replace_val[$rkey] .= '<ul' . $class . '>';
 											$j=0;
 											foreach ( $values as $metavalue ) :
 												$checked = '';
