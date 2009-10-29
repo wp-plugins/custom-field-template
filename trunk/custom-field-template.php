@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.4.7
+Version: 1.4.8
 Author URI: http://wpgogo.com/
 */
 
@@ -1449,7 +1449,7 @@ jQuery(this).addClass("closed");
 		endif;		
 
 		$out .= 
-			'<dl id="dl_' . $name . $sid . $cftnum . '">' .
+			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
 			'<dt><span' . $hide . '>' . $title . '</span>'.$addfield;
 			
 		if( $clearButton == true ) {
@@ -1529,7 +1529,7 @@ jQuery(this).addClass("closed");
 		endif;		
 
 		$out .= 
-			'<dl id="dl_' . $name . $sid . $cftnum . '">' .
+			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
 			'<dt><span' . $hide . '><label for="' . $name . $sid . $cftnum . '">' . $title . '</label></span>'.$addfield.'</dt>' .
 			'<dd>';
 			
@@ -1651,7 +1651,7 @@ jQuery(this).addClass("closed");
 		endforeach;
 		
 		$out .= 
-			'<dl id="dl_' . $name . $sid . $cftnum . '">' .
+			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
 			'<dt><span' . $hide . '><label for="' . $name . $sid . $cftnum . '">' . $title . '</label></span><br />' . $media . $switch . '</dt>' .
 			'<dd>';
 
@@ -1703,7 +1703,7 @@ jQuery(this).addClass("closed");
 		endif;
 				
 		$out .= 
-			'<dl id="dl_' . $name . $sid . $cftnum . '">' .
+			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
 			'<dt><span' . $hide . '><label for="' . $name . $sid . $cftnum . '">' . $title . '</label></span>'.$addfield.'</dt>' .
 			'<dd>';
 
@@ -2256,7 +2256,6 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 					foreach( $val2 as $key3 => $val3 ) :
 						foreach( $val3 as $key4 => $val4 ) :
 							if ( !empty($val['name'][$key3][$key4]) ) :
-								$key = $wpdb->escape(stripcslashes(trim($key)));
 								$tmpfiles[$key][$key3][$key4]['name']     = $val['name'][$key3][$key4];
 								$tmpfiles[$key][$key3][$key4]['type']     = $val['type'][$key3][$key4];
 								$tmpfiles[$key][$key3][$key4]['tmp_name'] = $val['tmp_name'][$key3][$key4];
@@ -2317,7 +2316,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 							if ( $_REQUEST[$name.'_delete'][$field_key][$data['cftnum']] ) :
 								wp_delete_attachment($value);
 							endif;
-							if( isset($tmpfiles[$title][$field_key][$data['cftnum']]) ) :
+							if( isset($tmpfiles[$name][$field_key][$data['cftnum']]) ) :
 								$_FILES[$title] = $tmpfiles[$name][$field_key][$data['cftnum']];
 								if ( $value ) :
 									wp_delete_attachment($value);
