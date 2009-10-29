@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.4.6
+Version: 1.4.7
 Author URI: http://wpgogo.com/
 */
 
@@ -23,7 +23,7 @@ class custom_field_template {
 		add_action( 'admin_head', array(&$this, 'custom_field_template_admin_head'), 100 );
 		
 		//add_action( 'edit_post', array(&$this, 'edit_meta_value'), 100 );
-		add_action( 'save_post', array(&$this, 'edit_meta_value'), 100 );
+		add_action( 'save_post', array(&$this, 'edit_meta_value'), 100, 2 );
 		//add_action( 'publish_post', array(&$this, 'edit_meta_value'), 100 );
 
 		add_action( 'delete_post', array(&$this, 'custom_field_template_delete_post'), 100 );
@@ -1127,7 +1127,7 @@ hideKey = true<br />
 <th>multipleButton</th><td>multipleButton = true</td><td></td><td>multipleButton = true</td><td>multipleButton = true</td><td></td><td>multipleButton = true</td>
 </tr>
 <tr>
-<th>blank</th><td>blank = true</td><td>blank = true</td><td>blank = true</td><td>blank = true</td><td>blank = true</td><td></td>
+<th>blank</th><td>blank = true</td><td>blank = true</td><td>blank = true</td><td>blank = true</td><td>blank = true</td><td>blank = true</td>
 </tr>
 <tr>
 <th>sort</th><td>sort = asc</td><td>sort = desc</td><td>sort = asc</td><td>sort = desc</td><td>sort = asc</td><td></td>
@@ -1688,11 +1688,7 @@ jQuery(this).addClass("closed");
 			$value = $default;
 		}
 		if ( empty($ct_value) ) $ct_value = 1;
-		
-		if ( !get_post($value) && $value ) :
-			delete_post_meta($_REQUEST[ 'post' ], $name, $value);
-		endif;
-		
+				
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		if ( !empty($class) ) $class = ' class="' . $class . '"';
 		if ( !empty($style) ) $style = ' style="' . $style . '"';
@@ -1723,7 +1719,7 @@ jQuery(this).addClass("closed");
 			$title = esc_attr($post->post_title);
 			
 			$out .= '<p><label for=""><input type="checkbox" name="'.$name . '_delete[' . $sid . '][' . $cftnum . ']" id="'.$name . '_delete' . $sid . '" value="1" />' . __('Delete', 'custom-field-template') . '</label> <img src="'.$thumb_url.'" width="32" height="32" style="vertical-align:middle;" /> ' . $title . ' </p>';
-			$out .= '<input type="hidden" name="'.$name . '[' . $sid . '][]" value="' . $value . '" />';
+			$out .= '<input type="hidden" name="'.$name . '[' . $sid . '][' . $cftnum . ']" value="' . $value . '" />';
 		endif;
 
 		$out .= '</dd></dl>'."\n";
@@ -2215,7 +2211,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		return $out;
 	}
 
-	function edit_meta_value( $id ) {
+	function edit_meta_value( $id, $post ) {
 		global $wpdb, $wp_version;
 		$options = $this->get_custom_field_template_data();
 		
@@ -2234,6 +2230,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			return $id;
 		endif;
 		
+		if ($post->post_type == 'revision') 
+			return;
+		
 		$fields = $this->get_custom_fields($_REQUEST['custom-field-template-id']);
 		
 		if ( $fields == null )
@@ -2250,7 +2249,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		}
 		
 		$save_value = array();
-
+		
 		if ( $_FILES ) :
 			foreach($_FILES as $key => $val ) :
 				foreach( $val as $key2 => $val2 ) :
@@ -2290,38 +2289,38 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 						if ( is_numeric($data['editCode']) ) :
 							eval(stripcslashes($options['php'][$data['editCode']]));
 						endif;
-						if( isset( $value ) && strlen( $value ) && $data['type'] != 'file' ) :
-							if ( $data['insertTag'] == true ) $tags_input[] = $value;
-							if ( $data['valueCount'] == true ) :
-								$options['value_count'][$title][$value] = $this->set_value_count($title, $value);
-							endif;
+						if ( $data['type'] != 'file' ) :
+							if( isset( $value ) && strlen( $value ) ) :
+								if ( $data['insertTag'] == true ) $tags_input[] = $value;
+								if ( $data['valueCount'] == true ) :
+									$options['value_count'][$title][$value] = $this->set_value_count($title, $value);
+								endif;
 						
-							if ( $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'] ) {
-								preg_match('/cw=[0-9]+&ch=([0-9]+)/', $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'], $matched);
-								$options['tinyMCE'][$id][$name][$i] = (int)($matched[1]/20);			
-							}
-							$save_value[$title][] = $value;
-						elseif ( $data['blank'] == true ) :
-							$save_value[$title][] = '';
-						else :
-							$tmp_value = $this->get_post_meta( $id, $title, false );
-							if ( $data['type'] == 'checkbox' ) :
-								delete_post_meta($id, $title, $data['value']);
+								if ( $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'] ) {
+									preg_match('/cw=[0-9]+&ch=([0-9]+)/', $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'], $matched);
+									$options['tinyMCE'][$id][$name][$i] = (int)($matched[1]/20);			
+								}
+								$save_value[$title][] = $value;
+							elseif ( $data['blank'] == true ) :
+								$save_value[$title][] = '';
 							else :
-								delete_post_meta($id, $title, $tmp_value[$data['cftnum']]);
+								$tmp_value = $this->get_post_meta( $id, $title, false );
+								if ( $data['type'] == 'checkbox' ) :
+									delete_post_meta($id, $title, $data['value']);
+								else :
+									delete_post_meta($id, $title, $tmp_value[$data['cftnum']]);
+								endif;
 							endif;
 						endif;
-					
+
 						if ( $data['type'] == 'file' ) :
 							if ( $_REQUEST[$name.'_delete'][$field_key][$data['cftnum']] ) :
 								wp_delete_attachment($value);
-								delete_post_meta($id, $title, $value);
 							endif;
-							if( isset($tmpfiles[$name][$field_key][$data['cftnum']]) ) :
+							if( isset($tmpfiles[$title][$field_key][$data['cftnum']]) ) :
 								$_FILES[$title] = $tmpfiles[$name][$field_key][$data['cftnum']];
 								if ( $value ) :
 									wp_delete_attachment($value);
-									delete_post_meta($id, $title, $value);
 								endif;
 
 								if ( $data['relation'] == true ) :
@@ -2329,23 +2328,33 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 								else :
 									$upload_id = media_handle_upload($title, '');
 								endif;
-								add_post_meta( $id, $title, apply_filters('cft_'.rawurlencode($title), $upload_id) );
+								$save_value[$title][] = $upload_id;
 								unset($_FILES);
-							endif;
-							if ( !get_post($value) && $value ) :
-								delete_post_meta($id, $title, $value);
+							else :
+								if ( !get_post($value) && $value ) :
+									if ( $data['blank'] == true ) :
+										$save_value[$title][] = '';
+									endif;
+								elseif ( $value ) :
+									$save_value[$title][] = $value;
+								else :
+									if ( $data['blank'] == true ) :
+										$save_value[$title][] = '';
+									endif;
+								endif;
 							endif;
 						endif;
 				endswitch;
 			endforeach;
 		endforeach;
-		
+
 		/*print_r($tmpfiles);
 		print_r($fields);
 		print_r($_REQUEST);
 		print_r($save_value);
+		print_r(get_post_custom($id));
 		exit;*/
-
+		
 		foreach( $save_value as $title => $values ) :
 			unset($delete);
 			if ( count($values) == 1 ) :
