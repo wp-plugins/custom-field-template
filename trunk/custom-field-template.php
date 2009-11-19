@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.4.8
+Version: 1.4.9
 Author URI: http://wpgogo.com/
 */
 
@@ -68,7 +68,7 @@ class custom_field_template {
 		
 		if ( is_user_logged_in() && isset($_REQUEST['post']) && $_REQUEST['page'] == 'custom-field-template/custom-field-template.php' && $_REQUEST['cft_mode'] == 'ajaxsave' ) {
 			if ( $_REQUEST['post'] > 0 )
-				$this->edit_meta_value( $_REQUEST['post'] );
+				$this->edit_meta_value( $_REQUEST['post'], '' );
 			exit();
 		}
 		
@@ -130,7 +130,7 @@ class custom_field_template {
 			endif;
 		}
 
-		if( strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') ) :
+		if( strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') ) :
 			add_action('admin_head', array(&$this, 'custom_field_template_admin_head_buffer') );   
 			add_action('admin_footer', array(&$this, 'custom_field_template_admin_footer_buffer') );  
 		endif;
@@ -499,7 +499,11 @@ type = textarea
 rows = 4
 cols = 40
 tinyMCE = true
-mediaButton = true';
+htmlEditor = true
+mediaButton = true
+
+[File Upload]
+type = file';
 		$options['shortcode_format'][0] = '<table class="cft">
 <tbody>
 <tr>
@@ -650,6 +654,8 @@ mediaButton = true';
 			$options['custom_field_template_use_multiple_insert'] = $_POST['custom_field_template_use_multiple_insert'];
 			$options['custom_field_template_use_wpautop'] = $_POST['custom_field_template_use_wpautop'];
 			$options['custom_field_template_use_autosave'] = $_POST['custom_field_template_use_autosave'];
+			$options['custom_field_template_disable_initialize_button'] = $_POST['custom_field_template_disable_initialize_button'];
+			$options['custom_field_template_disable_save_button'] = $_POST['custom_field_template_disable_save_button'];
 			$options['custom_field_template_disable_default_custom_fields'] = $_POST['custom_field_template_disable_default_custom_fields'];
 			$options['custom_field_template_disable_quick_edit'] = $_POST['custom_field_template_disable_quick_edit'];						
 			$options['custom_field_template_disable_custom_field_column'] = $_POST['custom_field_template_disable_custom_field_column'];
@@ -665,6 +671,7 @@ mediaButton = true';
 					$options['custom_fields'][$j]['post'] = $_POST["custom_field_template_post"][$i];
 					$options['custom_fields'][$j]['post_type'] = $_POST["custom_field_template_post_type"][$i];
 					$options['custom_fields'][$j]['template_files'] = $_POST["custom_field_template_template_files"][$i];					
+					$options['custom_fields'][$j]['disable'] = $_POST["custom_field_template_disable"][$i];					
 					$j++;
 				}
 			}			
@@ -760,7 +767,9 @@ mediaButton = true';
 	for ( $i = 0; $i < count($options['custom_fields'])+1; $i++ ) {
 ?>
 <tr><td>
-<p><strong>TEMPLATE #<?php echo $i; ?></strong></p>
+<p><strong>TEMPLATE #<?php echo $i; ?></strong>
+<label for="custom_field_template_disable[<?php echo $i; ?>]"><input type="checkbox" name="custom_field_template_disable[<?php echo $i; ?>]" id="custom_field_template_disable[<?php echo $i; ?>]" value="1" <?php checked(1, $options['custom_fields'][$i]['disable']); ?> /> <?php _e('Disable', 'custom-field-template'); ?></label>
+</p>
 <p><label for="custom_field_template_title[<?php echo $i; ?>]"><?php echo sprintf(__('Template Title', 'custom-field-template'), $i); ?></label>:<br />
 <input type="text" name="custom_field_template_title[<?php echo $i; ?>]" id="custom_field_template_title[<?php echo $i; ?>]" value="<?php echo stripcslashes($options['custom_fields'][$i]['title']); ?>" size="80" /></p>
 <p><label for="custom_field_template_instruction[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Template Instruction', 'custom-field-template'), $i); ?></a></label>:<br />
@@ -799,6 +808,16 @@ mediaButton = true';
 <tr><td>
 <p><label for="custom_field_template_use_autosave"><?php _e('In case that you would like to save values automatically in switching templates', 'custom-field-template'); ?></label>:<br />
 <input type="checkbox" name="custom_field_template_use_autosave" id="custom_field_template_use_autosave" value="1" <?php if ($options['custom_field_template_use_autosave']) { echo 'checked="checked"'; } ?> /> <?php _e('Use the auto save in switching templates', 'custom-field-template'); ?></p>
+</td>
+</tr>
+<tr><td>
+<p><label for="custom_field_template_disable_initialize_button"><?php _e('In case that you would like to forbid to use the initialize button.', 'custom-field-template'); ?></label>:<br />
+<input type="checkbox" name="custom_field_template_disable_initialize_button" id="custom_field_template_disable_initialize_button" value="1" <?php if ($options['custom_field_template_disable_initialize_button']) { echo 'checked="checked"'; } ?> /> <?php _e('Disable the initialize button', 'custom-field-template'); ?></p>
+</td>
+</tr>
+<tr><td>
+<p><label for="custom_field_template_disable_save_button"><?php _e('In case that you would like to forbid to use the save button.', 'custom-field-template'); ?></label>:<br />
+<input type="checkbox" name="custom_field_template_disable_save_button" id="custom_field_template_disable_save_button" value="1" <?php if ($options['custom_field_template_disable_save_button']) { echo 'checked="checked"'; } ?> /> <?php _e('Disable the save button', 'custom-field-template'); ?></p>
 </td>
 </tr>
 <tr><td>
@@ -1709,7 +1728,7 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= trim($before).'<input id="' . $name . $sid . '" name="' . $name . '['.$sid.'][]" type="file" size="' . $size . '"' . $class . $style . ' />'.trim($after);
+		$out .= trim($before).'<input id="' . $name . $sid . '" name="' . $name . '['.$sid.'][]" type="file" size="' . $size . '"' . $class . $style . ' onchange="if (jQuery(this).val()) { jQuery(\'#cft_save_button\').attr(\'disabled\', true); } else { jQuery(\'#cft_save_button\').attr(\'disabled\', false); }" />'.trim($after);
 
 		if ( ( $value = intval($value) ) && $thumb_url = get_attachment_icon_src( $value ) ) :
 			$thumb_url = $thumb_url[0];
@@ -1718,7 +1737,7 @@ jQuery(this).addClass("closed");
 			$filename = basename($post->guid);
 			$title = esc_attr($post->post_title);
 			
-			$out .= '<p><label for=""><input type="checkbox" name="'.$name . '_delete[' . $sid . '][' . $cftnum . ']" id="'.$name . '_delete' . $sid . '" value="1" />' . __('Delete', 'custom-field-template') . '</label> <img src="'.$thumb_url.'" width="32" height="32" style="vertical-align:middle;" /> ' . $title . ' </p>';
+			$out .= '<p><label for=""><input type="checkbox" name="'.$name . '_delete[' . $sid . '][' . $cftnum . ']" id="'.$name . '_delete' . $sid . '" value="1" class="delete_file_checkbox" />' . __('Delete', 'custom-field-template') . '</label> <img src="'.$thumb_url.'" width="32" height="32" style="vertical-align:middle;" /> ' . $title . ' </p>';
 			$out .= '<input type="hidden" name="'.$name . '[' . $sid . '][' . $cftnum . ']" value="' . $value . '" />';
 		endif;
 
@@ -1734,6 +1753,9 @@ jQuery(this).addClass("closed");
 		$level = $userdata->user_level;
 		
 		$options = $this->get_custom_field_template_data();
+		
+		if ( $options['custom_fields'][$id]['disable'] )
+			return;
 	
 		if ( $_REQUEST['page_template'] ) :
 			if ( count($options['custom_fields']) > 0 ) :
@@ -2068,14 +2090,18 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		
 		$out .= '<div style="position:absolute; top:30px; right:5px;">';
 		$out .= '<img class="waiting" style="display:none; vertical-align:middle;" src="images/loading.gif" alt="" id="cftloading_img" /> ';
+		if ( !$options['custom_field_template_disable_initialize_button'] ) :
 		$out .= '<input type="button" value="' . __('Initialize', 'custom-field-template') . '" onclick="';
 		$out .= 'if(confirm(\''.__('Are you sure to reset current values? Default values will be loaded.', 'custom-field-template').'\')){if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID.length=0;};jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&default=true&id=\'+jQuery(\'#custom-field-template-id\').val()+\'&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {';
 		$out .= 'jQuery(\'#cft\').html(html);}});}';
 		$out .= '" class="button" style="vertical-align:middle;" />';
-		$out .= '<input type="button" value="' . __('Save', 'custom-field-template') . '" onclick="';
+		endif;
+		if ( !$options['custom_field_template_disable_save_button'] ) :
+		$out .= '<input type="button" id="cft_save_button" value="' . __('Save', 'custom-field-template') . '" onclick="';
 		$out .= 'var fields = jQuery(\'#cft :input\').fieldSerialize();';
-		$out .= 'jQuery.ajax({type: \'POST\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post=\'+jQuery(\'#post_ID\').val()+\'&custom-field-template-verify-key=\'+jQuery(\'#custom-field-template-verify-key\').val()+\'&\'+fields});';
+		$out .= 'jQuery.ajax({type: \'POST\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post=\'+jQuery(\'#post_ID\').val()+\'&custom-field-template-verify-key=\'+jQuery(\'#custom-field-template-verify-key\').val()+\'&\'+fields, success: function() {jQuery(\'.delete_file_checkbox:checked\').each(function() {jQuery(this).parent().parent().remove();});}});';
 		$out .= '" class="button" style="vertical-align:middle;" />';
+		endif;
 		$out .= '</div>';
 			
 		if ( substr($wp_version, 0, 3) < '2.5' ) {
@@ -2250,7 +2276,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		
 		$save_value = array();
 		
-		if ( $_FILES ) :
+		if ( is_array($_FILES) ) :
 			foreach($_FILES as $key => $val ) :
 				foreach( $val as $key2 => $val2 ) :
 					foreach( $val2 as $key3 => $val3 ) :
@@ -2315,6 +2341,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 						if ( $data['type'] == 'file' ) :
 							if ( $_REQUEST[$name.'_delete'][$field_key][$data['cftnum']] ) :
 								wp_delete_attachment($value);
+								delete_post_meta($id, $title, $value);
 							endif;
 							if( isset($tmpfiles[$name][$field_key][$data['cftnum']]) ) :
 								$_FILES[$title] = $tmpfiles[$name][$field_key][$data['cftnum']];
@@ -2547,13 +2574,15 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			endforeach;
 			
 			unset($cftnum);
-			foreach( $returndata as $Data_key => $Data_val ) :
-				foreach( $Data_val as $title => $data ) :
-					if ( is_numeric($cftnum[$title]) ) $cftnum[$title]++;
-					else $cftnum[$title] = 0;
-					$returndata[$Data_key][$title]['cftnum'] = $cftnum[$title];
+			if ( is_array($returndata) ) :
+				foreach( $returndata as $Data_key => $Data_val ) :
+					foreach( $Data_val as $title => $data ) :
+						if ( is_numeric($cftnum[$title]) ) $cftnum[$title]++;
+						else $cftnum[$title] = 0;
+						$returndata[$Data_key][$title]['cftnum'] = $cftnum[$title];
+					endforeach;
 				endforeach;
-			endforeach;
+			endif;
 		}
 
 		return $returndata;

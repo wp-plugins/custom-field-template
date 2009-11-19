@@ -3,8 +3,8 @@ Contributors: Hiroaki Miyashita
 Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
-Tested up to: 2.8.5
-Stable tag: 1.4.8
+Tested up to: 2.8.6
+Stable tag: 1.4.9
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -66,7 +66,7 @@ Localization
 * German (de_DE) - F J Kaiser
 * Spanish (es_ES) - [Dario Ferrer](http://www.darioferrer.com/)
 * French (fr_FR) - Nicolas Lemoine
-* Hangarian (hu_HU) - [Balazs Kovacs](http://www.netpok.hu)
+* Hungarian (hu_HU) - [Balazs Kovacs](http://www.netpok.hu)
 * Italian (it_IT) - [Gianni Diurno](http://gidibao.net/)
 * Japanese (ja) - [Hiroaki Miyashita](http://wpgogo.com/)
 * Russian (ru_RU) - [Sonika](http://www.sonika.ru/blog/)
@@ -98,6 +98,11 @@ See the default template and modify it.
 
 == Changelog ==
 
+= 1.4.9 =
+* Options to disable the cutom field template, the initialize button, and the save button.
+* Bugfix: enctype missing.
+* Bugfix: meta values not being deleted when a file is deleted.
+
 = 1.4.8 =
 * Bugfix: file type.
 
@@ -127,7 +132,7 @@ See the default template and modify it.
 * The group functionality. The fields between `type = fieldset_open` and `type = fieldset_close` will be enclosed in the fieldset. The key name of the `fieldset_open` and `fieldset_close` must be same. You can use `multipleButton = true` with `type = fieldset_open`. You can also use the `legend = blah` attribute. 
 * Revision of the interpretation of the template codes.
 * Bugfix: loading templates in switching catgories.
-* Hangarian and Uzbek.
+* Hungarian and Uzbek.
 
 = 1.3.8 =
 * `readOnly` attribute. ex) `readOnly = true`
