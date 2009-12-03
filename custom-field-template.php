@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.4.9
+Version: 1.5
 Author URI: http://wpgogo.com/
 */
 
@@ -1832,15 +1832,15 @@ jQuery(this).addClass("closed");
 						if ( !empty($data['class']) ) $class = ' class="' . $data['class'] . '"';
 						if ( !empty($data['style']) ) $style = ' style="' . $data['style'] . '"';
 						$out .= '<fieldset' . $class . $style . '>'."\n";
-						$out .= '<input type="hidden" name="' . $title . '[]" value="1" />'."\n";
+						$out .= '<input type="hidden" name="' . $this->sanitize_name( $title ) . '[]" value="1" />'."\n";
 					
 						unset($addfield);
 						if ( $data['multipleButton'] == true ) :
 							$addfield .= ' <span>';
 							$addbutton = $this->get_post_meta( $_REQUEST['post'], $title, true )-1;
 							if ( $addbutton<=0 ) $addbutton = 0;
-							if ( $data['cftnum'] == $addbutton ) :
-								$addfield .= ' <a href="#clear" onclick="var tmp = jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent());tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''".');tmp.find('."'select'".').val('."''".');tmp.find('."'textarea'".').val('."''".');tmp.find('."'input'".').attr('."'checked',false".');if(tmp.find('."'input[type=radio]'".').attr('."'name'".').match(/\[([0-9]+)\]$/)) { matchval = RegExp.$1; matchval++;tmp.find('."'input[type=radio]'".').attr('."'name',".'tmp.find('."'input[type=radio]'".').attr('."'name'".').replace(/\[([0-9]+)\]$/, \'[\'+matchval+\']\'));}jQuery(this).parent().css('."'visibility','hidden'".');return false;">' . __('Add New', 'custom-field-template') . '</a>';
+							if ( $data['cftnum']/2 == $addbutton ) :
+								$addfield .= ' <a href="#clear" onclick="var tmp = jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent());tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''".');tmp.find('."'select'".').val('."''".');tmp.find('."'textarea'".').val('."''".');tmp.find('."'input'".').attr('."'checked',false".');if(tmp.find('."'input[type=radio]'".').attr('."'name'".')){if(tmp.find('."'input[type=radio]'".').attr('."'name'".').match(/\[([0-9]+)\]$/)) { matchval = RegExp.$1; matchval++;tmp.find('."'input[type=radio]'".').attr('."'name',".'tmp.find('."'input[type=radio]'".').attr('."'name'".').replace(/\[([0-9]+)\]$/, \'[\'+matchval+\']\'));}}jQuery(this).parent().css('."'visibility','hidden'".');return false;">' . __('Add New', 'custom-field-template') . '</a>';
 							else :
 								$addfield .= ' <a href="#clear" onclick="jQuery(this).parent().parent().parent().remove();return false;">' . __('Delete', 'custom-field-template') . '</a>';
 							endif;
@@ -2099,7 +2099,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		if ( !$options['custom_field_template_disable_save_button'] ) :
 		$out .= '<input type="button" id="cft_save_button" value="' . __('Save', 'custom-field-template') . '" onclick="';
 		$out .= 'var fields = jQuery(\'#cft :input\').fieldSerialize();';
-		$out .= 'jQuery.ajax({type: \'POST\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post=\'+jQuery(\'#post_ID\').val()+\'&custom-field-template-verify-key=\'+jQuery(\'#custom-field-template-verify-key\').val()+\'&\'+fields, success: function() {jQuery(\'.delete_file_checkbox:checked\').each(function() {jQuery(this).parent().parent().remove();});}});';
+		$out .= 'jQuery.ajax({type: \'POST\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post=\'+jQuery(\'#post_ID\').val()+\'&custom-field-template-verify-key=\'+jQuery(\'#custom-field-template-verify-key\').val(), data: fields, success: function() {jQuery(\'.delete_file_checkbox:checked\').each(function() {jQuery(this).parent().parent().remove();});}});';
 		$out .= '" class="button" style="vertical-align:middle;" />';
 		endif;
 		$out .= '</div>';
