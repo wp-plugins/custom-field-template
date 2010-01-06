@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.5.3
+Version: 1.5.4
 Author URI: http://wpgogo.com/
 */
 
@@ -1348,13 +1348,13 @@ jQuery(this).addClass("closed");
 		endif;
 				
 		$out .= 
-			'<dl id="dl_' . $name . $sid . '">' .
-			'<dt><span' . $hide . '><label for="' . $name . $sid . $cftnum . '">' . $title . '</label></span>'.$addfield.'</dt>' .
+			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
+			'<dt><span' . $hide . '><label for="' . $name . $sid . '_' . $cftnum . '">' . $title . '</label></span>'.$addfield.'</dt>' .
 			'<dd>';
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= trim($before).'<input id="' . $name . $sid . $cftnum . '" name="' . $name . '['. $sid . '][]" value="' . attribute_escape(trim($value)) . '" type="text" size="' . $size . '"' . $class . $style . $maxlength . $event_output . $readOnly . ' />'.trim($after);
+		$out .= trim($before).'<input id="' . $name . $sid . '_' . $cftnum . '" name="' . $name . '['. $sid . '][]" value="' . attribute_escape(trim($value)) . '" type="text" size="' . $size . '"' . $class . $style . $maxlength . $event_output . $readOnly . ' />'.trim($after);
 		
 		if ( $date == true ) :
 			$out .= '<script type="text/javascript">' . "\n" .
@@ -1487,7 +1487,7 @@ jQuery(this).addClass("closed");
 		$i = 0;
 		if ( is_array($values) ) :
 			foreach( $values as $val ) {
-				$id = $name . $sid . '_' . $this->sanitize_name( $val );
+				$id = $name . $sid . '_' . $cftnum . '_' . $this->sanitize_name( $val );
 			
 				$checked = ( stripcslashes(trim( $val )) == trim( $selected ) ) ? 'checked="checked"' : '';
 			
@@ -1550,12 +1550,12 @@ jQuery(this).addClass("closed");
 
 		$out .= 
 			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
-			'<dt><span' . $hide . '><label for="' . $name . $sid . $cftnum . '">' . $title . '</label></span>'.$addfield.'</dt>' .
+			'<dt><span' . $hide . '><label for="' . $name . $sid . '_' . $cftnum . '">' . $title . '</label></span>'.$addfield.'</dt>' .
 			'<dd>';
 			
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .=	trim($before).'<select id="' . $name . $sid . $cftnum . '" name="' . $name . '[' . $sid . '][]"' . $class . $style . $event_output . '>';
+		$out .=	trim($before).'<select id="' . $name . $sid . '_' . $cftnum . '" name="' . $name . '[' . $sid . '][]"' . $class . $style . $event_output . '>';
 		
 		if ( $selectLabel )
 			$out .= '<option value="">' . stripcslashes(trim($selectLabel)) . '</option>';
@@ -1672,7 +1672,7 @@ jQuery(this).addClass("closed");
 		
 		$out .= 
 			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
-			'<dt><span' . $hide . '><label for="' . $name . $sid . $cftnum . '">' . $title . '</label></span><br />' . $media . $switch . '</dt>' .
+			'<dt><span' . $hide . '><label for="' . $name . $sid . '_' . $cftnum . '">' . $title . '</label></span><br />' . $media . $switch . '</dt>' .
 			'<dd>';
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
@@ -1724,12 +1724,12 @@ jQuery(this).addClass("closed");
 				
 		$out .= 
 			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
-			'<dt><span' . $hide . '><label for="' . $name . $sid . $cftnum . '">' . $title . '</label></span>'.$addfield.'</dt>' .
+			'<dt><span' . $hide . '><label for="' . $name . $sid . '_' . $cftnum . '">' . $title . '</label></span>'.$addfield.'</dt>' .
 			'<dd>';
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= trim($before).'<input id="' . $name . $sid . '" name="' . $name . '['.$sid.'][]" type="file" size="' . $size . '"' . $class . $style . ' onchange="if (jQuery(this).val()) { jQuery(\'#cft_save_button\').attr(\'disabled\', true); } else { jQuery(\'#cft_save_button\').attr(\'disabled\', false); }" />'.trim($after);
+		$out .= trim($before).'<input id="' . $name . $sid . '_' . $cftnum . '" name="' . $name . '['.$sid.'][]" type="file" size="' . $size . '"' . $class . $style . ' onchange="if (jQuery(this).val()) { jQuery(\'#cft_save_button\').attr(\'disabled\', true); } else { jQuery(\'#cft_save_button\').attr(\'disabled\', false); }" />'.trim($after);
 
 		if ( ( $value = intval($value) ) && $thumb_url = get_attachment_icon_src( $value ) ) :
 			$thumb_url = $thumb_url[0];
@@ -3032,8 +3032,11 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 						if ( is_array($val2) ) :
 							foreach( $val2 as $val3 ) :
 								if ( $val3 ) :
-									if ( $ch == 0 ) $where .= ' AND (';
-									else $where .= ' AND ';
+									if ( $ch == 0 ) : $where .= ' AND (';
+									else :
+										if ( $replace[$key][$key2]['type'] == 'checkbox' || !$replace[$key][$key2]['type'] ) $where .= ' OR ';
+										else $where .= ' AND ';
+									endif;
 									switch( $replace[$key][$key2]['operator'] ) :
 										case '<=' :
 										case '>=' :
@@ -3042,7 +3045,11 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										case '=' :
 										case '<>' :
 										case '<=>':
-											$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " '" . trim($val3) . "') GROUP BY post_id) ";
+											if ( is_numeric($val3) ) :
+												$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " " . trim($val3) . ") GROUP BY post_id) ";
+											else :
+												$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " '" . trim($val3) . "') GROUP BY post_id) ";
+											endif;
 											break;
 										default :
 											$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value LIKE '%" . trim($val3) . "%') GROUP BY post_id) ";
@@ -3069,6 +3076,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 					$where .= " AND ROW(ID,1) IN (SELECT post_id,count(post_id) FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_value LIKE '%" . trim($v) . "%') GROUP BY post_id) ";
 				endif;
 			endforeach;
+			$where .= " OR ((`" . $wpdb->post . "`.post_title LIKE '%" . trim($_REQUEST['s']) . "%') OR (`" . $wpdb->post . "`.post_content LIKE '%" . trim($_REQUEST['s']) . "%'))";
 		endif;
 
 		if ( is_array($_REQUEST['cftcategory_in']) ) :
@@ -3092,7 +3100,6 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		else :
 			$where .= " AND `".$wpdb->posts."`.post_status = 'publish' GROUP BY `".$wpdb->posts."`.ID";
 		endif;
-		//if ( $_REQUEST['s'] ) $where .= $original_where;
 		
 		return $where;
 	}
