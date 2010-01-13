@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.5.4
+Version: 1.5.5
 Author URI: http://wpgogo.com/
 */
 
@@ -1731,7 +1731,7 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= trim($before).'<input id="' . $name . $sid . '_' . $cftnum . '" name="' . $name . '['.$sid.'][]" type="file" size="' . $size . '"' . $class . $style . ' onchange="if (jQuery(this).val()) { jQuery(\'#cft_save_button\').attr(\'disabled\', true); } else { jQuery(\'#cft_save_button\').attr(\'disabled\', false); }" />'.trim($after);
+		$out .= trim($before).'<input id="' . $name . $sid . '_' . $cftnum . '" name="' . $name . '['.$sid.'][]" type="file" size="' . $size . '"' . $class . $style . ' onchange="if (jQuery(this).val()) { jQuery(\'#cft_save_button\').attr(\'disabled\', true); jQuery(\'#post-preview\').hide(); } else { jQuery(\'#cft_save_button\').attr(\'disabled\', false); jQuery(\'#post-preview\').show(); }" />'.trim($after);
 
 		if ( ( $value = intval($value) ) && $thumb_url = get_attachment_icon_src( $value ) ) :
 			$thumb_url = $thumb_url[0];
