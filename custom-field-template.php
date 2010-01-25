@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.5.5
+Version: 1.5.6
 Author URI: http://wpgogo.com/
 */
 
@@ -126,6 +126,7 @@ class custom_field_template {
 			add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), 'page', 'normal', 'core');
 			if ( function_exists('remove_meta_box') && $options['custom_field_template_disable_default_custom_fields'] ) :
 				remove_meta_box('postcustom', 'post', 'normal');
+				remove_meta_box('postcustom', 'page', 'normal');
 				remove_meta_box('pagecustomdiv', 'page', 'normal');
 			endif;
 		}
@@ -1738,7 +1739,7 @@ jQuery(this).addClass("closed");
 			
 			$post = get_post($value);
 			$filename = basename($post->guid);
-			$title = esc_attr($post->post_title);
+			$title = attribute_escape(trim($post->post_title));
 			
 			$out .= '<p><label for=""><input type="checkbox" name="'.$name . '_delete[' . $sid . '][' . $cftnum . ']" id="'.$name . '_delete' . $sid . '" value="1" class="delete_file_checkbox" />' . __('Delete', 'custom-field-template') . '</label> <img src="'.$thumb_url.'" width="32" height="32" style="vertical-align:middle;" /> ' . $title . ' </p>';
 			$out .= '<input type="hidden" name="'.$name . '[' . $sid . '][' . $cftnum . ']" value="' . $value . '" />';
