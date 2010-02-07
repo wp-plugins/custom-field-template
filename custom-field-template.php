@@ -4,13 +4,30 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.5.6
+Version: 1.5.7
 Author URI: http://wpgogo.com/
 */
 
 /*
 This program is based on the rc:custom_field_gui plugin written by Joshua Sigar.
 I appreciate your efforts, Joshua.
+*/
+
+/*  Copyright 2008 -2010 Hiroaki Miyashita
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 class custom_field_template {
@@ -603,7 +620,7 @@ type = file';
 							endif;
 						endforeach;
 					endif;
-				elseif ( $option['hook'][$i]['post_type']=='post' ) :
+				elseif ( $options['hook'][$i]['post_type']=='post' ) :
 					if ( is_category() || is_single() ) :
 						if ( $options['hook'][$i]['use_php'] ) :
 							$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
@@ -616,7 +633,7 @@ type = file';
 						else
 							$content = $options['hook'][$i]['content'] . $content;
 					endif;		
-				elseif ( $option['hook'][$i]['post_type']=='page' ) :
+				elseif ( $options['hook'][$i]['post_type']=='page' ) :
 					if ( is_page() ) :
 						if ( $options['hook'][$i]['use_php'] ) :
 							$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
@@ -1419,7 +1436,7 @@ jQuery(this).addClass("closed");
 		
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] && $cftnum == 0 )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .=	'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . '][' . $cftnum . ']" value="' . attribute_escape(trim($value)) . '"' . $checked . ' type="checkbox"' . $class . $style . $event_output . ' /> ';
+		$out .=	'<label for="' . $id . '" class="selectit"><input id="' . $id . '" name="' . $name . '[' . $sid . '][' . $cftnum . ']" value="' . attribute_escape(stripcslashes(trim($value))) . '"' . $checked . ' type="checkbox"' . $class . $style . $event_output . ' /> ';
 		if ( $valueLabel )
 			$out .= stripcslashes(trim($valueLabel));
 		else
@@ -1495,7 +1512,7 @@ jQuery(this).addClass("closed");
 				$checked = ( stripcslashes(trim( $val )) == trim( $selected ) ) ? 'checked="checked"' : '';
 			
 				$out .=	
-					'<label for="' . $id . '" class="selectit"><input name="' . $name . '[' . $sid . '][' . $cftnum . ']" value="' . attribute_escape(trim($val)) . '" ' . $checked . ' type="radio"' . $class . $style . $event_output . ' /> ';
+					'<label for="' . $id . '" class="selectit"><input name="' . $name . '[' . $sid . '][' . $cftnum . ']" value="' . attribute_escape(trim(stripcslashes($val))) . '" ' . $checked . ' type="radio"' . $class . $style . $event_output . ' /> ';
 				if ( $valueLabel[$i] )
 					$out .= stripcslashes(trim($valueLabel[$i]));
 				else
@@ -1570,7 +1587,7 @@ jQuery(this).addClass("closed");
 			foreach( $values as $val ) {
 				$checked = ( stripcslashes(trim( $val )) == trim( $selected ) ) ? 'selected="selected"' : '';
 		
-				$out .=	'<option value="' . attribute_escape(trim($val)) . '" ' . $checked . '>';
+				$out .=	'<option value="' . attribute_escape(stripcslashes(trim($val))) . '" ' . $checked . '>';
 				if ( $valueLabel[$i] )
 					$out .= stripcslashes(trim($valueLabel[$i]));
 				else
