@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Custom Field Template\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-11-19 15:20+0900\n"
-"PO-Revision-Date: 2009-11-19 15:28+0900\n"
+"POT-Creation-Date: 2010-03-09 11:37+0900\n"
+"PO-Revision-Date: 2010-03-09 11:37+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,453 +16,457 @@ msgstr ""
 "X-Poedit-Basepath: ../\n"
 "X-Poedit-SearchPath-0: custom-field-template\n"
 
-#: custom-field-template/custom-field-template.php:125
-#: custom-field-template/custom-field-template.php:126
-#: custom-field-template/custom-field-template.php:547
-#: custom-field-template/custom-field-template.php:754
-#: custom-field-template/custom-field-template.php:1918
-#: custom-field-template/custom-field-template.php:2046
+#: custom-field-template/custom-field-template.php:142
+#: custom-field-template/custom-field-template.php:143
+#: custom-field-template/custom-field-template.php:159
+#: custom-field-template/custom-field-template.php:580
+#: custom-field-template/custom-field-template.php:790
+#: custom-field-template/custom-field-template.php:1966
+#: custom-field-template/custom-field-template.php:2094
 msgid "Custom Field Template"
 msgstr "カスタムフィールドテンプレート"
 
-#: custom-field-template/custom-field-template.php:236
-#: custom-field-template/custom-field-template.php:2223
+#: custom-field-template/custom-field-template.php:268
+#: custom-field-template/custom-field-template.php:2280
 msgid "Load"
 msgstr "読込"
 
-#: custom-field-template/custom-field-template.php:392
+#: custom-field-template/custom-field-template.php:424
 msgid "read more"
 msgstr "続きを表示"
 
-#: custom-field-template/custom-field-template.php:410
-#: custom-field-template/custom-field-template.php:420
+#: custom-field-template/custom-field-template.php:442
+#: custom-field-template/custom-field-template.php:452
 msgid "Custom Fields"
 msgstr "カスタムフィールド"
 
-#: custom-field-template/custom-field-template.php:450
+#: custom-field-template/custom-field-template.php:482
 msgid "Settings"
 msgstr "設定"
 
-#: custom-field-template/custom-field-template.php:470
+#: custom-field-template/custom-field-template.php:502
 msgid "Default Template"
 msgstr "デフォルトテンプレート"
 
-#: custom-field-template/custom-field-template.php:679
-#: custom-field-template/custom-field-template.php:683
-#: custom-field-template/custom-field-template.php:695
-#: custom-field-template/custom-field-template.php:703
-#: custom-field-template/custom-field-template.php:719
+#: custom-field-template/custom-field-template.php:714
+#: custom-field-template/custom-field-template.php:718
+#: custom-field-template/custom-field-template.php:730
+#: custom-field-template/custom-field-template.php:738
+#: custom-field-template/custom-field-template.php:755
 msgid "Options updated."
 msgstr "オプションは更新されました。"
 
-#: custom-field-template/custom-field-template.php:723
+#: custom-field-template/custom-field-template.php:759
 msgid "Value Counts rebuilt."
 msgstr "バリューカウントは再構築されました。"
 
-#: custom-field-template/custom-field-template.php:726
+#: custom-field-template/custom-field-template.php:762
 msgid "Tags rebuilt."
 msgstr "タグは再構築されました。"
 
-#: custom-field-template/custom-field-template.php:735
+#: custom-field-template/custom-field-template.php:771
 msgid "Options imported."
 msgstr "オプションはインポートされました。"
 
-#: custom-field-template/custom-field-template.php:742
+#: custom-field-template/custom-field-template.php:778
 msgid "Options resetted."
 msgstr "オプションはリセットされました。"
 
-#: custom-field-template/custom-field-template.php:746
+#: custom-field-template/custom-field-template.php:782
 msgid "Options deleted."
 msgstr "オプションは削除されました。"
 
-#: custom-field-template/custom-field-template.php:760
-#: custom-field-template/custom-field-template.php:863
-#: custom-field-template/custom-field-template.php:882
-#: custom-field-template/custom-field-template.php:911
-#: custom-field-template/custom-field-template.php:942
-#: custom-field-template/custom-field-template.php:981
-#: custom-field-template/custom-field-template.php:1002
-#: custom-field-template/custom-field-template.php:1019
-#: custom-field-template/custom-field-template.php:1181
-#: custom-field-template/custom-field-template.php:1197
-#: custom-field-template/custom-field-template.php:1213
-#: custom-field-template/custom-field-template.php:1229
-#: custom-field-template/custom-field-template.php:1245
+#: custom-field-template/custom-field-template.php:796
+#: custom-field-template/custom-field-template.php:903
+#: custom-field-template/custom-field-template.php:922
+#: custom-field-template/custom-field-template.php:951
+#: custom-field-template/custom-field-template.php:982
+#: custom-field-template/custom-field-template.php:1023
+#: custom-field-template/custom-field-template.php:1044
+#: custom-field-template/custom-field-template.php:1061
+#: custom-field-template/custom-field-template.php:1223
+#: custom-field-template/custom-field-template.php:1239
+#: custom-field-template/custom-field-template.php:1255
+#: custom-field-template/custom-field-template.php:1271
+#: custom-field-template/custom-field-template.php:1287
 msgid "Click to toggle"
 msgstr "クリックで切替"
 
-#: custom-field-template/custom-field-template.php:761
+#: custom-field-template/custom-field-template.php:797
 msgid "Custom Field Template Options"
 msgstr "カスタムフィールドテンプレートオプション"
 
-#: custom-field-template/custom-field-template.php:771
+#: custom-field-template/custom-field-template.php:807
 msgid "Disable"
 msgstr "無効"
 
-#: custom-field-template/custom-field-template.php:773
+#: custom-field-template/custom-field-template.php:809
 msgid "Template Title"
 msgstr "テンプレートタイトル"
 
-#: custom-field-template/custom-field-template.php:775
+#: custom-field-template/custom-field-template.php:811
 msgid "Template Instruction"
 msgstr "テンプレートインストラクション"
 
-#: custom-field-template/custom-field-template.php:777
-#: custom-field-template/custom-field-template.php:958
+#: custom-field-template/custom-field-template.php:813
+#: custom-field-template/custom-field-template.php:998
 msgid "Post Type"
 msgstr "投稿タイプ"
 
-#: custom-field-template/custom-field-template.php:779
-#: custom-field-template/custom-field-template.php:959
+#: custom-field-template/custom-field-template.php:815
+#: custom-field-template/custom-field-template.php:999
 msgid "Both"
 msgstr "両方"
 
-#: custom-field-template/custom-field-template.php:780
-#: custom-field-template/custom-field-template.php:960
+#: custom-field-template/custom-field-template.php:816
+#: custom-field-template/custom-field-template.php:1000
 msgid "Post"
 msgstr "投稿"
 
-#: custom-field-template/custom-field-template.php:781
-#: custom-field-template/custom-field-template.php:961
+#: custom-field-template/custom-field-template.php:817
+#: custom-field-template/custom-field-template.php:1001
 msgid "Page"
 msgstr "ページ"
 
-#: custom-field-template/custom-field-template.php:782
+#: custom-field-template/custom-field-template.php:818
+#: custom-field-template/custom-field-template.php:1002
+msgid "Custom Post Type (comma-deliminated)"
+msgstr "カスタムポストタイプ （カンマ区切り）"
+
+#: custom-field-template/custom-field-template.php:820
 msgid "Post ID (comma-deliminated)"
 msgstr "Post ID （カンマ区切り）"
 
-#: custom-field-template/custom-field-template.php:784
-#: custom-field-template/custom-field-template.php:962
+#: custom-field-template/custom-field-template.php:822
+#: custom-field-template/custom-field-template.php:1004
 msgid "Category ID (comma-deliminated)"
 msgstr "カテゴリーID （カンマ区切り）"
 
-#: custom-field-template/custom-field-template.php:786
+#: custom-field-template/custom-field-template.php:824
 msgid "Page Template file name(s) (comma-deliminated)"
 msgstr "ページテンプレートファイル名 （カンマ区切り）"
 
-#: custom-field-template/custom-field-template.php:788
+#: custom-field-template/custom-field-template.php:826
 msgid "Template Content"
 msgstr "テンプレートコンテンツ"
 
-#: custom-field-template/custom-field-template.php:795
-msgid "In case that you would like to insert multiple images at once in use of the custom field media buttons"
-msgstr "カスタムフィールへの画像挿入を一度に複数枚実行する場合"
-
-#: custom-field-template/custom-field-template.php:796
-msgid "Use multiple image inset"
-msgstr "複数画像挿入を利用する"
-
-#: custom-field-template/custom-field-template.php:796
-msgid "Caution:"
-msgstr "ご注意："
-
-#: custom-field-template/custom-field-template.php:796
-msgid "You need to edit `wp-admin/includes/media.php`. Delete or comment out the code in the function media_send_to_editor."
-msgstr "`wp-admin/includes/media.php`を編集する必要があります。media_send_to_editor関数の中身を削除するかコメントアウトしてください。"
-
-#: custom-field-template/custom-field-template.php:800
+#: custom-field-template/custom-field-template.php:840
 msgid "In case that you would like to replace custom keys by labels if `label` is set"
 msgstr "`label`がセットされていて、カスタムフィールドのキーの代わりにラベルを表示したい場合"
 
-#: custom-field-template/custom-field-template.php:801
+#: custom-field-template/custom-field-template.php:841
 msgid "Use labels in place of custom keys"
 msgstr "カスタムフィールドのキーの代わりにラベルを使用する"
 
-#: custom-field-template/custom-field-template.php:804
+#: custom-field-template/custom-field-template.php:844
 msgid "In case that you would like to add p and br tags in textareas automatically"
 msgstr "テキストエリアでpタグ、brタグを自動的に追加したい場合"
 
-#: custom-field-template/custom-field-template.php:805
+#: custom-field-template/custom-field-template.php:845
 msgid "Use wpautop function"
 msgstr "wpautop関数を使用する"
 
-#: custom-field-template/custom-field-template.php:809
+#: custom-field-template/custom-field-template.php:849
 msgid "In case that you would like to save values automatically in switching templates"
 msgstr "テンプレート切替時自動で保存したい場合"
 
-#: custom-field-template/custom-field-template.php:810
+#: custom-field-template/custom-field-template.php:850
 msgid "Use the auto save in switching templates"
 msgstr "テンプレート切替時の自動保存を使用する"
 
-#: custom-field-template/custom-field-template.php:814
+#: custom-field-template/custom-field-template.php:854
 msgid "In case that you would like to forbid to use the initialize button."
 msgstr "初期化ボタンの使用を禁止する場合"
 
-#: custom-field-template/custom-field-template.php:815
+#: custom-field-template/custom-field-template.php:855
 msgid "Disable the initialize button"
 msgstr "初期化ボタンを無効にする"
 
-#: custom-field-template/custom-field-template.php:819
+#: custom-field-template/custom-field-template.php:859
 msgid "In case that you would like to forbid to use the save button."
 msgstr "保存ボタンの使用を禁止する場合"
 
-#: custom-field-template/custom-field-template.php:820
+#: custom-field-template/custom-field-template.php:860
 msgid "Disable the save button"
 msgstr "保存ボタンを無効にする"
 
-#: custom-field-template/custom-field-template.php:824
+#: custom-field-template/custom-field-template.php:864
 msgid "In case that you would like to forbid to use the default custom fields."
 msgstr "デフォルトのカスタムフィールドの使用を禁止する場合"
 
-#: custom-field-template/custom-field-template.php:825
+#: custom-field-template/custom-field-template.php:865
 msgid "Disable the default custom fields"
 msgstr "デフォルトのカスタムフィールドを無効にする"
 
-#: custom-field-template/custom-field-template.php:829
+#: custom-field-template/custom-field-template.php:869
 msgid "In case that you would like to forbid to use the quick edit."
 msgstr "クイック編集の使用を禁止する場合"
 
-#: custom-field-template/custom-field-template.php:830
+#: custom-field-template/custom-field-template.php:870
 msgid "Disable the quick edit"
 msgstr "クイック編集を無効にする"
 
-#: custom-field-template/custom-field-template.php:834
+#: custom-field-template/custom-field-template.php:874
 msgid "In case that you would like to forbid to display the custom field column on the edit post list page."
 msgstr "編集リストページのカスタムフィールドコラムの表示を禁止する場合"
 
-#: custom-field-template/custom-field-template.php:835
+#: custom-field-template/custom-field-template.php:875
 msgid "Disable the custom field column (The quick edit also does not work.)"
 msgstr "カスタムフィールドコラムを無効にする（クイック編集も動きません）"
 
-#: custom-field-template/custom-field-template.php:839
+#: custom-field-template/custom-field-template.php:879
 msgid "In case that you would like to replace the box title with the template title."
 msgstr "ボックスタイトルをテンプレートタイトルで置き換える場合"
 
-#: custom-field-template/custom-field-template.php:840
+#: custom-field-template/custom-field-template.php:880
 msgid "Replace the box title"
 msgstr "ボックスタイトルを置き換える"
 
-#: custom-field-template/custom-field-template.php:844
+#: custom-field-template/custom-field-template.php:884
 msgid "In case that you would like to use the shortcode in the widget."
 msgstr "ショートコードをウィジェットで使用したい場合"
 
-#: custom-field-template/custom-field-template.php:845
+#: custom-field-template/custom-field-template.php:885
 msgid "Use the shortcode in the widget"
 msgstr "ショートコードをウィジェットで使用する"
 
-#: custom-field-template/custom-field-template.php:849
+#: custom-field-template/custom-field-template.php:889
 msgid "In case that you would like to use the shortcode in the excerpt."
 msgstr "ショートコードを抜粋で使用したい場合"
 
-#: custom-field-template/custom-field-template.php:850
+#: custom-field-template/custom-field-template.php:890
 msgid "Use the shortcode in the excerpt"
 msgstr "ショートコードを抜粋で使用する"
 
-#: custom-field-template/custom-field-template.php:854
-#: custom-field-template/custom-field-template.php:873
-#: custom-field-template/custom-field-template.php:902
-#: custom-field-template/custom-field-template.php:933
-#: custom-field-template/custom-field-template.php:972
+#: custom-field-template/custom-field-template.php:894
+#: custom-field-template/custom-field-template.php:913
+#: custom-field-template/custom-field-template.php:942
+#: custom-field-template/custom-field-template.php:973
+#: custom-field-template/custom-field-template.php:1014
 msgid "Update Options &raquo;"
 msgstr "オプションを更新する &raquo;"
 
-#: custom-field-template/custom-field-template.php:864
+#: custom-field-template/custom-field-template.php:904
 msgid "ADMIN CSS"
 msgstr "ADMIN CSS"
 
-#: custom-field-template/custom-field-template.php:883
+#: custom-field-template/custom-field-template.php:923
 msgid "[cft] and [cftsearch] Shortcode Format"
 msgstr "[cft] and [cftsearch] Shortcode Format"
 
-#: custom-field-template/custom-field-template.php:886
+#: custom-field-template/custom-field-template.php:926
 msgid "For [cft], [key] will be converted into the value of [key]."
 msgstr "[cft]では、[key]は、[key]の値に置換されます。"
 
-#: custom-field-template/custom-field-template.php:887
+#: custom-field-template/custom-field-template.php:927
 msgid "For [cftsearch], [key] will be converted into the input field."
 msgstr "[cftsearch]では、[key]は、インプットフィールドに置換されます。"
 
-#: custom-field-template/custom-field-template.php:896
-#: custom-field-template/custom-field-template.php:965
+#: custom-field-template/custom-field-template.php:936
+#: custom-field-template/custom-field-template.php:1007
 msgid "Use PHP"
 msgstr "PHPを使用する"
 
-#: custom-field-template/custom-field-template.php:912
+#: custom-field-template/custom-field-template.php:952
 msgid "PHP CODE (Experimental Option)"
 msgstr "PHP CODE (Experimental Option)"
 
-#: custom-field-template/custom-field-template.php:914
+#: custom-field-template/custom-field-template.php:954
 msgid "Are you sure to save PHP codes? Please do it at your own risk."
 msgstr "PHPコードを保存してよろしいですか？自己責任で実行してください。"
 
-#: custom-field-template/custom-field-template.php:915
+#: custom-field-template/custom-field-template.php:955
 msgid "For `text` and `textarea`, you must set $value as an string."
 msgstr "`text`と`textarea`は$valueを文字列としてセットしてください。"
 
-#: custom-field-template/custom-field-template.php:917
+#: custom-field-template/custom-field-template.php:957
 msgid "For `checkbox`, `radio`, and `select`, you must set $values as an array."
 msgstr "`checkbox`、`radio`、`select`では、配列として$valuesをセットしてください。"
 
-#: custom-field-template/custom-field-template.php:943
+#: custom-field-template/custom-field-template.php:983
 msgid "Auto Hook of `the_content()` (Experimental Option)"
 msgstr "Auto Hook of `the_content()` (Experimental Option)"
 
-#: custom-field-template/custom-field-template.php:953
+#: custom-field-template/custom-field-template.php:993
 msgid "Position"
 msgstr "位置"
 
-#: custom-field-template/custom-field-template.php:954
+#: custom-field-template/custom-field-template.php:994
 msgid "Before the conetnt"
 msgstr "コンテンツの前"
 
-#: custom-field-template/custom-field-template.php:955
+#: custom-field-template/custom-field-template.php:995
 msgid "After the conetnt"
 msgstr "コンテンツの後"
 
-#: custom-field-template/custom-field-template.php:956
+#: custom-field-template/custom-field-template.php:996
 #, php-format
 msgid "Inside the conetnt ([cfthook hook=%d])"
 msgstr "コンテンツの中 （[cfthook hook=%d]）"
 
-#: custom-field-template/custom-field-template.php:964
+#: custom-field-template/custom-field-template.php:1006
 msgid "Content"
 msgstr "コンテンツ"
 
-#: custom-field-template/custom-field-template.php:966
+#: custom-field-template/custom-field-template.php:1008
 msgid "Apply to feeds"
 msgstr "フィードに適用する"
 
-#: custom-field-template/custom-field-template.php:982
+#: custom-field-template/custom-field-template.php:1024
 msgid "Rebuild Value Counts"
 msgstr "バリューカウントの再構築"
 
-#: custom-field-template/custom-field-template.php:984
+#: custom-field-template/custom-field-template.php:1026
 msgid "Are you sure to rebuild all value counts?"
 msgstr "本当に全てのバリューカウントを再構築しますか？"
 
-#: custom-field-template/custom-field-template.php:988
+#: custom-field-template/custom-field-template.php:1030
 msgid "Value Counts are used for temporarily saving how many values in each key. Set `valueCount = true` into fields."
 msgstr "バリューカウントはキーごとに値がどのくらいあるか一時的に保存するのに使用されます。`valueCount = true`をフィールドにセットしてください。"
 
-#: custom-field-template/custom-field-template.php:992
+#: custom-field-template/custom-field-template.php:1034
 msgid "Rebuild Value Counts &raquo;"
 msgstr "バリューカウントを再構築する &raquo;"
 
-#: custom-field-template/custom-field-template.php:1003
+#: custom-field-template/custom-field-template.php:1045
 msgid "Rebuild Tags"
 msgstr "タグの再構築"
 
-#: custom-field-template/custom-field-template.php:1005
+#: custom-field-template/custom-field-template.php:1047
 msgid "Are you sure to rebuild tags?"
 msgstr "本当に全てのタグを再構築しますか？"
 
-#: custom-field-template/custom-field-template.php:1009
+#: custom-field-template/custom-field-template.php:1051
 msgid "Rebuild Tags &raquo;"
 msgstr "タグを再構築する &raquo;"
 
-#: custom-field-template/custom-field-template.php:1020
+#: custom-field-template/custom-field-template.php:1062
 msgid "Option List"
 msgstr "オプションリスト"
 
-#: custom-field-template/custom-field-template.php:1182
+#: custom-field-template/custom-field-template.php:1224
 msgid "Export Options"
 msgstr "オプションをエクスポートする"
 
-#: custom-field-template/custom-field-template.php:1188
+#: custom-field-template/custom-field-template.php:1230
 msgid "Export Options &raquo;"
 msgstr "オプションをエクスポートする &raquo;"
 
-#: custom-field-template/custom-field-template.php:1198
+#: custom-field-template/custom-field-template.php:1240
 msgid "Import Options"
 msgstr "オプションをインポートする"
 
-#: custom-field-template/custom-field-template.php:1200
+#: custom-field-template/custom-field-template.php:1242
 msgid "Are you sure to import options? Options you set will be overwritten."
 msgstr "本当にオプションをインポートしてもよろしいですか？設定したオプションは上書きされます。"
 
-#: custom-field-template/custom-field-template.php:1204
+#: custom-field-template/custom-field-template.php:1246
 msgid "Import Options &raquo;"
 msgstr "オプションをインポートする &raquo;"
 
-#: custom-field-template/custom-field-template.php:1214
+#: custom-field-template/custom-field-template.php:1256
 msgid "Reset Options"
 msgstr "オプションをリセットする"
 
-#: custom-field-template/custom-field-template.php:1216
+#: custom-field-template/custom-field-template.php:1258
 msgid "Are you sure to reset options? Options you set will be reset to the default settings."
 msgstr "本当にオプションをリセットしてもよろしいですか？設定したオプションはデフォルトの状態に戻ります。"
 
-#: custom-field-template/custom-field-template.php:1220
+#: custom-field-template/custom-field-template.php:1262
 msgid "Reset Options &raquo;"
 msgstr "オプションをリセットする &raquo;"
 
-#: custom-field-template/custom-field-template.php:1230
+#: custom-field-template/custom-field-template.php:1272
 msgid "Delete Options"
 msgstr "オプションを削除する"
 
-#: custom-field-template/custom-field-template.php:1232
+#: custom-field-template/custom-field-template.php:1274
 msgid "Are you sure to delete options? Options you set will be deleted."
 msgstr "本当にオプションを削除してもよろしいですか？設定したオプションは削除されます。"
 
-#: custom-field-template/custom-field-template.php:1236
+#: custom-field-template/custom-field-template.php:1278
 msgid "Delete Options &raquo;"
 msgstr "オプションを削除する &raquo;"
 
-#: custom-field-template/custom-field-template.php:1246
+#: custom-field-template/custom-field-template.php:1288
 msgid "Donation"
 msgstr "寄付"
 
-#: custom-field-template/custom-field-template.php:1248
+#: custom-field-template/custom-field-template.php:1290
 msgid "If you liked this plugin, please make a donation via paypal! Any amount is welcome. Your support is much appreciated."
 msgstr "このプラグインをお気に召しましたら、Paypalよりご寄付をよろしくお願いいたします。"
 
-#: custom-field-template/custom-field-template.php:1345
-#: custom-field-template/custom-field-template.php:1466
-#: custom-field-template/custom-field-template.php:1546
-#: custom-field-template/custom-field-template.php:1720
-#: custom-field-template/custom-field-template.php:1843
+#: custom-field-template/custom-field-template.php:1386
+#: custom-field-template/custom-field-template.php:1507
+#: custom-field-template/custom-field-template.php:1587
+#: custom-field-template/custom-field-template.php:1761
+#: custom-field-template/custom-field-template.php:1891
 msgid "Add New"
 msgstr "追加"
 
-#: custom-field-template/custom-field-template.php:1476
+#: custom-field-template/custom-field-template.php:1517
 msgid "Clear"
 msgstr "解除"
 
-#: custom-field-template/custom-field-template.php:1562
+#: custom-field-template/custom-field-template.php:1603
 msgid "Select"
 msgstr "選択してください"
 
-#: custom-field-template/custom-field-template.php:1627
+#: custom-field-template/custom-field-template.php:1668
 msgid "Add an Image"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1632
+#: custom-field-template/custom-field-template.php:1673
 msgid "Add Video"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1637
+#: custom-field-template/custom-field-template.php:1678
 msgid "Add Audio"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1641
+#: custom-field-template/custom-field-template.php:1682
 msgid "Add Media"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1648
+#: custom-field-template/custom-field-template.php:1689
 msgid "Toggle"
 msgstr "切り替え"
 
-#: custom-field-template/custom-field-template.php:1740
-#: custom-field-template/custom-field-template.php:1845
+#: custom-field-template/custom-field-template.php:1781
+#: custom-field-template/custom-field-template.php:1893
 msgid "Delete"
 msgstr "削除"
 
-#: custom-field-template/custom-field-template.php:2094
+#: custom-field-template/custom-field-template.php:2142
 msgid "Initialize"
 msgstr "初期化"
 
-#: custom-field-template/custom-field-template.php:2095
+#: custom-field-template/custom-field-template.php:2143
 msgid "Are you sure to reset current values? Default values will be loaded."
 msgstr "現在値をリセットしてもよろしいですか？初期値が読み込まれます。"
 
-#: custom-field-template/custom-field-template.php:2100
+#: custom-field-template/custom-field-template.php:2148
 msgid "Save"
 msgstr "保存"
 
-#: custom-field-template/custom-field-template.php:2720
+#: custom-field-template/custom-field-template.php:2779
 msgid "Search &raquo;"
 msgstr "検索 &raquo;"
 
+#~ msgid ""
+#~ "In case that you would like to insert multiple images at once in use of "
+#~ "the custom field media buttons"
+#~ msgstr "カスタムフィールへの画像挿入を一度に複数枚実行する場合"
+#~ msgid "Use multiple image inset"
+#~ msgstr "複数画像挿入を利用する"
+#~ msgid "Caution:"
+#~ msgstr "ご注意："
+#~ msgid ""
+#~ "You need to edit `wp-admin/includes/media.php`. Delete or comment out the "
+#~ "code in the function media_send_to_editor."
+#~ msgstr ""
+#~ "`wp-admin/includes/media.php`を編集する必要があります。"
+#~ "media_send_to_editor関数の中身を削除するかコメントアウトしてください。"
 #~ msgid "CSS"
 #~ msgstr "CSS"
 #~ msgid "Quick Edit"

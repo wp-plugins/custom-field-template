@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Custom Field Template\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-11-19 15:28+0900\n"
-"PO-Revision-Date: 2009-11-19 15:28+0900\n"
+"POT-Creation-Date: 2010-03-09 17:32+0900\n"
+"PO-Revision-Date: 2010-03-09 17:32+0900\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -13,450 +13,440 @@ msgstr ""
 "X-Poedit-Basepath: ../\n"
 "X-Poedit-SearchPath-0: custom-field-template\n"
 
-#: custom-field-template/custom-field-template.php:125
-#: custom-field-template/custom-field-template.php:126
-#: custom-field-template/custom-field-template.php:547
-#: custom-field-template/custom-field-template.php:754
-#: custom-field-template/custom-field-template.php:1918
-#: custom-field-template/custom-field-template.php:2046
+#: custom-field-template/custom-field-template.php:142
+#: custom-field-template/custom-field-template.php:143
+#: custom-field-template/custom-field-template.php:159
+#: custom-field-template/custom-field-template.php:580
+#: custom-field-template/custom-field-template.php:805
+#: custom-field-template/custom-field-template.php:1981
+#: custom-field-template/custom-field-template.php:2109
 msgid "Custom Field Template"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:236
-#: custom-field-template/custom-field-template.php:2223
+#: custom-field-template/custom-field-template.php:268
+#: custom-field-template/custom-field-template.php:2295
 msgid "Load"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:392
+#: custom-field-template/custom-field-template.php:424
 msgid "read more"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:410
-#: custom-field-template/custom-field-template.php:420
+#: custom-field-template/custom-field-template.php:442
+#: custom-field-template/custom-field-template.php:452
 msgid "Custom Fields"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:450
+#: custom-field-template/custom-field-template.php:482
 msgid "Settings"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:470
+#: custom-field-template/custom-field-template.php:502
 msgid "Default Template"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:679
-#: custom-field-template/custom-field-template.php:683
-#: custom-field-template/custom-field-template.php:695
-#: custom-field-template/custom-field-template.php:703
-#: custom-field-template/custom-field-template.php:719
+#: custom-field-template/custom-field-template.php:729
+#: custom-field-template/custom-field-template.php:733
+#: custom-field-template/custom-field-template.php:745
+#: custom-field-template/custom-field-template.php:753
+#: custom-field-template/custom-field-template.php:770
 msgid "Options updated."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:723
+#: custom-field-template/custom-field-template.php:774
 msgid "Value Counts rebuilt."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:726
+#: custom-field-template/custom-field-template.php:777
 msgid "Tags rebuilt."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:735
+#: custom-field-template/custom-field-template.php:786
 msgid "Options imported."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:742
+#: custom-field-template/custom-field-template.php:793
 msgid "Options resetted."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:746
+#: custom-field-template/custom-field-template.php:797
 msgid "Options deleted."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:760
-#: custom-field-template/custom-field-template.php:863
-#: custom-field-template/custom-field-template.php:882
-#: custom-field-template/custom-field-template.php:911
-#: custom-field-template/custom-field-template.php:942
-#: custom-field-template/custom-field-template.php:981
-#: custom-field-template/custom-field-template.php:1002
-#: custom-field-template/custom-field-template.php:1019
-#: custom-field-template/custom-field-template.php:1181
-#: custom-field-template/custom-field-template.php:1197
-#: custom-field-template/custom-field-template.php:1213
-#: custom-field-template/custom-field-template.php:1229
-#: custom-field-template/custom-field-template.php:1245
+#: custom-field-template/custom-field-template.php:811
+#: custom-field-template/custom-field-template.php:918
+#: custom-field-template/custom-field-template.php:937
+#: custom-field-template/custom-field-template.php:966
+#: custom-field-template/custom-field-template.php:997
+#: custom-field-template/custom-field-template.php:1038
+#: custom-field-template/custom-field-template.php:1059
+#: custom-field-template/custom-field-template.php:1076
+#: custom-field-template/custom-field-template.php:1238
+#: custom-field-template/custom-field-template.php:1254
+#: custom-field-template/custom-field-template.php:1270
+#: custom-field-template/custom-field-template.php:1286
+#: custom-field-template/custom-field-template.php:1302
 msgid "Click to toggle"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:761
+#: custom-field-template/custom-field-template.php:812
 msgid "Custom Field Template Options"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:771
+#: custom-field-template/custom-field-template.php:822
 msgid "Disable"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:773
+#: custom-field-template/custom-field-template.php:824
 msgid "Template Title"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:775
+#: custom-field-template/custom-field-template.php:826
 msgid "Template Instruction"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:777
-#: custom-field-template/custom-field-template.php:958
+#: custom-field-template/custom-field-template.php:828
+#: custom-field-template/custom-field-template.php:1013
 msgid "Post Type"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:779
-#: custom-field-template/custom-field-template.php:959
+#: custom-field-template/custom-field-template.php:830
+#: custom-field-template/custom-field-template.php:1014
 msgid "Both"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:780
-#: custom-field-template/custom-field-template.php:960
+#: custom-field-template/custom-field-template.php:831
+#: custom-field-template/custom-field-template.php:1015
 msgid "Post"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:781
-#: custom-field-template/custom-field-template.php:961
+#: custom-field-template/custom-field-template.php:832
+#: custom-field-template/custom-field-template.php:1016
 msgid "Page"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:782
-msgid "Post ID (comma-deliminated)"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:784
-#: custom-field-template/custom-field-template.php:962
-msgid "Category ID (comma-deliminated)"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:786
-msgid "Page Template file name(s) (comma-deliminated)"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:788
-msgid "Template Content"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:795
-msgid "In case that you would like to insert multiple images at once in use of the custom field media buttons"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:796
-msgid "Use multiple image inset"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:796
-msgid "Caution:"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:796
-msgid "You need to edit `wp-admin/includes/media.php`. Delete or comment out the code in the function media_send_to_editor."
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:800
-msgid "In case that you would like to replace custom keys by labels if `label` is set"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:801
-msgid "Use labels in place of custom keys"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:804
-msgid "In case that you would like to add p and br tags in textareas automatically"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:805
-msgid "Use wpautop function"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:809
-msgid "In case that you would like to save values automatically in switching templates"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:810
-msgid "Use the auto save in switching templates"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:814
-msgid "In case that you would like to forbid to use the initialize button."
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:815
-msgid "Disable the initialize button"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:819
-msgid "In case that you would like to forbid to use the save button."
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:820
-msgid "Disable the save button"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:824
-msgid "In case that you would like to forbid to use the default custom fields."
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:825
-msgid "Disable the default custom fields"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:829
-msgid "In case that you would like to forbid to use the quick edit."
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:830
-msgid "Disable the quick edit"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:834
-msgid "In case that you would like to forbid to display the custom field column on the edit post list page."
+#: custom-field-template/custom-field-template.php:833
+#: custom-field-template/custom-field-template.php:1017
+msgid "Custom Post Type (comma-deliminated)"
 msgstr ""
 
 #: custom-field-template/custom-field-template.php:835
-msgid "Disable the custom field column (The quick edit also does not work.)"
+msgid "Post ID (comma-deliminated)"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:837
+#: custom-field-template/custom-field-template.php:1019
+msgid "Category ID (comma-deliminated)"
 msgstr ""
 
 #: custom-field-template/custom-field-template.php:839
-msgid "In case that you would like to replace the box title with the template title."
+msgid "Page Template file name(s) (comma-deliminated)"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:840
-msgid "Replace the box title"
+#: custom-field-template/custom-field-template.php:841
+msgid "Template Content"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:844
-msgid "In case that you would like to use the shortcode in the widget."
+#: custom-field-template/custom-field-template.php:855
+msgid "In case that you would like to replace custom keys by labels if `label` is set"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:845
-msgid "Use the shortcode in the widget"
+#: custom-field-template/custom-field-template.php:856
+msgid "Use labels in place of custom keys"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:849
-msgid "In case that you would like to use the shortcode in the excerpt."
+#: custom-field-template/custom-field-template.php:859
+msgid "In case that you would like to add p and br tags in textareas automatically"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:850
-msgid "Use the shortcode in the excerpt"
-msgstr ""
-
-#: custom-field-template/custom-field-template.php:854
-#: custom-field-template/custom-field-template.php:873
-#: custom-field-template/custom-field-template.php:902
-#: custom-field-template/custom-field-template.php:933
-#: custom-field-template/custom-field-template.php:972
-msgid "Update Options &raquo;"
+#: custom-field-template/custom-field-template.php:860
+msgid "Use wpautop function"
 msgstr ""
 
 #: custom-field-template/custom-field-template.php:864
+msgid "In case that you would like to save values automatically in switching templates"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:865
+msgid "Use the auto save in switching templates"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:869
+msgid "In case that you would like to forbid to use the initialize button."
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:870
+msgid "Disable the initialize button"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:874
+msgid "In case that you would like to forbid to use the save button."
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:875
+msgid "Disable the save button"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:879
+msgid "In case that you would like to forbid to use the default custom fields."
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:880
+msgid "Disable the default custom fields"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:884
+msgid "In case that you would like to forbid to use the quick edit."
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:885
+msgid "Disable the quick edit"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:889
+msgid "In case that you would like to forbid to display the custom field column on the edit post list page."
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:890
+msgid "Disable the custom field column (The quick edit also does not work.)"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:894
+msgid "In case that you would like to replace the box title with the template title."
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:895
+msgid "Replace the box title"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:899
+msgid "In case that you would like to use the shortcode in the widget."
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:900
+msgid "Use the shortcode in the widget"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:904
+msgid "In case that you would like to use the shortcode in the excerpt."
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:905
+msgid "Use the shortcode in the excerpt"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:909
+#: custom-field-template/custom-field-template.php:928
+#: custom-field-template/custom-field-template.php:957
+#: custom-field-template/custom-field-template.php:988
+#: custom-field-template/custom-field-template.php:1029
+msgid "Update Options &raquo;"
+msgstr ""
+
+#: custom-field-template/custom-field-template.php:919
 msgid "ADMIN CSS"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:883
+#: custom-field-template/custom-field-template.php:938
 msgid "[cft] and [cftsearch] Shortcode Format"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:886
+#: custom-field-template/custom-field-template.php:941
 msgid "For [cft], [key] will be converted into the value of [key]."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:887
+#: custom-field-template/custom-field-template.php:942
 msgid "For [cftsearch], [key] will be converted into the input field."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:896
-#: custom-field-template/custom-field-template.php:965
+#: custom-field-template/custom-field-template.php:951
+#: custom-field-template/custom-field-template.php:1022
 msgid "Use PHP"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:912
+#: custom-field-template/custom-field-template.php:967
 msgid "PHP CODE (Experimental Option)"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:914
+#: custom-field-template/custom-field-template.php:969
 msgid "Are you sure to save PHP codes? Please do it at your own risk."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:915
+#: custom-field-template/custom-field-template.php:970
 msgid "For `text` and `textarea`, you must set $value as an string."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:917
+#: custom-field-template/custom-field-template.php:972
 msgid "For `checkbox`, `radio`, and `select`, you must set $values as an array."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:943
+#: custom-field-template/custom-field-template.php:998
 msgid "Auto Hook of `the_content()` (Experimental Option)"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:953
+#: custom-field-template/custom-field-template.php:1008
 msgid "Position"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:954
+#: custom-field-template/custom-field-template.php:1009
 msgid "Before the conetnt"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:955
+#: custom-field-template/custom-field-template.php:1010
 msgid "After the conetnt"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:956
+#: custom-field-template/custom-field-template.php:1011
 #, php-format
 msgid "Inside the conetnt ([cfthook hook=%d])"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:964
+#: custom-field-template/custom-field-template.php:1021
 msgid "Content"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:966
+#: custom-field-template/custom-field-template.php:1023
 msgid "Apply to feeds"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:982
+#: custom-field-template/custom-field-template.php:1039
 msgid "Rebuild Value Counts"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:984
+#: custom-field-template/custom-field-template.php:1041
 msgid "Are you sure to rebuild all value counts?"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:988
+#: custom-field-template/custom-field-template.php:1045
 msgid "Value Counts are used for temporarily saving how many values in each key. Set `valueCount = true` into fields."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:992
+#: custom-field-template/custom-field-template.php:1049
 msgid "Rebuild Value Counts &raquo;"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1003
+#: custom-field-template/custom-field-template.php:1060
 msgid "Rebuild Tags"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1005
+#: custom-field-template/custom-field-template.php:1062
 msgid "Are you sure to rebuild tags?"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1009
+#: custom-field-template/custom-field-template.php:1066
 msgid "Rebuild Tags &raquo;"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1020
+#: custom-field-template/custom-field-template.php:1077
 msgid "Option List"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1182
+#: custom-field-template/custom-field-template.php:1239
 msgid "Export Options"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1188
+#: custom-field-template/custom-field-template.php:1245
 msgid "Export Options &raquo;"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1198
+#: custom-field-template/custom-field-template.php:1255
 msgid "Import Options"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1200
+#: custom-field-template/custom-field-template.php:1257
 msgid "Are you sure to import options? Options you set will be overwritten."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1204
+#: custom-field-template/custom-field-template.php:1261
 msgid "Import Options &raquo;"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1214
+#: custom-field-template/custom-field-template.php:1271
 msgid "Reset Options"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1216
+#: custom-field-template/custom-field-template.php:1273
 msgid "Are you sure to reset options? Options you set will be reset to the default settings."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1220
+#: custom-field-template/custom-field-template.php:1277
 msgid "Reset Options &raquo;"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1230
+#: custom-field-template/custom-field-template.php:1287
 msgid "Delete Options"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1232
+#: custom-field-template/custom-field-template.php:1289
 msgid "Are you sure to delete options? Options you set will be deleted."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1236
+#: custom-field-template/custom-field-template.php:1293
 msgid "Delete Options &raquo;"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1246
+#: custom-field-template/custom-field-template.php:1303
 msgid "Donation"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1248
+#: custom-field-template/custom-field-template.php:1305
 msgid "If you liked this plugin, please make a donation via paypal! Any amount is welcome. Your support is much appreciated."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1345
-#: custom-field-template/custom-field-template.php:1466
-#: custom-field-template/custom-field-template.php:1546
-#: custom-field-template/custom-field-template.php:1720
-#: custom-field-template/custom-field-template.php:1843
+#: custom-field-template/custom-field-template.php:1401
+#: custom-field-template/custom-field-template.php:1522
+#: custom-field-template/custom-field-template.php:1602
+#: custom-field-template/custom-field-template.php:1776
+#: custom-field-template/custom-field-template.php:1906
 msgid "Add New"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1476
+#: custom-field-template/custom-field-template.php:1532
 msgid "Clear"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1562
+#: custom-field-template/custom-field-template.php:1618
 msgid "Select"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1627
+#: custom-field-template/custom-field-template.php:1683
 msgid "Add an Image"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1632
+#: custom-field-template/custom-field-template.php:1688
 msgid "Add Video"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1637
+#: custom-field-template/custom-field-template.php:1693
 msgid "Add Audio"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1641
+#: custom-field-template/custom-field-template.php:1697
 msgid "Add Media"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1648
+#: custom-field-template/custom-field-template.php:1704
 msgid "Toggle"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:1740
-#: custom-field-template/custom-field-template.php:1845
+#: custom-field-template/custom-field-template.php:1796
+#: custom-field-template/custom-field-template.php:1908
 msgid "Delete"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:2094
+#: custom-field-template/custom-field-template.php:2157
 msgid "Initialize"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:2095
+#: custom-field-template/custom-field-template.php:2158
 msgid "Are you sure to reset current values? Default values will be loaded."
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:2100
+#: custom-field-template/custom-field-template.php:2163
 msgid "Save"
 msgstr ""
 
-#: custom-field-template/custom-field-template.php:2720
+#: custom-field-template/custom-field-template.php:2793
 msgid "Search &raquo;"
 msgstr ""
 
