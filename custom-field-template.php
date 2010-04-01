@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.6
+Version: 1.6.1
 Author URI: http://wpgogo.com/
 */
 
@@ -156,6 +156,9 @@ class custom_field_template {
 				endforeach;
 				if ( is_array($custom_post_type) ) :
 					foreach( $custom_post_type as $val ) :
+						if ( function_exists('remove_meta_box') && $options['custom_field_template_disable_default_custom_fields'] ) :
+							remove_meta_box('postcustom', $val, 'normal');
+						endif;
 						add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), $val, 'normal', 'core');
 					endforeach;
 				endif;
@@ -713,6 +716,9 @@ type = file';
 			$options['custom_field_template_excerpt_shortcode'] = $_POST['custom_field_template_excerpt_shortcode'];
 			for($i=0;$i<count($_POST["custom_field_template_content"]);$i++) {
 				if( $_POST["custom_field_template_content"][$i] ) {
+					if ( preg_match('/\[content\]|\[post_title\]|\[excerpt\]/', $_POST["custom_field_template_content"][$i]) ) :
+						$errormessage = __('You can not use the following words as the field key: `content`, `post_title`, and `excerpt`.', 'custom-field-template');
+					endif;
 					$options['custom_fields'][$j]['title']   = $_POST["custom_field_template_title"][$i];
 					$options['custom_fields'][$j]['content'] = $_POST["custom_field_template_content"][$i];
 					$options['custom_fields'][$j]['instruction'] = $_POST["custom_field_template_instruction"][$i];
@@ -800,6 +806,9 @@ type = file';
 <?php if ($message) : ?>
 <div id="message" class="updated"><p><?php echo $message; ?></p></div>
 <?php endif; ?>
+<?php if ($errormessage) : ?>
+<div id="errormessage" class="error"><p><?php echo $errormessage; ?></p></div>
+<?php endif; ?>
 <div class="wrap">
 <div id="icon-plugins" class="icon32"><br/></div>
 <h2><?php _e('Custom Field Template', 'custom-field-template'); ?></h2>
@@ -863,6 +872,11 @@ type = file';
 <tr><td>
 <p><label for="custom_field_template_use_autosave"><?php _e('In case that you would like to save values automatically in switching templates', 'custom-field-template'); ?></label>:<br />
 <input type="checkbox" name="custom_field_template_use_autosave" id="custom_field_template_use_autosave" value="1" <?php if ($options['custom_field_template_use_autosave']) { echo 'checked="checked"'; } ?> /> <?php _e('Use the auto save in switching templates', 'custom-field-template'); ?></p>
+</td>
+</tr>
+<tr><td>
+<p><label for="custom_field_template_use_disable_button"><?php _e('In case that you would like to disable input fields of the custom field template temporarily', 'custom-field-template'); ?></label>:<br />
+<input type="checkbox" name="v" id="custom_field_template_use_disable_button" value="1" <?php if ($options['custom_field_template_use_disable_button']) { echo 'checked="checked"'; } ?> /> <?php _e('Use the `Disable` button. The default custom fields will be superseded.', 'custom-field-template'); ?></p>
 </td>
 </tr>
 <tr><td>
@@ -1793,7 +1807,7 @@ jQuery(this).addClass("closed");
 			$filename = basename($post->guid);
 			$title = attribute_escape(trim($post->post_title));
 			
-			$out .= '<p><label for=""><input type="checkbox" name="'.$name . '_delete[' . $sid . '][' . $cftnum . ']" id="'.$name . '_delete' . $sid . '" value="1" class="delete_file_checkbox" />' . __('Delete', 'custom-field-template') . '</label> <img src="'.$thumb_url.'" width="32" height="32" style="vertical-align:middle;" /> ' . $title . ' </p>';
+			$out .= '<p><label for="'.$name . '_delete' . $sid . '"><input type="checkbox" name="'.$name . '_delete[' . $sid . '][' . $cftnum . ']" id="'.$name . '_delete' . $sid . '" value="1" class="delete_file_checkbox" />' . __('Delete', 'custom-field-template') . '</label> <img src="'.$thumb_url.'" width="32" height="32" style="vertical-align:middle;" /> ' . $title . ' </p>';
 			$out .= '<input type="hidden" name="'.$name . '[' . $sid . '][' . $cftnum . ']" value="' . $value . '" />';
 		endif;
 
@@ -1812,6 +1826,8 @@ jQuery(this).addClass("closed");
 		
 		if ( $options['custom_fields'][$id]['disable'] )
 			return;
+			
+		if ( $_REQUEST['post'] ) $post = get_post($_REQUEST['post']);
 	
 		if ( $_REQUEST['page_template'] ) :
 			if ( count($options['custom_fields']) > 0 ) :
@@ -2153,6 +2169,12 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		
 		$out .= '<div style="position:absolute; top:30px; right:5px;">';
 		$out .= '<img class="waiting" style="display:none; vertical-align:middle;" src="images/loading.gif" alt="" id="cftloading_img" /> ';
+		if ( !$options['custom_field_template_use_disable_button'] ) :
+		$out .= '<input type="hidden" id="disable_value" value="0" />';
+		$out .= '<input type="button" value="' . __('Disable', 'custom-field-template') . '" onclick="';
+		$out .= 'if(jQuery(\'#disable_value\').val()==0) { jQuery(\'#disable_value\').val(1);jQuery(this).val(\''.__('Enable', 'custom-field-template').'\');jQuery(\'#cft input, #cft select, #cft textarea\').attr(\'disabled\',true);}else{  jQuery(\'#disable_value\').val(0);jQuery(this).val(\''.__('Disable', 'custom-field-template').'\');jQuery(\'#cft input, #cft select, #cft textarea\').attr(\'disabled\',false);}'; 
+		$out .= '" class="button" style="vertical-align:middle;" />';
+		endif;
 		if ( !$options['custom_field_template_disable_initialize_button'] ) :
 		$out .= '<input type="button" value="' . __('Initialize', 'custom-field-template') . '" onclick="';
 		$out .= 'if(confirm(\''.__('Are you sure to reset current values? Default values will be loaded.', 'custom-field-template').'\')){if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID.length=0;};jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&default=true&id=\'+jQuery(\'#custom-field-template-id\').val()+\'&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {';
