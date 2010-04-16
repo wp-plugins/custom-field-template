@@ -3,8 +3,8 @@ Contributors: Hiroaki Miyashita
 Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
-Tested up to: 3.0-alpha
-Stable tag: 1.6.1
+Tested up to: 3.0
+Stable tag: 1.6.2
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -101,9 +101,14 @@ See the default template and modify it.
 
 == Changelog ==
 
+= 1.6.2 =
+* Global Settings
+* Text to place before and after every list and value which is called by the cft shortcode
+* Bugfix: controlling conditions in WordPress 3.0
+
 = 1.6.1 =
 * Bugfix: selectable custom field templates in the custom post type.
-* Bugfix: disable the default cusmto fields in the custom post type.
+* Bugfix: disable the default custom fields in the custom post type.
 * Chinese (zh_CN) - hurri zhu
 
 = 1.6 =
