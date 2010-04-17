@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.6.2
+Version: 1.6.3
 Author URI: http://wpgogo.com/
 */
 
@@ -290,7 +290,7 @@ class custom_field_template {
 		else
 			$plugin_dir = dirname( plugin_basename(__FILE__) );
 
-		echo '<link rel="stylesheet" type="text/css" href="' . get_settings('siteurl') . '/' . PLUGINDIR . '/' . $plugin_dir . '/js/datePicker.css" />'."\n";
+		echo '<link rel="stylesheet" type="text/css" href="' . wp_guess_url() . '/' . PLUGINDIR . '/' . $plugin_dir . '/js/datePicker.css" />'."\n";
 
 		if ( substr($wp_version, 0, 3) >= '2.7' && is_user_logged_in() && ( strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php') ) && !strstr($_SERVER['REQUEST_URI'], 'page=') ) {
 ?>
@@ -738,6 +738,7 @@ type = file';
 			$options['custom_field_template_use_multiple_insert'] = $_POST['custom_field_template_use_multiple_insert'];
 			$options['custom_field_template_use_wpautop'] = $_POST['custom_field_template_use_wpautop'];
 			$options['custom_field_template_use_autosave'] = $_POST['custom_field_template_use_autosave'];
+			$options['custom_field_template_use_disable_button'] = $_POST['custom_field_template_use_disable_button'];
 			$options['custom_field_template_disable_initialize_button'] = $_POST['custom_field_template_disable_initialize_button'];
 			$options['custom_field_template_disable_save_button'] = $_POST['custom_field_template_disable_save_button'];
 			$options['custom_field_template_disable_default_custom_fields'] = $_POST['custom_field_template_disable_default_custom_fields'];
@@ -913,7 +914,7 @@ type = file';
 </tr>
 <tr><td>
 <p><label for="custom_field_template_use_disable_button"><?php _e('In case that you would like to disable input fields of the custom field template temporarily', 'custom-field-template'); ?></label>:<br />
-<input type="checkbox" name="v" id="custom_field_template_use_disable_button" value="1" <?php if ($options['custom_field_template_use_disable_button']) { echo 'checked="checked"'; } ?> /> <?php _e('Use the `Disable` button. The default custom fields will be superseded.', 'custom-field-template'); ?></p>
+<input type="checkbox" name="custom_field_template_use_disable_button" id="custom_field_template_use_disable_button" value="1" <?php if ($options['custom_field_template_use_disable_button']) { echo 'checked="checked"'; } ?> /> <?php _e('Use the `Disable` button. The default custom fields will be superseded.', 'custom-field-template'); ?></p>
 </td>
 </tr>
 <tr><td>
@@ -2253,7 +2254,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		
 		$out .= '<div style="position:absolute; top:30px; right:5px;">';
 		$out .= '<img class="waiting" style="display:none; vertical-align:middle;" src="images/loading.gif" alt="" id="cftloading_img" /> ';
-		if ( !$options['custom_field_template_use_disable_button'] ) :
+		if ( $options['custom_field_template_use_disable_button'] ) :
 		$out .= '<input type="hidden" id="disable_value" value="0" />';
 		$out .= '<input type="button" value="' . __('Disable', 'custom-field-template') . '" onclick="';
 		$out .= 'if(jQuery(\'#disable_value\').val()==0) { jQuery(\'#disable_value\').val(1);jQuery(this).val(\''.__('Enable', 'custom-field-template').'\');jQuery(\'#cft input, #cft select, #cft textarea\').attr(\'disabled\',true);}else{  jQuery(\'#disable_value\').val(0);jQuery(this).val(\''.__('Disable', 'custom-field-template').'\');jQuery(\'#cft input, #cft select, #cft textarea\').attr(\'disabled\',false);}'; 
