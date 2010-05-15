@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.6.4
+Version: 1.6.5
 Author URI: http://wpgogo.com/
 */
 
@@ -2337,14 +2337,14 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			// If only shows up on pages or posts if set
 			if ( $options['custom_fields'][$i]['post_type'] ) :
 				if ( substr($wp_version, 0, 3) < '3.0' ) :
-					if ( $options['custom_fields'][$id]['post_type'] == 'post' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php')) ) :
+					if ( $options['custom_fields'][$i]['post_type'] == 'post' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php')) ) :
 						continue;
 					endif;
-					if ( $options['custom_fields'][$id]['post_type'] == 'page' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php')) ) :
+					if ( $options['custom_fields'][$i]['post_type'] == 'page' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php')) ) :
 						continue;
 					endif;
 				else :
-					if ( $post->post_type!=$options['custom_fields'][$id]['post_type'] ) :
+					if ( $post->post_type!=$options['custom_fields'][$i]['post_type'] ) :
 						continue;
 					endif;
 				endif;
