@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.6.3
+Version: 1.6.4
 Author URI: http://wpgogo.com/
 */
 
@@ -499,6 +499,7 @@ class custom_field_template {
 		wp_enqueue_script( 'date', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/date.js', array('jquery') );
 		wp_enqueue_script( 'bgiframe', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.bgiframe.js', array('jquery') ) ;
 		wp_enqueue_script( 'datePicker', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.datePicker.js', array('jquery') );
+		wp_enqueue_script( 'textarearesizer', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.textarearesizer.js', array('jquery') );
 	}
 
 	function install_custom_field_template_data() {
@@ -565,14 +566,16 @@ type = file';
 	
 	function install_custom_field_template_css() {
 		$options = get_option('custom_field_template_data');
-		$options['css'] = '#cft dl { clear:both; margin:0; padding:0; width:100%; }
-#cft dt { float:left; font-weight:bold; margin:0; text-align:center; width:20%; }
+		$options['css'] = '#cft dl { margin:10px 0; }
+#cft dl:after { content:" "; clear:both; height:0; display:block; visibility:hidden; }
+#cft dt { width:20%; clear:both; float:left; display:inline; font-weight:bold; text-align:center; }
 #cft dt .hideKey { visibility:hidden; }
-#cft dd { float:left; margin:0; text-align:left; width:80%; }
+#cft dd { margin:0 0 0 21%; }
 #cft dd p.label { font-weight:bold; margin:0; }
 #cft_instruction { margin:10px; }
 #cft fieldset { border:1px solid #CCC; margin:5px; padding:5px; }
 #cft .mceStatusbar { padding-bottom:22px; }
+#cft .dl_checkbox { margin:0; }
 ';
 		update_option('custom_field_template_data', $options);
 	}
@@ -822,7 +825,32 @@ type = file';
 			$options = $this->get_custom_field_template_data();
 			$message = __('Options deleted.', 'custom-field-template');
 		endif;
+		
+		if ( !defined('WP_PLUGIN_DIR') )
+			$plugin_dir = str_replace( ABSPATH, '', dirname(__FILE__) );
+		else
+			$plugin_dir = dirname( plugin_basename(__FILE__) );
 ?>
+<style type="text/css">
+div.grippie {
+background:#EEEEEE url(<?php echo '../' . PLUGINDIR . '/' . $plugin_dir . '/js/'; ?>grippie.png) no-repeat scroll center 2px;
+border-color:#DDDDDD;
+border-style:solid;
+border-width:0pt 1px 1px;
+cursor:s-resize;
+height:9px;
+overflow:hidden;
+}
+.resizable-textarea textarea {
+display:block;
+margin-bottom:0pt;
+}
+</style>
+<script type="text/javascript">
+	jQuery(document).ready(function() {
+		jQuery('textarea.resizable:not(.processed)').TextAreaResizer();
+	});
+</script>
 <?php if ($message) : ?>
 <div id="message" class="updated"><p><?php echo $message; ?></p></div>
 <?php endif; ?>
@@ -853,7 +881,7 @@ type = file';
 <p><label for="custom_field_template_title[<?php echo $i; ?>]"><?php echo sprintf(__('Template Title', 'custom-field-template'), $i); ?></label>:<br />
 <input type="text" name="custom_field_template_title[<?php echo $i; ?>]" id="custom_field_template_title[<?php echo $i; ?>]" value="<?php echo attribute_escape(stripcslashes($options['custom_fields'][$i]['title'])); ?>" size="80" /></p>
 <p><label for="custom_field_template_instruction[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Template Instruction', 'custom-field-template'), $i); ?></a></label>:<br />
-<textarea name="custom_field_template_instruction[<?php echo $i; ?>]" class="large-text" id="custom_field_template_instruction[<?php echo $i; ?>]" rows="5" cols="80"<?php if ( empty($options['custom_fields'][$i]['instruction']) ) : echo ' style="display:none;"'; endif; ?>><?php echo stripcslashes($options['custom_fields'][$i]['instruction']); ?></textarea></p>
+<textarea class="large-text" name="custom_field_template_instruction[<?php echo $i; ?>]" class="large-text" id="custom_field_template_instruction[<?php echo $i; ?>]" rows="5" cols="80"<?php if ( empty($options['custom_fields'][$i]['instruction']) ) : echo ' style="display:none;"'; endif; ?>><?php echo stripcslashes($options['custom_fields'][$i]['instruction']); ?></textarea></p>
 <p><label for="custom_field_template_post_type[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Post Type', 'custom-field-template'), $i); ?></a></label>:<br />
 <span<?php if ( empty($options['custom_fields'][$i]['post_type']) ) : echo ' style="display:none;"'; endif; ?>>
 <input type="radio" name="custom_field_template_post_type[<?php echo $i; ?>]" id="custom_field_template_post_type[<?php echo $i; ?>]" value=""<?php if ( !$options['custom_fields'][$i]['post_type'] ) :  echo ' checked="checked"'; endif; ?> /> <?php _e('Both', 'custom-field-template'); ?>
@@ -868,7 +896,7 @@ type = file';
 <p><label for="custom_field_template_template_files[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Page Template file name(s) (comma-deliminated)', 'custom-field-template'), $i); ?></a></label>:<br />
 <input type="text" name="custom_field_template_template_files[<?php echo $i; ?>]" id="custom_field_template_template_files[<?php echo $i; ?>]" value="<?php echo attribute_escape(stripcslashes($options['custom_fields'][$i]['template_files'])); ?>" size="80"<?php if ( empty($options['custom_fields'][$i]['template_files']) ) : echo ' style="display:none;"'; endif; ?> /></p>
 <p><label for="custom_field_template_content[<?php echo $i; ?>]"><?php echo sprintf(__('Template Content', 'custom-field-template'), $i); ?></label>:<br />
-<textarea name="custom_field_template_content[<?php echo $i; ?>]" class="large-text" id="custom_field_template_content[<?php echo $i; ?>]" rows="10" cols="80"><?php echo stripcslashes($options['custom_fields'][$i]['content']); ?></textarea></p>
+<textarea name="custom_field_template_content[<?php echo $i; ?>]" class="resizable large-text" id="custom_field_template_content[<?php echo $i; ?>]" rows="10" cols="80"><?php echo stripcslashes($options['custom_fields'][$i]['content']); ?></textarea></p>
 </td></tr>
 <?php
 	}
@@ -991,7 +1019,7 @@ type = file';
 <table class="form-table" style="margin-bottom:5px;">
 <tbody>
 <tr><td>
-<p><textarea name="custom_field_template_css" class="large-text" id="custom_field_template_css" rows="10" cols="80"><?php echo stripcslashes($options['css']); ?></textarea></p>
+<p><textarea name="custom_field_template_css" class="large-text resizable" id="custom_field_template_css" rows="10" cols="80"><?php echo stripcslashes($options['css']); ?></textarea></p>
 </td></tr>
 <tr><td>
 <p><input type="submit" name="custom_field_template_css_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
@@ -1016,7 +1044,7 @@ type = file';
 ?>
 <tr><th><strong>FORMAT #<?php echo $i; ?></strong></th></tr>
 <tr><td>
-<p><textarea name="custom_field_template_shortcode_format[<?php echo $i; ?>]" class="large-text" rows="10" cols="80"><?php echo stripcslashes($options['shortcode_format'][$i]); ?></textarea></p>
+<p><textarea name="custom_field_template_shortcode_format[<?php echo $i; ?>]" class="large-text resizable" rows="10" cols="80"><?php echo stripcslashes($options['shortcode_format'][$i]); ?></textarea></p>
 <p><label><input type="checkbox" name="custom_field_template_shortcode_format_use_php[<?php echo $i; ?>]" value="1" <?php if ($options['shortcode_format_use_php'][$i]) { echo ' checked="checked"'; } ?> /> <?php _e('Use PHP', 'custom-field-template'); ?></label></p>
 </td></tr>
 <?php
@@ -1048,7 +1076,7 @@ ex. `radio` and `select`:</dt><dd>$values = array('dog', 'cat', 'monkey'); $defa
 ?>
 <tr><th><strong>CODE #<?php echo $i; ?></strong></th></tr>
 <tr><td>
-<p><textarea name="custom_field_template_php[]" class="large-text" rows="10" cols="80"><?php echo stripcslashes($options['php'][$i]); ?></textarea></p>
+<p><textarea name="custom_field_template_php[]" class="large-text resizable" rows="10" cols="80"><?php echo stripcslashes($options['php'][$i]); ?></textarea></p>
 </td></tr>
 <?php
 	endfor;
@@ -1087,7 +1115,7 @@ ex. `radio` and `select`:</dt><dd>$values = array('dog', 'cat', 'monkey'); $defa
 <input type="text" name="custom_field_template_hook_custom_post_type[<?php echo $i; ?>]" id="custom_field_template_hook_custom_post_type[<?php echo $i; ?>]" value="<?php echo attribute_escape(stripcslashes($options['hook'][$i]['custom_post_type'])); ?>" size="80" /></p>
 <p><label for="custom_field_template_hook_category[<?php echo $i; ?>]"><?php echo sprintf(__('Category ID (comma-deliminated)', 'custom-field-template'), $i); ?></label>:<br />
 <input type="text" name="custom_field_template_hook_category[<?php echo $i; ?>]" id="custom_field_template_hook_category[<?php echo $i; ?>]" value="<?php echo attribute_escape(stripcslashes($options['hook'][$i]['category'])); ?>" size="80" /></p>
-<p><label for="custom_field_template_hook_content[<?php echo $i; ?>]"><?php echo sprintf(__('Content', 'custom-field-template'), $i); ?></label>:<br /><textarea name="custom_field_template_hook_content[<?php echo $i; ?>]" class="large-text" rows="5" cols="80"><?php echo stripcslashes($options['hook'][$i]['content']); ?></textarea></p>
+<p><label for="custom_field_template_hook_content[<?php echo $i; ?>]"><?php echo sprintf(__('Content', 'custom-field-template'), $i); ?></label>:<br /><textarea name="custom_field_template_hook_content[<?php echo $i; ?>]" class="large-text resizable" rows="5" cols="80"><?php echo stripcslashes($options['hook'][$i]['content']); ?></textarea></p>
 <p><input type="checkbox" name="custom_field_template_hook_use_php[<?php echo $i; ?>]" id="custom_field_template_hook_use_php[<?php echo $i; ?>]" value="1" <?php if ($options['hook'][$i]['use_php']) { echo ' checked="checked"'; } ?> /> <?php _e('Use PHP', 'custom-field-template'); ?></p>
 <p><input type="checkbox" name="custom_field_template_hook_feed[<?php echo $i; ?>]" id="custom_field_template_hook_feed[<?php echo $i; ?>]" value="1" <?php if ($options['hook'][$i]['feed']) { echo ' checked="checked"'; } ?> /> <?php _e('Apply to feeds', 'custom-field-template'); ?></p>
 </td></tr>
@@ -1472,7 +1500,7 @@ jQuery(this).addClass("closed");
 		endif;
 				
 		$out .= 
-			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
+			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '" class="dl_text">' .
 			'<dt><span' . $hide . '><label for="' . $name . $sid . '_' . $cftnum . '">' . $title . '</label></span>'.$addfield.'</dt>' .
 			'<dd>';
 
@@ -1534,7 +1562,7 @@ jQuery(this).addClass("closed");
 		$id = $name . $sid . '_' . $cftnum . '_' . $this->sanitize_name( $value );
 
 		$out .= 
-			'<dl id="dl_' . $id . '">' .
+			'<dl id="dl_' . $id . '" class="dl_checkbox">' .
 			'<dt><span' . $hide . '>' . $title . '</span></dt>' .
 			'<dd>';
 		
@@ -1593,7 +1621,7 @@ jQuery(this).addClass("closed");
 		endif;		
 
 		$out .= 
-			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
+			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '" class="dl_radio">' .
 			'<dt><span' . $hide . '>' . $title . '</span>'.$addfield;
 			
 		if( $clearButton == true ) {
@@ -1673,7 +1701,7 @@ jQuery(this).addClass("closed");
 		endif;		
 
 		$out .= 
-			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
+			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '" class="dl_select">' .
 			'<dt><span' . $hide . '><label for="' . $name . $sid . '_' . $cftnum . '">' . $title . '</label></span>'.$addfield.'</dt>' .
 			'<dd>';
 			
@@ -1795,7 +1823,7 @@ jQuery(this).addClass("closed");
 		endforeach;
 		
 		$out .= 
-			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
+			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '" class="dl_textarea">' .
 			'<dt><span' . $hide . '><label for="' . $name . $sid . '_' . $cftnum . '">' . $title . '</label></span><br />' . $media . $switch . '</dt>' .
 			'<dd>';
 
@@ -1847,7 +1875,7 @@ jQuery(this).addClass("closed");
 		endif;
 				
 		$out .= 
-			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '">' .
+			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '" class="dl_file">' .
 			'<dt><span' . $hide . '><label for="' . $name . $sid . '_' . $cftnum . '">' . $title . '</label></span>'.$addfield.'</dt>' .
 			'<dd>';
 
