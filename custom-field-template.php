@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.6.5
+Version: 1.6.6
 Author URI: http://wpgogo.com/
 */
 
@@ -160,6 +160,9 @@ class custom_field_template {
 							remove_meta_box('postcustom', $val, 'normal');
 						endif;
 						add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), $val, 'normal', 'core');
+						if ( empty($options['custom_field_template_disable_custom_field_column']) ) :
+							add_filter( 'manage_'.$val.'_posts_columns', array(&$this, 'add_manage_pages_columns') );
+						endif;
 					endforeach;
 				endif;
 			endif;
@@ -320,7 +323,7 @@ class custom_field_template {
 
 			var params = {
 				action: 'inline-save',
-				post_type: this.type,
+				post_type: <?php if ( substr($wp_version, 0, 3) >= '3.0' ) echo 'typenow'; else echo 'this.type'; ?>, 
 				post_ID: id,
 				edit_date: 'true'
 			};
@@ -881,7 +884,7 @@ margin-bottom:0pt;
 <p><label for="custom_field_template_title[<?php echo $i; ?>]"><?php echo sprintf(__('Template Title', 'custom-field-template'), $i); ?></label>:<br />
 <input type="text" name="custom_field_template_title[<?php echo $i; ?>]" id="custom_field_template_title[<?php echo $i; ?>]" value="<?php echo attribute_escape(stripcslashes($options['custom_fields'][$i]['title'])); ?>" size="80" /></p>
 <p><label for="custom_field_template_instruction[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Template Instruction', 'custom-field-template'), $i); ?></a></label>:<br />
-<textarea class="large-text" name="custom_field_template_instruction[<?php echo $i; ?>]" class="large-text" id="custom_field_template_instruction[<?php echo $i; ?>]" rows="5" cols="80"<?php if ( empty($options['custom_fields'][$i]['instruction']) ) : echo ' style="display:none;"'; endif; ?>><?php echo stripcslashes($options['custom_fields'][$i]['instruction']); ?></textarea></p>
+<textarea class="large-text" name="custom_field_template_instruction[<?php echo $i; ?>]" id="custom_field_template_instruction[<?php echo $i; ?>]" rows="5" cols="80"<?php if ( empty($options['custom_fields'][$i]['instruction']) ) : echo ' style="display:none;"'; endif; ?>><?php echo stripcslashes($options['custom_fields'][$i]['instruction']); ?></textarea></p>
 <p><label for="custom_field_template_post_type[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Post Type', 'custom-field-template'), $i); ?></a></label>:<br />
 <span<?php if ( empty($options['custom_fields'][$i]['post_type']) ) : echo ' style="display:none;"'; endif; ?>>
 <input type="radio" name="custom_field_template_post_type[<?php echo $i; ?>]" id="custom_field_template_post_type[<?php echo $i; ?>]" value=""<?php if ( !$options['custom_fields'][$i]['post_type'] ) :  echo ' checked="checked"'; endif; ?> /> <?php _e('Both', 'custom-field-template'); ?>
@@ -3272,13 +3275,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										case '<>' :
 										case '<=>':
 											if ( is_numeric($val3) ) :
-												$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " " . trim($val3) . ") GROUP BY post_id) ";
+												$where .=  $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %d) GROUP BY post_id) ", $key, trim($val3));
 											else :
-												$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " '" . trim($val3) . "') GROUP BY post_id) ";
+												$where .= $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %s) GROUP BY post_id) ", $key, trim($val3));
 											endif;
 											break;
 										default :
-											$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = '" . $key . "' AND `" . $wpdb->postmeta . "`.meta_value LIKE '%" . trim($val3) . "%') GROUP BY post_id) ";
+											$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value LIKE %s) GROUP BY post_id) ", $key, '%'.trim($val3).'%');
 											break;
 									endswitch;
 									$ch++;
@@ -3302,11 +3305,11 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			foreach ( $s as $v ) :
 				if ( !empty($v) ) :
 					if ( $i>0 ) $where .= ' AND ';
-					$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_value LIKE '%" . trim($v) . "%') GROUP BY post_id) ";
+					$where .= $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_value LIKE %s) GROUP BY post_id) ", '%'.trim($v).'%');
 					$i++;
 				endif;
 			endforeach;
-			$where .= " OR ((`" . $wpdb->posts . "`.post_title LIKE '%" . trim($_REQUEST['s']) . "%') OR (`" . $wpdb->posts . "`.post_content LIKE '%" . trim($_REQUEST['s']) . "%'))";
+			$where .= $wpdb->prepare(" OR ((`" . $wpdb->posts . "`.post_title LIKE %s) OR (`" . $wpdb->posts . "`.post_content LIKE %s))", '%'.trim($_REQUEST['s']).'%', '%'.trim($_REQUEST['s']).'%');
 			$where .= ') ';
 		endif;
 
@@ -3325,6 +3328,10 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 				$where .= " AND ID NOT IN (" . $in_posts . ")";
 			endif;
 		endif;
+		
+		if ( $_REQUEST['post_type'] ) :
+			$where .= $wpdb->prepare(" AND " . $wpdb->posts . ".post_type = %s", trim($_REQUEST['post_type'])); 
+		endif;
 				
 		if ( $_REQUEST['no_is_search'] ) :
 			$where .= " AND `".$wpdb->posts."`.post_status = 'publish'";
@@ -3339,7 +3346,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		if ( ($_REQUEST['order'] == 'ASC' || $_REQUEST['order'] == 'DESC') && $_REQUEST['orderby'] ) :
 			global $wpdb;
 
-			$sql = " LEFT JOIN `" . $wpdb->postmeta . "` AS meta ON (`" . $wpdb->posts . "`.ID = meta.post_id AND meta.meta_key = '". $_REQUEST['orderby'] . "')"; 
+			$sql = $wpdb->prepare(" LEFT JOIN `" . $wpdb->postmeta . "` AS meta ON (`" . $wpdb->posts . "`.ID = meta.post_id AND meta.meta_key = %s)", $_REQUEST['orderby']); 
 			return $sql;
 		endif;
 	}
@@ -3352,20 +3359,20 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 
 		if ( $_REQUEST['orderby'] ) :
 			if ( in_array($_REQUEST['orderby'], array('post_author', 'post_date', 'post_title', 'post_modified', 'menu_order', 'post_parent', 'ID')) ):
-				$sql = "`".$wpdb->posts."`.".$_REQUEST['orderby']." ".$_REQUEST['order'];
+				$sql = $wpdb->prepare("`".$wpdb->posts."`.%s %s", $_REQUEST['orderby'], $_REQUEST['order']);
 			elseif ( $_REQUEST['orderby']=='rand' ):
 				$sql = "RAND()";
 			else:
 				if ( in_array($_REQUEST['cast'], array('binary', 'char', 'date', 'datetime', 'signed', 'time', 'unsigned')) ) :
-					$sql = " CAST(meta.meta_value AS " . $_REQUEST['cast'] . ") " . $_REQUEST['order'];
+					$sql = $wpdb->prepare(" CAST(meta.meta_value AS %s) %s", $_REQUEST['cast'], $_REQUEST['order']);
 				else :
-					$sql = " meta.meta_value " . $_REQUEST['order'];
+					$sql = $wpdb->prepare(" meta.meta_value %s", $_REQUEST['order']);
 				endif;
 			endif;
 			return $sql;
 		endif;
 
-		$sql = "`".$wpdb->posts."`.post_date ".$_REQUEST['order'];
+		$sql = $wpdb->prepare("`".$wpdb->posts."`.post_date %s", $_REQUEST['order']);
 		return $sql;
 	}
 	
@@ -3377,7 +3384,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		$limit = (int)$_REQUEST['limit'];
 		if ( !$limit )
 			$limit = trim($old_limit);
-		$wp_query->query_vars['posts_per_page'] = $limit;
+		$wp_query->query_vars0['posts_per_page'] = $limit;
 		$offset = ($wp_query->query_vars['paged'] - 1) * $limit;
 		if ( $offset < 0 ) $offset = 0;
 
