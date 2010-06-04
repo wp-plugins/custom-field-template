@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.6.6
+Version: 1.6.7
 Author URI: http://wpgogo.com/
 */
 
@@ -3281,7 +3281,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 											endif;
 											break;
 										default :
-											$where .= " ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value LIKE %s) GROUP BY post_id) ", $key, '%'.trim($val3).'%');
+											$where .= $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value LIKE %s) GROUP BY post_id) ", $key, '%'.trim($val3).'%');
 											break;
 									endswitch;
 									$ch++;
