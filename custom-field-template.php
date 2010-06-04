@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.6.7
+Version: 1.6.8
 Author URI: http://wpgogo.com/
 */
 
@@ -3359,14 +3359,14 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 
 		if ( $_REQUEST['orderby'] ) :
 			if ( in_array($_REQUEST['orderby'], array('post_author', 'post_date', 'post_title', 'post_modified', 'menu_order', 'post_parent', 'ID')) ):
-				$sql = $wpdb->prepare("`".$wpdb->posts."`.%s %s", $_REQUEST['orderby'], $_REQUEST['order']);
+				$sql = "`".$wpdb->posts."`.".$_REQUEST['orderby']." ".$_REQUEST['order'];
 			elseif ( $_REQUEST['orderby']=='rand' ):
 				$sql = "RAND()";
 			else:
 				if ( in_array($_REQUEST['cast'], array('binary', 'char', 'date', 'datetime', 'signed', 'time', 'unsigned')) ) :
-					$sql = $wpdb->prepare(" CAST(meta.meta_value AS %s) %s", $_REQUEST['cast'], $_REQUEST['order']);
+					$sql = " CAST(meta.meta_value AS ".$_REQUEST['cast'].") ".$_REQUEST['order'];
 				else :
-					$sql = $wpdb->prepare(" meta.meta_value %s", $_REQUEST['order']);
+					$sql = " meta.meta_value ".$_REQUEST['order'];
 				endif;
 			endif;
 			return $sql;
