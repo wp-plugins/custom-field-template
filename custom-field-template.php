@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.6.8
+Version: 1.6.9
 Author URI: http://wpgogo.com/
 */
 
@@ -152,6 +152,7 @@ class custom_field_template {
 				foreach($options['custom_fields'] as $key => $val ) :
 					$tmp_custom_post_type = explode(',', $options['custom_fields'][$key]['custom_post_type']);
 					$tmp_custom_post_type = array_filter( $tmp_custom_post_type );
+					array_walk( $tmp_custom_post_type, create_function('&$v', '$v = trim($v);') );
 					$custom_post_type = array_merge($custom_post_type, $tmp_custom_post_type);
 				endforeach;
 				if ( is_array($custom_post_type) ) :
@@ -644,6 +645,8 @@ type = file';
 							$options['hook'][$i]['content'] = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $options['hook'][$i]['content']);
 						endif;
 						$needle = explode(',', $options['hook'][$i]['category']);
+						$needle = array_filter($needle);
+						array_walk( $needle, create_function('&$v', '$v = trim($v);') );
 						foreach ( $needle as $val ) :
 							if ( in_array($val, $cats ) ) :
 								if ( $options['hook'][$i]['position'] == 0 )
@@ -685,6 +688,7 @@ type = file';
 				elseif ( $options['hook'][$i]['custom_post_type'] ) :
 					$custom_post_type = explode(',', $options['hook'][$i]['custom_post_type']);
 					$custom_post_type = array_filter( $custom_post_type );
+					array_walk( $custom_post_type, create_function('&$v', '$v = trim($v);') );
 					if ( in_array($post->post_type, $custom_post_type) ) :
 						if ( $options['hook'][$i]['use_php'] ) :
 							$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
@@ -1909,21 +1913,40 @@ jQuery(this).addClass("closed");
 		$level = $userdata->user_level;
 		
 		$options = $this->get_custom_field_template_data();
+					
+		if ( $_REQUEST['post'] ) $post = get_post($_REQUEST['post']);
+
+		if ( count($options['custom_fields']) > 0 && !isset($_REQUEST['id']) && !isset($options['posts'][$_REQUEST['post']]) ) :
+			foreach ( $options['custom_fields'] as $key => $val ) :
+				if ( !empty($val['template_files']) && !empty($_REQUEST['page_template']) ) :
+					$template_files = explode(',', $val['template_files']);
+					$template_files = array_filter( $template_files );
+					array_walk( $template_files, create_function('&$v', '$v = trim($v);') );
+					if ( in_array($_REQUEST['page_template'], $template_files) ) :
+						$id = $key;
+						break;
+					endif;
+				endif;
+				if ( !empty($val['post_type']) ) :
+					if ( $post->post_type == $val['post_type'] ) :
+						$id = $key;
+						break;
+					endif;
+				endif;
+				if ( !empty($val['custom_post_type']) ) :
+					$tmp_custom_post_type = explode(',', $val['custom_post_type']);
+					$tmp_custom_post_type = array_filter( $tmp_custom_post_type );
+					array_walk( $tmp_custom_post_type, create_function('&$v', '$v = trim($v);') );
+					if ( in_array($post->post_type, $tmp_custom_post_type) ) :
+						$id = $key;
+						break;
+					endif;
+				endif;
+			endforeach;
+		endif;
 		
 		if ( $options['custom_fields'][$id]['disable'] )
 			return;
-			
-		if ( $_REQUEST['post'] ) $post = get_post($_REQUEST['post']);
-		
-		if ( $_REQUEST['page_template'] ) :
-			if ( count($options['custom_fields']) > 0 ) :
-				foreach ( $options['custom_fields'] as $key => $val ) :
-					$template_files = explode(',', $val['template_files']);
-					$template_files = array_filter( $template_files );
-					if ( in_array($_REQUEST['page_template'], $template_files) ) $id = $key;
-				endforeach;
-			endif;
-		endif;
 
 		$fields = $this->get_custom_fields( $id );
 
@@ -1953,6 +1976,8 @@ jQuery(this).addClass("closed");
 		if ( $options['custom_fields'][$id]['custom_post_type'] ) :
 			$custom_post_type = explode(',', $options['custom_fields'][$id]['custom_post_type']);
 			$custom_post_type = array_filter( $custom_post_type );
+			array_walk( $custom_post_type, create_function('&$v', '$v = trim($v);') );
+			
 			if ( !in_array($post->post_type, $custom_post_type) )
 				return;
 		endif;		
@@ -1985,6 +2010,7 @@ jQuery(this).addClass("closed");
 		if ( $options['custom_fields'][$id]['post'] ) :
 			$post_ids = explode(',', $options['custom_fields'][$id]['post']);
 			$post_ids = array_filter( $post_ids );
+			array_walk( $post_ids, create_function('&$v', '$v = trim($v);') );
 			if ( !in_array($_REQUEST['post'], $post_ids) )
 				return;
 		endif;
@@ -1992,6 +2018,7 @@ jQuery(this).addClass("closed");
 		if ( $options['custom_fields'][$id]['template_files'] && (isset($post->page_template) || $_REQUEST['page_template']) ) :
 			$template_files = explode(',', $options['custom_fields'][$id]['template_files']);
 			$template_files = array_filter( $template_files );
+			array_walk( $template_files, create_function('&$v', '$v = trim($v);') );
 			if ( $_REQUEST['page_template'] ) :
 				if ( !in_array($_REQUEST['page_template'], $template_files) ) :
 					return;
@@ -2217,6 +2244,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 					$val['category'] = preg_replace('/\s/', '', $val['category']);
 					$categories = explode(',', $val['category']);
 					$categories = array_filter($categories);
+					array_walk( $categories, create_function('&$v', '$v = trim($v);') );
 					foreach($categories as $cat_id) :
 						if ( is_numeric($cat_id) ) :
 							$out .=		'jQuery(\'#in-category-' . $cat_id . '\').click(function(){if(jQuery(\'#in-category-' . $cat_id . '\').attr(\'checked\') == true) { if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID.length=0;}; jQuery.get(\'?page=custom-field-template/custom-field-template.php&cft_mode=selectbox&post=\'+jQuery(\'#post_ID\').val()+\'&\'+jQuery(\'#categories-all :input\').fieldSerialize(), function(html) { jQuery(\'#cft_selectbox\').html(html);';
@@ -2356,18 +2384,20 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			if ( $options['custom_fields'][$i]['custom_post_type'] ) :
 				$custom_post_type = explode(',', $options['custom_fields'][$i]['custom_post_type']);
 				$custom_post_type = array_filter( $custom_post_type );
+				array_walk( $custom_post_type, create_function('&$v', '$v = trim($v);') );
 				if ( !in_array($post->post_type, $custom_post_type) )
 					continue;
 			endif;
 		
-			// Filter IDs and Pages
 			$cat_ids = explode(',', $options['custom_fields'][$i]['category']);
 			$template_files = explode(',', $options['custom_fields'][$i]['template_files']);
 			$post_ids = explode(',', $options['custom_fields'][$i]['post']);
-			// Send back empties
 			$cat_ids = array_filter( $cat_ids );
 			$template_files = array_filter( $template_files );
 			$post_ids = array_filter( $post_ids );
+			array_walk( $cat_ids, create_function('&$v', '$v = trim($v);') );
+			array_walk( $template_files, create_function('&$v', '$v = trim($v);') );
+			array_walk( $post_ids, create_function('&$v', '$v = trim($v);') );
 			
 			if ( (strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php') || strstr($_SERVER['REQUEST_URI'], 'post_type=page') || $post->post_type=='page') ) :
 				// Check if there are page template files to filter by and  there is a page template
