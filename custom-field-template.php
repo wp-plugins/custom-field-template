@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.7
+Version: 1.7.1
 Author URI: http://wpgogo.com/
 */
 
