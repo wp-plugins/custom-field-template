@@ -102,6 +102,9 @@ See the default template and modify it.
 
 == Changelog ==
 
+= 1.7 =
+* Bugfix: JavaScript error.
+
 = 1.6.9 =
 * Bugfix: template loading.
 
