@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.7.1
+Version: 1.7.2
 Author URI: http://wpgogo.com/
 */
 
@@ -45,7 +45,6 @@ class custom_field_template {
 
 		add_action( 'delete_post', array(&$this, 'custom_field_template_delete_post'), 100 );
 		
-		add_filter( 'media_send_to_editor', array(&$this, 'media_send_to_custom_field'), 15 );
 		add_filter( 'plugin_action_links', array(&$this, 'wpaq_filter_plugin_actions'), 10, 2 );
 		
 		add_filter( 'get_the_excerpt', array(&$this, 'custom_field_template_get_the_excerpt'), 1 );
@@ -152,7 +151,7 @@ class custom_field_template {
 				foreach($options['custom_fields'] as $key => $val ) :
 					$tmp_custom_post_type = explode(',', $options['custom_fields'][$key]['custom_post_type']);
 					$tmp_custom_post_type = array_filter( $tmp_custom_post_type );
-					array_walk( $tmp_custom_post_type, create_function('&$v', '$v = trim($v);') );
+					$tmp_custom_post_type = array_unique(array_filter(array_map('trim', $tmp_custom_post_type)));
 					$custom_post_type = array_merge($custom_post_type, $tmp_custom_post_type);
 				endforeach;
 				if ( is_array($custom_post_type) ) :
@@ -460,25 +459,6 @@ class custom_field_template {
 		endforeach;
 		return $new_columns;
 	}
-		
-	function media_send_to_custom_field($html) {
-		$options = $this->get_custom_field_template_data();
-
-		$out =  '<script type="text/javascript">' . "\n" .
-				'	/* <![CDATA[ */' . "\n" .
-				'	var win = window.dialogArguments || opener || parent || top;' . "\n" .
-				'	win.send_to_custom_field("' . addslashes($html) . '");' . "\n" .
-				'/* ]]> */' . "\n" .
-				'</script>' . "\n";
-
-		echo $out;
-
-		if ($options['custom_field_template_use_multiple_insert']) {
-			return;
-		} else {
-			exit();
-		}
-	}
 	
 	function wpaq_filter_plugin_actions($links, $file){
 		static $this_plugin;
@@ -646,7 +626,7 @@ type = file';
 						endif;
 						$needle = explode(',', $options['hook'][$i]['category']);
 						$needle = array_filter($needle);
-						array_walk( $needle, create_function('&$v', '$v = trim($v);') );
+						$needle = array_unique(array_filter(array_map('trim', $needle)));
 						foreach ( $needle as $val ) :
 							if ( in_array($val, $cats ) ) :
 								if ( $options['hook'][$i]['position'] == 0 )
@@ -1268,6 +1248,9 @@ hideKey = true<br />
 <th>relation</th><td></td><td></td><td></td><td></td><td></td><td>relation = true</td>
 </tr>
 <tr>
+<th>mediaLibrary</th><td></td><td></td><td></td><td></td><td></td><td>mediaLibrary = true</td>
+</tr>
+<tr>
 <th>code</th><td>code = 0</td><td>code = 0</td><td>code = 0</td><td>code = 0</td><td>code = 0</td><td></td>
 </tr>
 <tr>
@@ -1851,7 +1834,7 @@ jQuery(this).addClass("closed");
 		return $out;
 	}
 	
-	function make_file( $name, $sid, $cftnum, $size, $hideKey, $label, $class, $style, $before, $after, $multipleButton ) {
+	function make_file( $name, $sid, $cftnum, $size, $hideKey, $label, $class, $style, $before, $after, $multipleButton, $relation, $mediaLibrary ) {
 		$options = $this->get_custom_field_template_data();
 
 		$title = $name;
@@ -1897,6 +1880,12 @@ jQuery(this).addClass("closed");
 			$filename = basename($post->guid);
 			$title = attribute_escape(trim($post->post_title));
 			
+			if ( !empty($mediaLibrary) ) :
+				$media_upload_iframe_src = "media-upload.php";
+				$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src?type=image&tab=gallery");
+				$title = '<a href="'.$image_upload_iframe_src.'&post_id='.$_REQUEST[ 'post' ].'&type=image&TB_iframe=true&width=670" onclick="return thickbox(this);">'.$title.'</a>';
+			endif;
+			
 			$out .= '<p><label for="'.$name . '_delete' . $sid . '"><input type="checkbox" name="'.$name . '_delete[' . $sid . '][' . $cftnum . ']" id="'.$name . '_delete' . $sid . '" value="1" class="delete_file_checkbox" />' . __('Delete', 'custom-field-template') . '</label> <img src="'.$thumb_url.'" width="32" height="32" style="vertical-align:middle;" /> ' . $title . ' </p>';
 			$out .= '<input type="hidden" name="'.$name . '[' . $sid . '][' . $cftnum . ']" value="' . $value . '" />';
 		endif;
@@ -1921,7 +1910,7 @@ jQuery(this).addClass("closed");
 				if ( !empty($val['template_files']) && !empty($_REQUEST['page_template']) ) :
 					$template_files = explode(',', $val['template_files']);
 					$template_files = array_filter( $template_files );
-					array_walk( $template_files, create_function('&$v', '$v = trim($v);') );
+					$template_files = array_unique(array_filter(array_map('trim', $template_files)));
 					if ( in_array($_REQUEST['page_template'], $template_files) ) :
 						$id = $key;
 						break;
@@ -1976,8 +1965,7 @@ jQuery(this).addClass("closed");
 		if ( $options['custom_fields'][$id]['custom_post_type'] ) :
 			$custom_post_type = explode(',', $options['custom_fields'][$id]['custom_post_type']);
 			$custom_post_type = array_filter( $custom_post_type );
-			array_walk( $custom_post_type, create_function('&$v', '$v = trim($v);') );
-			
+			$custom_post_type = array_unique(array_filter(array_map('trim', $custom_post_type)));
 			if ( !in_array($post->post_type, $custom_post_type) )
 				return;
 		endif;		
@@ -2010,7 +1998,7 @@ jQuery(this).addClass("closed");
 		if ( $options['custom_fields'][$id]['post'] ) :
 			$post_ids = explode(',', $options['custom_fields'][$id]['post']);
 			$post_ids = array_filter( $post_ids );
-			array_walk( $post_ids, create_function('&$v', '$v = trim($v);') );
+			$post_ids = array_unique(array_filter(array_map('trim', $post_ids)));
 			if ( !in_array($_REQUEST['post'], $post_ids) )
 				return;
 		endif;
@@ -2018,7 +2006,7 @@ jQuery(this).addClass("closed");
 		if ( $options['custom_fields'][$id]['template_files'] && (isset($post->page_template) || $_REQUEST['page_template']) ) :
 			$template_files = explode(',', $options['custom_fields'][$id]['template_files']);
 			$template_files = array_filter( $template_files );
-			array_walk( $template_files, create_function('&$v', '$v = trim($v);') );
+			$template_files = array_unique(array_filter(array_map('trim', $template_files)));
 			if ( $_REQUEST['page_template'] ) :
 				if ( !in_array($_REQUEST['page_template'], $template_files) ) :
 					return;
@@ -2103,7 +2091,7 @@ jQuery(this).addClass("closed");
 					}
 					else if( $data['type'] == 'file' ) {
 						$out .= 
-							$this->make_file( $title, $parentSN, $data['cftnum'], $data['size'], $data['hideKey'], $data['label'], $data['class'], $data['style'], $data['before'], $data['after'], $data['multipleButton'] );
+							$this->make_file( $title, $parentSN, $data['cftnum'], $data['size'], $data['hideKey'], $data['label'], $data['class'], $data['style'], $data['before'], $data['after'], $data['multipleButton'], $data['relation'], $data['mediaLibrary'] );
 				}
 			}
 		endforeach;
@@ -2384,7 +2372,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			if ( $options['custom_fields'][$i]['custom_post_type'] ) :
 				$custom_post_type = explode(',', $options['custom_fields'][$i]['custom_post_type']);
 				$custom_post_type = array_filter( $custom_post_type );
-				array_walk( $custom_post_type, create_function('&$v', '$v = trim($v);') );
+				$custom_post_type = array_unique(array_filter(array_map('trim', $custom_post_type)));
 				if ( !in_array($post->post_type, $custom_post_type) )
 					continue;
 			endif;
@@ -2395,10 +2383,10 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			$cat_ids = array_filter( $cat_ids );
 			$template_files = array_filter( $template_files );
 			$post_ids = array_filter( $post_ids );
-			array_walk( $cat_ids, create_function('&$v', '$v = trim($v);') );
-			array_walk( $template_files, create_function('&$v', '$v = trim($v);') );
-			array_walk( $post_ids, create_function('&$v', '$v = trim($v);') );
-			
+			$cat_ids = array_unique(array_filter(array_map('trim', $cat_ids)));
+			$template_files = array_unique(array_filter(array_map('trim', $template_files)));
+			$post_ids = array_unique(array_filter(array_map('trim', $post_ids)));
+
 			if ( (strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php') || strstr($_SERVER['REQUEST_URI'], 'post_type=page') || $post->post_type=='page') ) :
 				// Check if there are page template files to filter by and  there is a page template
 				if ( count($template_files) && (isset($post->page_template) || $_REQUEST['page_template']) ) :
@@ -3360,7 +3348,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		endif;
 		
 		if ( $_REQUEST['post_type'] ) :
-			$where .= $wpdb->prepare(" AND " . $wpdb->posts . ".post_type = %s", trim($_REQUEST['post_type'])); 
+			$where .= $wpdb->prepare(" AND `" . $wpdb->posts . "`.post_type = %s", trim($_REQUEST['post_type'])); 
 		endif;
 				
 		if ( $_REQUEST['no_is_search'] ) :
@@ -3373,11 +3361,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 	}
 
 	function custom_field_template_posts_join($sql) {
-		if ( ($_REQUEST['order'] == 'ASC' || $_REQUEST['order'] == 'DESC') && $_REQUEST['orderby'] ) :
-			global $wpdb;
+		if ( !in_array($_REQUEST['orderby'], array('post_author', 'post_date', 'post_title', 'post_modified', 'menu_order', 'post_parent', 'ID')) ):
+			if ( ($_REQUEST['order'] == 'ASC' || $_REQUEST['order'] == 'DESC') && $_REQUEST['orderby'] ) :
+				global $wpdb;
 
-			$sql = $wpdb->prepare(" LEFT JOIN `" . $wpdb->postmeta . "` AS meta ON (`" . $wpdb->posts . "`.ID = meta.post_id AND meta.meta_key = %s)", $_REQUEST['orderby']); 
-			return $sql;
+				$sql = " LEFT JOIN `" . $wpdb->postmeta . "` AS meta ON (`" . $wpdb->posts . "`.ID = meta.post_id AND meta.meta_key = " . $_REQUEST['orderby']; 
+				return $sql;
+			endif;
 		endif;
 	}
 
@@ -3389,20 +3379,20 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 
 		if ( $_REQUEST['orderby'] ) :
 			if ( in_array($_REQUEST['orderby'], array('post_author', 'post_date', 'post_title', 'post_modified', 'menu_order', 'post_parent', 'ID')) ):
-				$sql = "`".$wpdb->posts."`.".$_REQUEST['orderby']." ".$_REQUEST['order'];
-			elseif ( $_REQUEST['orderby']=='rand' ):
+				$sql = "`" . $wpdb->posts . "`." . $_REQUEST['orderby'] . " " . $_REQUEST['order'];
+			elseif ( $_REQUEST['orderby'] == 'rand' ):
 				$sql = "RAND()";
 			else:
 				if ( in_array($_REQUEST['cast'], array('binary', 'char', 'date', 'datetime', 'signed', 'time', 'unsigned')) ) :
-					$sql = " CAST(meta.meta_value AS ".$_REQUEST['cast'].") ".$_REQUEST['order'];
+					$sql = " CAST(meta.meta_value AS " . $_REQUEST['cast'] . ") " . $_REQUEST['order'];
 				else :
-					$sql = " meta.meta_value ".$_REQUEST['order'];
+					$sql = " meta.meta_value " . $_REQUEST['order'];
 				endif;
 			endif;
 			return $sql;
 		endif;
 
-		$sql = $wpdb->prepare("`".$wpdb->posts."`.post_date %s", $_REQUEST['order']);
+		$sql = "`" . $wpdb->posts . "`.post_date " . $_REQUEST['order'];
 		return $sql;
 	}
 	
