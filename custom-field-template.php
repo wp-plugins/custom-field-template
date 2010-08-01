@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.7.2
+Version: 1.7.3
 Author URI: http://wpgogo.com/
 */
 
@@ -45,6 +45,7 @@ class custom_field_template {
 
 		add_action( 'delete_post', array(&$this, 'custom_field_template_delete_post'), 100 );
 		
+		add_filter( 'media_send_to_editor', array(&$this, 'media_send_to_custom_field'), 15 );
 		add_filter( 'plugin_action_links', array(&$this, 'wpaq_filter_plugin_actions'), 10, 2 );
 		
 		add_filter( 'get_the_excerpt', array(&$this, 'custom_field_template_get_the_excerpt'), 1 );
@@ -458,6 +459,26 @@ class custom_field_template {
 				$new_columns['custom-fields'] = __('Custom Fields', 'custom-field-template');
 		endforeach;
 		return $new_columns;
+	}
+	
+	function media_send_to_custom_field($html) {
+		$options = $this->get_custom_field_template_data();
+
+		$out =  '<script type="text/javascript">' . "\n" .
+				'	/* <![CDATA[ */' . "\n" .
+				'	var win = window.dialogArguments || opener || parent || top;' . "\n" .
+				'	win.send_to_custom_field("' . addslashes($html) . '");' . "\n" .
+				'/* ]]> */' . "\n" .
+				'</script>' . "\n";
+
+		echo $out;
+		exit();
+
+		/*if ($options['custom_field_template_use_multiple_insert']) {
+			return;
+		} else {
+			exit();
+		}*/
 	}
 	
 	function wpaq_filter_plugin_actions($links, $file){
