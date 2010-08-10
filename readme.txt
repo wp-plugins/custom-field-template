@@ -4,7 +4,7 @@ Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
 Tested up to: 3.0.1
-Stable tag: 1.7.3
+Stable tag: 1.7.4
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -102,11 +102,16 @@ See the default template and modify it.
 
 == Changelog ==
 
+= 1.7.4 =
+* `mediaPicker` attribute for the file type to select the file form Media Library. This attribute currently does not work with `multipleButton` attribute. ex) `mediaPicker = true`
+* Bugfix: eval system.
+* Bugfix: TinyMCE for the custom post types.
+
 = 1.7.3 =
 * Bugfix: image insert.
 
 = 1.7.2 =
-* `mediaLibrary` attribute for the file type to show the link of the uploaded file name.
+* `mediaLibrary` attribute for the file type to show the link of the uploaded file name. ex) `mediaLibrary = true`
 * Bugfix: search.
 
 = 1.7.1 =

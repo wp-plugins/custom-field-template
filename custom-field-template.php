@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.7.3
+Version: 1.7.4
 Author URI: http://wpgogo.com/
 */
 
@@ -46,12 +46,14 @@ class custom_field_template {
 		add_action( 'delete_post', array(&$this, 'custom_field_template_delete_post'), 100 );
 		
 		add_filter( 'media_send_to_editor', array(&$this, 'media_send_to_custom_field'), 15 );
-		add_filter( 'plugin_action_links', array(&$this, 'wpaq_filter_plugin_actions'), 10, 2 );
+		add_filter( 'plugin_action_links', array(&$this, 'wpaq_filter_plugin_actions'), 100, 2 );
 		
 		add_filter( 'get_the_excerpt', array(&$this, 'custom_field_template_get_the_excerpt'), 1 );
 		add_filter( 'the_content', array(&$this, 'custom_field_template_the_content') );
 		add_filter( 'the_content_rss', array(&$this, 'custom_field_template_the_content') );
-		
+
+		add_filter( 'attachment_fields_to_edit', array(&$this, 'custom_field_template_attachment_fields_to_edit'), 10, 2 );
+
 		if ( isset($_REQUEST['cftsearch_submit']) ) :
 			if ( $_REQUEST['limit'] )
 				add_action( 'post_limits', array(&$this, 'custom_field_template_post_limits'));
@@ -121,7 +123,7 @@ class custom_field_template {
 				
 		if ( $options['custom_field_template_widget_shortcode'] )
 			add_filter('widget_text', 'do_shortcode');
-		
+
 		if ( substr($wp_version, 0, 3) >= '2.7' ) {
 			if ( empty($options['custom_field_template_disable_custom_field_column']) ) :
 				add_action( 'manage_posts_custom_column', array(&$this, 'add_manage_posts_custom_column'), 10, 2 );
@@ -173,6 +175,14 @@ class custom_field_template {
 			add_action('admin_head', array(&$this, 'custom_field_template_admin_head_buffer') );   
 			add_action('admin_footer', array(&$this, 'custom_field_template_admin_footer_buffer') );  
 		endif;
+	}
+	
+	function custom_field_template_attachment_fields_to_edit($form_fields, $post) {
+		$form_fields["custom_field_template"]["label"] = __('Media Picker', 'custom-field-template');
+		$form_fields["custom_field_template"]["input"] = "html";
+		$form_fields["custom_field_template"]["html"] = '<a href="javascript:void(0);" onclick="var win = window.dialogArguments || opener || parent || top;win.cft_use_this('.$post->ID.');return false;">'.__('Use this', 'custom-field-template').'</a>';
+		
+		return $form_fields;
 	}
 	
 	function custom_field_template_add_enctype($buffer) {
@@ -505,6 +515,9 @@ class custom_field_template {
 		wp_enqueue_script( 'bgiframe', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.bgiframe.js', array('jquery') ) ;
 		wp_enqueue_script( 'datePicker', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.datePicker.js', array('jquery') );
 		wp_enqueue_script( 'textarearesizer', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.textarearesizer.js', array('jquery') );
+		if( strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || $post->post_type=='page' ) :
+			wp_enqueue_script( 'editor' );
+		endif;
 	}
 
 	function install_custom_field_template_data() {
@@ -642,8 +655,7 @@ type = file';
 				if ( $options['hook'][$i]['category'] ) :
 					if ( is_category() || is_single() || is_feed() ) :
 						if ( $options['hook'][$i]['use_php'] ) :
-							$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
-							$options['hook'][$i]['content'] = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $options['hook'][$i]['content']);
+							$options['hook'][$i]['content'] = $this->EvalBuffer(stripcslashes($options['hook'][$i]['content']));
 						endif;
 						$needle = explode(',', $options['hook'][$i]['category']);
 						$needle = array_filter($needle);
@@ -663,8 +675,7 @@ type = file';
 				elseif ( $options['hook'][$i]['post_type']=='post' ) :
 					if ( is_category() || is_single() ) :
 						if ( $options['hook'][$i]['use_php'] ) :
-							$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
-							$options['hook'][$i]['content'] = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $options['hook'][$i]['content']);
+							$options['hook'][$i]['content'] = $this->EvalBuffer(stripcslashes($options['hook'][$i]['content']));
 						endif;
 						if ( $options['hook'][$i]['position'] == 0 )
 							$content .= $options['hook'][$i]['content'];
@@ -676,8 +687,7 @@ type = file';
 				elseif ( $options['hook'][$i]['post_type']=='page' ) :
 					if ( is_page() ) :
 						if ( $options['hook'][$i]['use_php'] ) :
-							$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
-							$options['hook'][$i]['content'] = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $options['hook'][$i]['content']);
+							$options['hook'][$i]['content'] = $this->EvalBuffer(stripcslashes($options['hook'][$i]['content']));
 						endif;
 						if ( $options['hook'][$i]['position'] == 0 )
 							$content .= $options['hook'][$i]['content'];
@@ -692,8 +702,7 @@ type = file';
 					array_walk( $custom_post_type, create_function('&$v', '$v = trim($v);') );
 					if ( in_array($post->post_type, $custom_post_type) ) :
 						if ( $options['hook'][$i]['use_php'] ) :
-							$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
-							$options['hook'][$i]['content'] = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $options['hook'][$i]['content']);
+							$options['hook'][$i]['content'] = $this->EvalBuffer(stripcslashes($options['hook'][$i]['content']));
 						endif;
 						if ( $options['hook'][$i]['position'] == 0 )
 							$content .= $options['hook'][$i]['content'];
@@ -704,8 +713,7 @@ type = file';
 					endif;
 				else :
 					if ( $options['hook'][$i]['use_php'] ) :
-						$options['hook'][$i]['content'] = stripcslashes($options['hook'][$i]['content']);
-						$options['hook'][$i]['content'] = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $options['hook'][$i]['content']);
+							$options['hook'][$i]['content'] = $this->EvalBuffer(stripcslashes($options['hook'][$i]['content']));
 					endif;
 					if ( $options['hook'][$i]['position'] == 0 )
 						$content .= $options['hook'][$i]['content'];
@@ -1270,6 +1278,9 @@ hideKey = true<br />
 </tr>
 <tr>
 <th>mediaLibrary</th><td></td><td></td><td></td><td></td><td></td><td>mediaLibrary = true</td>
+</tr>
+<tr>
+<th>mediaPicker</th><td></td><td></td><td></td><td></td><td></td><td>mediaPicker = true</td>
 </tr>
 <tr>
 <th>code</th><td>code = 0</td><td>code = 0</td><td>code = 0</td><td>code = 0</td><td>code = 0</td><td></td>
@@ -1855,7 +1866,7 @@ jQuery(this).addClass("closed");
 		return $out;
 	}
 	
-	function make_file( $name, $sid, $cftnum, $size, $hideKey, $label, $class, $style, $before, $after, $multipleButton, $relation, $mediaLibrary ) {
+	function make_file( $name, $sid, $cftnum, $size, $hideKey, $label, $class, $style, $before, $after, $multipleButton, $relation, $mediaLibrary, $mediaPicker ) {
 		$options = $this->get_custom_field_template_data();
 
 		$title = $name;
@@ -1884,6 +1895,16 @@ jQuery(this).addClass("closed");
 			$addfield .= '<a href="#clear" onclick="jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent()).find('."'input'".').val('."''".');jQuery(this).parent().css('."'visibility','hidden'".');jQuery(this).parent().prev().css('."'visibility','hidden'".'); return false;">' . __('Add New', 'custom-field-template') . '</a>';
 			$addfield .= '</div>';
 		endif;
+	
+		if ( $relation == true ) $tab = 'gallery';
+		else $tab = 'library';
+		$media_upload_iframe_src = "media-upload.php";
+		$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src?type=image&tab=library");
+
+		if ( $mediaPicker == true ) :
+			$picker = __(' OR ', 'custom-field-template');
+			$picker .= '<a href="'.$image_upload_iframe_src.'&post_id='.$_REQUEST[ 'post' ].'&TB_iframe=1&tab='.$tab.'&cftid='.$name . $sid . '_' . $cftnum.'"  class="thickbox" onclick="jQuery('."'#cft_clicked_id'".').val('."'".$name.$sid.'_'.$cftnum."'".');">'.__('Select by Media Picker', 'custom-field-template').'</a>';
+		endif;
 				
 		$out .= 
 			'<dl id="dl_' . $name . $sid . '_' . $cftnum . '" class="dl_file">' .
@@ -1892,7 +1913,7 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= trim($before).'<input id="' . $name . $sid . '_' . $cftnum . '" name="' . $name . '['.$sid.'][]" type="file" size="' . $size . '"' . $class . $style . ' onchange="if (jQuery(this).val()) { jQuery(\'#cft_save_button\').attr(\'disabled\', true); jQuery(\'#post-preview\').hide(); } else { jQuery(\'#cft_save_button\').attr(\'disabled\', false); jQuery(\'#post-preview\').show(); }" />'.trim($after);
+		$out .= trim($before).'<input id="' . $name . $sid . '_' . $cftnum . '" name="' . $name . '['.$sid.'][]" type="file" size="' . $size . '"' . $class . $style . ' onchange="if (jQuery(this).val()) { jQuery(\'#cft_save_button\').attr(\'disabled\', true); jQuery(\'#post-preview\').hide(); } else { jQuery(\'#cft_save_button\').attr(\'disabled\', false); jQuery(\'#post-preview\').show(); }" />'.trim($after).$picker;
 
 		if ( ( $value = intval($value) ) && $thumb_url = get_attachment_icon_src( $value ) ) :
 			$thumb_url = $thumb_url[0];
@@ -1902,13 +1923,13 @@ jQuery(this).addClass("closed");
 			$title = attribute_escape(trim($post->post_title));
 			
 			if ( !empty($mediaLibrary) ) :
-				$media_upload_iframe_src = "media-upload.php";
-				$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src?type=image&tab=gallery");
-				$title = '<a href="'.$image_upload_iframe_src.'&post_id='.$_REQUEST[ 'post' ].'&type=image&TB_iframe=true&width=670" onclick="return thickbox(this);">'.$title.'</a>';
+				$title = '<a href="'.$image_upload_iframe_src.'&post_id='.$_REQUEST[ 'post' ].'&TB_iframe=1&tab='.$tab.'" class="thickbox">'.$title.'</a>';
 			endif;
 			
 			$out .= '<p><label for="'.$name . '_delete' . $sid . '"><input type="checkbox" name="'.$name . '_delete[' . $sid . '][' . $cftnum . ']" id="'.$name . '_delete' . $sid . '" value="1" class="delete_file_checkbox" />' . __('Delete', 'custom-field-template') . '</label> <img src="'.$thumb_url.'" width="32" height="32" style="vertical-align:middle;" /> ' . $title . ' </p>';
-			$out .= '<input type="hidden" name="'.$name . '[' . $sid . '][' . $cftnum . ']" value="' . $value . '" />';
+			$out .= '<input type="hidden" id="' . $name . $sid . '_' . $cftnum . '_hide" name="'.$name . '[' . $sid . '][' . $cftnum . ']" value="' . $value . '" />';
+		else :
+			$out .= '<input type="hidden" id="' . $name . $sid . '_' . $cftnum . '_hide" name="'.$name . '[' . $sid . '][' . $cftnum . ']" value="" />';
 		endif;
 
 		$out .= '</dd></dl>'."\n";
@@ -2040,8 +2061,7 @@ jQuery(this).addClass("closed");
 		endif;
 			
 		if ( $options['custom_fields'][$id]['instruction'] ) :
-			$instruction = stripcslashes($options['custom_fields'][$id]['instruction']);
-			$instruction = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $instruction);
+			$instruction = $this->EvalBuffer(stripcslashes($options['custom_fields'][$id]['instruction']));
 			$out .= '<div id="cft_instruction">' . $instruction . '</div>';
 		endif;
 
@@ -2112,7 +2132,7 @@ jQuery(this).addClass("closed");
 					}
 					else if( $data['type'] == 'file' ) {
 						$out .= 
-							$this->make_file( $title, $parentSN, $data['cftnum'], $data['size'], $data['hideKey'], $data['label'], $data['class'], $data['style'], $data['before'], $data['after'], $data['multipleButton'], $data['relation'], $data['mediaLibrary'] );
+							$this->make_file( $title, $parentSN, $data['cftnum'], $data['size'], $data['hideKey'], $data['label'], $data['class'], $data['style'], $data['before'], $data['after'], $data['multipleButton'], $data['relation'], $data['mediaLibrary'], $data['mediaPicker'] );
 				}
 			}
 		endforeach;
@@ -2222,6 +2242,13 @@ jQuery(this).addClass("closed");
 					'	link.blur();' . "\n" .
 					'	return false;' . "\n" .
 					'}' . "\n";
+
+		$out .=		'function cft_use_this(file_id) {
+		var win = window.dialogArguments || opener || parent || top;
+		win.jQuery("#"+win.jQuery("#cft_clicked_id").val()+"_hide").val(file_id);
+		var fields = win.jQuery("#cft :input").fieldSerialize();
+		win.jQuery.ajax({type: "POST", url: "?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post="+win.jQuery(\'#post_ID\').val()+"&custom-field-template-verify-key="+win.jQuery("#custom-field-template-verify-key").val(), data: fields, success: function() {win.jQuery.ajax({type: "GET", url: "?page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&id="+win.jQuery("#custom-field-template-id").val()+"&post="+win.jQuery(\'#post_ID\').val(), success: function(html) {win.jQuery("#cft").html(html);win.tb_remove();}});}});
+	}';
 					
 					if(count($options['custom_fields'])>$options['posts'][$_REQUEST['post']] && $options['posts'][$_REQUEST['post']]) $init_id = $options['posts'][$_REQUEST['post']];
 					else $init_id = 0;
@@ -2340,6 +2367,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		$out .= 'jQuery.ajax({type: \'POST\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post=\'+jQuery(\'#post_ID\').val()+\'&custom-field-template-verify-key=\'+jQuery(\'#custom-field-template-verify-key\').val(), data: fields, success: function() {jQuery(\'.delete_file_checkbox:checked\').each(function() {jQuery(this).parent().parent().remove();});}});';
 		$out .= '" class="button" style="vertical-align:middle;" />';
 		endif;
+		$out .= '<input type="hidden" id="cft_clicked_id" value="" />';
 		$out .= '</div>';
 			
 		if ( substr($wp_version, 0, 3) < '2.5' ) {
@@ -2928,7 +2956,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 								else $replace_val = '';
 							endif;
 							if ( $options['shortcode_format_use_php'][$format] )
-								$output = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $output);
+								$output = $this->EvalBuffer($output);
+								
 							$key = preg_quote($key, '/');
 							$replace_val = str_replace('\\', '\\\\', $replace_val); 
 							$replace_val = str_replace('$', '\$', $replace_val); 
@@ -3146,7 +3175,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 							endforeach;
 						
 							if ( $options['shortcode_format_use_php'][$format] )
-								$output = preg_replace_callback("/(<\?php|<\?|< \?php)(.*?)\?>/si", array($this, 'EvalBuffer'), $output);
+								$output = $this->EvalBuffer($output);
 							$key = preg_quote($key, '/');
 							$output = preg_replace('/\['.$key.'\](?!\[[0-9]+\])/', $replace_val[0], $output); 
 							$output = preg_replace('/\['.$key.'\]\[([0-9]+)\](?!\[\])/e', '$replace_val[${1}]', $output);
@@ -3434,7 +3463,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 	
 	function EvalBuffer($string) {
 		ob_start();
-		eval("$string[2];");
+		eval('?>'.$string);
 		$ret = ob_get_contents();
 		ob_end_clean();
 		return $ret;
