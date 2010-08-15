@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.7.4
+Version: 1.7.5
 Author URI: http://wpgogo.com/
 */
 
@@ -605,7 +605,7 @@ type = file';
 	}
 
 	function custom_field_template_admin_menu() {
-		add_options_page(__('Custom Field Template', 'custom-field-template'), __('Custom Field Template', 'custom-field-template'), 8, basename(__FILE__), array(&$this, 'custom_field_template_admin'));
+		add_options_page(__('Custom Field Template', 'custom-field-template'), __('Custom Field Template', 'custom-field-template'), 'manage_options', basename(__FILE__), array(&$this, 'custom_field_template_admin'));
 	}
 	
 	
@@ -3343,13 +3343,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										case '<>' :
 										case '<=>':
 											if ( is_numeric($val3) ) :
-												$where .=  $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %d) GROUP BY post_id) ", $key, trim($val3));
+												$where .=  $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %d) GROUP BY post_id) ", $key, trim($val3));
 											else :
-												$where .= $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %s) GROUP BY post_id) ", $key, trim($val3));
+												$where .= $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %s) GROUP BY post_id) ", $key, trim($val3));
 											endif;
 											break;
 										default :
-											$where .= $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM " . $wpdb->postmeta . " WHERE (" . $wpdb->postmeta . ".meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value LIKE %s) GROUP BY post_id) ", $key, '%'.trim($val3).'%');
+											$where .= $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value LIKE %s) GROUP BY post_id) ", $key, '%'.trim($val3).'%');
 											break;
 									endswitch;
 									$ch++;
@@ -3415,7 +3415,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			if ( ($_REQUEST['order'] == 'ASC' || $_REQUEST['order'] == 'DESC') && $_REQUEST['orderby'] ) :
 				global $wpdb;
 
-				$sql = " LEFT JOIN `" . $wpdb->postmeta . "` AS meta ON (`" . $wpdb->posts . "`.ID = meta.post_id AND meta.meta_key = " . $_REQUEST['orderby']; 
+				$sql = $wpdb->prepare(" LEFT JOIN `" . $wpdb->postmeta . "` AS meta ON (`" . $wpdb->posts . "`.ID = meta.post_id AND meta.meta_key = %s)", $_REQUEST['orderby']); 
 				return $sql;
 			endif;
 		endif;
