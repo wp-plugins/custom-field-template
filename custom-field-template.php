@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.7.5
+Version: 1.7.6
 Author URI: http://wpgogo.com/
 */
 
@@ -98,7 +98,8 @@ class custom_field_template {
 				$id = $options['posts'][$_REQUEST['post']];
 			else
 				$id = 0;
-			echo $this->load_custom_field( $id );
+			list($body, $init_id) = $this->load_custom_field( $id );
+			echo $body;
 			exit();
 		}
 		
@@ -735,8 +736,8 @@ type = file';
 			$j = 0;
 			for($i=0;$i<count($_POST["custom_field_template_content"]);$i++) {
 				if( $_POST["custom_field_template_content"][$i] ) {
-					if ( preg_match('/\[content\]|\[post_title\]|\[excerpt\]/', $_POST["custom_field_template_content"][$i]) ) :
-						$errormessage = __('You can not use the following words as the field key: `content`, `post_title`, and `excerpt`.', 'custom-field-template');
+					if ( preg_match('/\[content\]|\[post_title\]|\[excerpt\]|\[action\]/i', $_POST["custom_field_template_content"][$i]) ) :
+						$errormessage = __('You can not use the following words as the field key: `content`, `post_title`, and `excerpt`, and `action`.', 'custom-field-template');
 					endif;
 					$options['custom_fields'][$j]['title']   = $_POST["custom_field_template_title"][$i];
 					$options['custom_fields'][$j]['content'] = $_POST["custom_field_template_content"][$i];
@@ -2146,7 +2147,7 @@ jQuery(this).addClass("closed");
 		$out .= '</div>';
 		$out .= '<br style="clear:both; font-size:1px;" />';		
 	
-		return $out;
+		return array($out, $id);
 	}
 
 	function insert_custom_field() {
@@ -2252,7 +2253,7 @@ jQuery(this).addClass("closed");
 					
 					if(count($options['custom_fields'])>$options['posts'][$_REQUEST['post']] && $options['posts'][$_REQUEST['post']]) $init_id = $options['posts'][$_REQUEST['post']];
 					else $init_id = 0;
-					
+				
 		$out .=		'jQuery(document).ready(function() {' . "\n";
 
 		$fields = $this->get_custom_fields( $init_id );
@@ -2312,7 +2313,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		endif;
 
 		if ( 0 != count( get_page_templates() ) ):
-			$out .=		'jQuery(\'#page_template\').change(function(){ if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID.length=0;}; jQuery.get(\'?post_type='.$_REQUEST['post_type'].'&page=custom-field-template/custom-field-template.php&cft_mode=selectbox&post=\'+jQuery(\'#post_ID\').val()+\'&page_template=\'+jQuery(\'#page_template\').val(), function(html) { jQuery(\'#cft_selectbox\').html(html); jQuery.ajax({type: \'GET\', url: \'?post_type='.$_REQUEST['post_type'].'&page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&page_template=\'+jQuery(\'#page_template\').val()+\'&post=\'+jQuery(\'#post_ID\').val(), success: function(html) { jQuery(\'#cft\').html(html);}});});';
+			$out .=		'jQuery(\'#page_template\').change(function(){ if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID.length=0;}; jQuery.get(\'?post_type='.$_REQUEST['post_type'].'&page=custom-field-template/custom-field-template.php&cft_mode=selectbox&post=\'+jQuery(\'#post_ID\').val()+\'&page_template=\'+jQuery(\'#page_template\').val(), function(html) { jQuery(\'#cft_selectbox\').html(html); jQuery.ajax({type: \'GET\', url: \'?post_type='.$_REQUEST['post_type'].'&page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&page_template=\'+jQuery(\'#page_template\').val()+\'&post=\'+jQuery(\'#post_ID\').val(), success: function(html) { jQuery(\'#cft\').html(html);';
+			$out .= 'jQuery(\'#cftdiv h3 span\').text(jQuery(\'#custom_field_template_select :selected\').text());';
+			$out .= '}});});';
 			$out .= '});' . "\n";
 		endif;
 
@@ -2336,7 +2339,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 .quicktags div div input { margin: 3px 1px 4px; line-height: 18px; display: inline-block; border-width: 1px; border-style: solid; min-width: 26px; padding: 2px 4px; font-size: 12px; -moz-border-radius: 3px; -khtml-border-radius: 3px; -webkit-border-radius: 3px; border-radius: 3px; background:#FFFFFF url(images/fade-butt.png) repeat-x scroll 0 -2px; overflow: visible; }' . "\n";
 		$out .=		'-->' . "\n" .
 					'</style>';
-		$body = $this->load_custom_field($init_id);
+		list($body, $init_id) = $this->load_custom_field($init_id);
 		
 		$out .= '<div id="cft_selectbox" style="height:25px;">';
 		$out .= $this->custom_field_template_selectbox();
@@ -3454,7 +3457,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		$limit = (int)$_REQUEST['limit'];
 		if ( !$limit )
 			$limit = trim($old_limit);
-		$wp_query->query_vars0['posts_per_page'] = $limit;
+		$wp_query->query_vars['posts_per_page'] = $limit;
 		$offset = ($wp_query->query_vars['paged'] - 1) * $limit;
 		if ( $offset < 0 ) $offset = 0;
 
