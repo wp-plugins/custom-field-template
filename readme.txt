@@ -4,7 +4,7 @@ Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
 Tested up to: 3.0.1
-Stable tag: 1.7.6
+Stable tag: 1.7.7
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -71,6 +71,7 @@ Localization
 * Indonesian (id_ID) - [Masino Sinaga](http://www.openscriptsolution.com/)
 * Italian (it_IT) - [Gianni Diurno](http://gidibao.net/)
 * Japanese (ja) - [Hiroaki Miyashita](http://wpgogo.com/)
+* Dutch (nl_NL) - [Rene](http://wordpresswebshop.com/)
 * Brazilian Portuguese (pt_BR) - [Caciano Gabriel](http://www.gn10.com.br/)
 * Russian (ru_RU) - [Sonika](http://www.sonika.ru/blog/)
 * Turkish (tr_TR) - [Omer Faruk](http://ramerta.com/)
@@ -101,6 +102,13 @@ See the default template and modify it.
 4. Auto Hook of `the_content()` in the option page of this plugin may help you do this. You can use [cft] shortcodes here. You can switch the cft formats in each category.
 
 == Changelog ==
+
+= 1.7.7 =
+* Easier way to output images of the file type. ex) [cft key="file" image_size="thumbnail"] [cft key="file" image_size="medium" image_src=1] [cft key="file" image_size="large" image_width=1] [cft key="file" image_size="full" image_height=1] 
+* You can use shortcodes in the cft shortcode format.
+* Updated jquery.datePicker.js
+* Bugfix: search.
+* Dutch (nl_NL) - Rene
 
 = 1.7.6 =
 * Bugfix: Box title.

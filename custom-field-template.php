@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.7.6
+Version: 1.7.7
 Author URI: http://wpgogo.com/
 */
 
@@ -2895,21 +2895,32 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			'before_list' => $options['custom_field_template_before_list'],
 			'after_list' => $options['custom_field_template_after_list'],
 			'before_value' => $options['custom_field_template_before_value'],
-			'after_value' => $options['custom_field_template_after_value']
+			'after_value' => $options['custom_field_template_after_value'],
+			'image_size' => '',
+			'image_src' => false,
+			'image_width' => false,
+			'image_height' => false
 		), $attr));
-		
+
 		$metakey = $key;
 		if ( $metakey ) :
 			$metavalue = $this->get_post_meta($post_id, $key, $single);
-			if ( is_array($metavalue) ) :
-				if ( $before_list ) : $output = $before_list . "\n"; endif;
-				foreach ( $metavalue as $val ) :
-					$output .= $before_value . $val . $after_value . "\n";
-				endforeach;
-				if ( $after_list ) : $output .= $after_list . "\n"; endif;
-			else :
-				$output = $metavalue;
-			endif;
+			if ( !is_array($metavalue) ) $metavalue = array($metavalue);
+			if ( $before_list ) : $output = $before_list . "\n"; endif;
+			foreach ( $metavalue as $val ) :
+				if ( !empty($image_size) ) :
+					if ( $image_src || $image_width || $image_height ) :
+						list($src, $width, $height) = wp_get_attachment_image_src($val, $image_size);
+						if ( $image_src ) : $val = $src; endif;
+						if ( $image_width ) : $val = $width; endif;
+						if ( $image_height ) : $val = $height; endif;
+					else :
+						$val = wp_get_attachment_image($val, $image_size);
+					endif;
+				endif;
+				$output .= $before_value . $val . $after_value . "\n";
+			endforeach;
+			if ( $after_list ) : $output .= $after_list . "\n"; endif;
 			return $output;
 		endif;
 		
@@ -3008,7 +3019,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			$output .= '</dl>' . "\n";
 		endif;
 
-		return stripcslashes($output);
+		return do_shortcode(stripcslashes($output));
 	}
 	
 	function search_custom_field_values($attr) {
@@ -3346,13 +3357,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										case '<>' :
 										case '<=>':
 											if ( is_numeric($val3) ) :
-												$where .=  $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %d) GROUP BY post_id) ", $key, trim($val3));
+												$where .=  $wpdb->prepare(" ID IN (SELECT `" . $wpdb->postmeta . "`.post_id FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %d) GROUP BY `" . $wpdb->postmeta . "`.post_id) ", $key, trim($val3));
 											else :
-												$where .= $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %s) GROUP BY post_id) ", $key, trim($val3));
+												$where .= $wpdb->prepare(" ID IN (SELECT `" . $wpdb->postmeta . "`.post_id FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %s) GROUP BY `" . $wpdb->postmeta . "`.post_id) ", $key, trim($val3));
 											endif;
 											break;
 										default :
-											$where .= $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value LIKE %s) GROUP BY post_id) ", $key, '%'.trim($val3).'%');
+											$where .= $wpdb->prepare(" ID IN (SELECT `" . $wpdb->postmeta . "`.post_id FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value LIKE %s) GROUP BY `" . $wpdb->postmeta . "`.post_id) ", $key, '%'.trim($val3).'%');
 											break;
 									endswitch;
 									$ch++;
@@ -3376,7 +3387,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			foreach ( $s as $v ) :
 				if ( !empty($v) ) :
 					if ( $i>0 ) $where .= ' AND ';
-					$where .= $wpdb->prepare(" ROW(ID,1) IN (SELECT post_id,count(post_id) FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_value LIKE %s) GROUP BY post_id) ", '%'.trim($v).'%');
+					$where .= $wpdb->prepare(" ID IN (SELECT `" . $wpdb->postmeta . "`.post_id FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_value LIKE %s) GROUP BY `" . $wpdb->postmeta . "`.post_id) ", '%'.trim($v).'%');
 					$i++;
 				endif;
 			endforeach;
