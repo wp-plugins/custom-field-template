@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.7.8
+Version: 1.7.9
 Author URI: http://wpgogo.com/
 */
 
@@ -473,14 +473,15 @@ class custom_field_template {
 	}
 	
 	function media_send_to_custom_field($html) {
-		$options = $this->get_custom_field_template_data();
-
 		$out =  '<script type="text/javascript">' . "\n" .
-				'	/* <![CDATA[ */' . "\n" .
-				'	var win = window.dialogArguments || opener || parent || top;' . "\n" .
-				'	win.send_to_custom_field("' . addslashes($html) . '");' . "\n" .
-				'/* ]]> */' . "\n" .
-				'</script>' . "\n";
+					'	/* <![CDATA[ */' . "\n" .
+					'	var win = window.dialogArguments || opener || parent || top;' . "\n" .
+					'   if ( typeof win.send_to_custom_field == "function" ) ' . "\n" .
+					'	    win.send_to_custom_field("' . addslashes($html) . '");' . "\n" .
+					'   else ' . "\n" .
+					'       win.send_to_editor("' . addslashes($html) . '");' . "\n" .
+					'/* ]]> */' . "\n" .
+					'</script>' . "\n";
 
 		echo $out;
 		exit();
@@ -2880,6 +2881,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 	function output_custom_field_values($attr) {
 		global $post;
 		$options = $this->get_custom_field_template_data();
+		
+		if ( empty($post->ID) ) $post_id = get_the_ID();
+		else $post_id = $post->ID;
 
 		if ( !isset($options['custom_field_template_before_list']) ) $options['custom_field_template_before_list'] = '<ul>';
 		if ( !isset($options['custom_field_template_after_list']) ) $options['custom_field_template_after_list'] = '</ul>';
@@ -2887,7 +2891,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		if ( !isset($options['custom_field_template_after_value']) ) $options['custom_field_template_after_value'] = '</li>';
 
 		extract(shortcode_atts(array(
-			'post_id'   => $post->ID,
+			'post_id'   => $post_id,
 			'template'  => 0,
 			'format'    => '',
 			'key'   => '',
