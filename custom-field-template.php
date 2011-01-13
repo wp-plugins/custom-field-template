@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.7.9
+Version: 1.8
 Author URI: http://wpgogo.com/
 */
 
@@ -13,7 +13,7 @@ This program is based on the rc:custom_field_gui plugin written by Joshua Sigar.
 I appreciate your efforts, Joshua.
 */
 
-/*  Copyright 2008 -2010 Hiroaki Miyashita
+/*  Copyright 2008 -2011 Hiroaki Miyashita
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ class custom_field_template {
 			if ( $_REQUEST['limit'] )
 				add_action( 'post_limits', array(&$this, 'custom_field_template_post_limits'));
 			add_filter( 'posts_join', array(&$this, 'custom_field_template_posts_join') );
-			add_filter( 'posts_where', array(&$this, 'custom_field_template_posts_where') );
+			add_filter( 'posts_where', array(&$this, 'custom_field_template_posts_where'), 100 );
 			add_filter( 'posts_orderby',  array(&$this, 'custom_field_template_posts_orderby' ) );
 		endif;
 		
@@ -1295,6 +1295,9 @@ hideKey = true<br />
 </tr>
 <tr>
 <th>insertTag</th><td>insertTag = true</td><td>insertTag = true</td><td>insertTag = true</td><td>insertTag = true</td><td>insertTag = true</td><td></td>
+</tr>
+<tr>
+<th>tagName</th><td>tagName = movie_tag</td><td>tagName = book_tag</td><td>tagName = img_tag</td><td>tagName = dvd_tag</td><td>tagName = bd_tag</td><td></td>
 </tr>
 <tr>
 <th>output</th><td>output = true</td><td>output = true</td><td>output = true</td><td>output = true</td><td>output = true</td><td></td>
@@ -2607,9 +2610,15 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 						endif;
 						if ( $data['type'] != 'file' ) :
 							if( isset( $value ) && strlen( $value ) ) :
-								if ( $data['insertTag'] == true ) $tags_input[] = $value;
+								if ( $data['insertTag'] == true ) :
+									if ( !empty($data['tagName']) ) :
+										$tags_input[trim($data['tagName'])][] = $value;
+									else :
+										$tags_input['post_tag'][] = $value;
+									endif;
+								endif;
 								if ( $data['valueCount'] == true ) :
-									$options['value_count'][$title][$value] = $this->set_value_count($title, $value);
+									$options['value_count'][$title][$value] = $this->set_value_count($title, $value, $id)+1;
 								endif;
 						
 								if ( $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'] ) {
@@ -2692,15 +2701,20 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		endforeach;
 
 		if ( is_array($tags_input) ) :
-			if ( class_exists('SimpleTags') ) :
-				wp_cache_flush();
-				$taxonomy = wp_get_object_terms($id, 'post_tag', array());
-				if ( $taxonomy ) foreach($taxonomy as $val) $tags[] = $val->name;
-				if ( is_array($tags) ) $tags_input = array_merge($tags, $tags_input);
-			endif;
-			$tags_input = array_unique($tags_input);
-			if ( substr($wp_version, 0, 3) >= '2.3' )
-				wp_set_post_tags( $id, $tags_input );
+			foreach ( $tags_input as $tags_key => $tags_value ) :
+				if ( class_exists('SimpleTags') && $tags_key == 'post_tag' ) :
+					wp_cache_flush();
+					$taxonomy = wp_get_object_terms($id, 'post_tag', array());
+					if ( $taxonomy ) foreach($taxonomy as $val) $tags[] = $val->name;
+					if ( is_array($tags) ) $tags_value = array_merge($tags, $tags_value);
+				endif;
+				
+				$tags_input = array_unique($tags_value);
+				if ( substr($wp_version, 0, 3) >= '2.8' )
+					wp_set_post_terms( $id, $tags_value, $tags_key ); 
+				else if ( substr($wp_version, 0, 3) >= '2.3' )
+					wp_set_post_tags( $id, $tags_value );
+			endforeach;
 		endif;
 		
 		$options['posts'][$id] = $_REQUEST['custom-field-template-id'];
@@ -2903,11 +2917,16 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			'image_size' => '',
 			'image_src' => false,
 			'image_width' => false,
-			'image_height' => false
+			'image_height' => false,
+			'value_count' => false,
+			'value' => ''
 		), $attr));
 
 		$metakey = $key;
 		if ( $metakey ) :
+			if ( $value_count && $value ) :
+				return number_format($options['value_count'][$metakey][$value]);
+			endif;		
 			$metavalue = $this->get_post_meta($post_id, $key, $single);
 			if ( !is_array($metavalue) ) $metavalue = array($metavalue);
 			if ( $before_list ) : $output = $before_list . "\n"; endif;
@@ -2925,7 +2944,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 				$output .= $before_value . $val . $after_value . "\n";
 			endforeach;
 			if ( $after_list ) : $output .= $after_list . "\n"; endif;
-			return $output;
+			return do_shortcode($output);
 		endif;
 		
 		if ( is_numeric($format) && $output = $options['shortcode_format'][$format] ) :
@@ -3295,7 +3314,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			$output .= '</form>' . "\n";
 		endif;
 		
-		return stripcslashes($output);
+		return do_shortcode(stripcslashes($output));
 	}
 	
 	function custom_field_template_posts_where($where) {
@@ -3405,7 +3424,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 				$in_posts = "'" . implode("', '", $ids) . "'";
 				$where .= " AND ID IN (" . $in_posts . ")";
 			endif;
-			$where .= " AND " . $wpdb->posts . ".post_type = 'post'"; 
+			$where .= " AND `" . $wpdb->posts . "`.post_type = 'post'"; 
 		endif;
 		if ( is_array($_REQUEST['cftcategory_not_in']) ) :
 			$ids = get_objects_in_term($_REQUEST['cftcategory_not_in'], 'category');
@@ -3487,12 +3506,12 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		return $ret;
 	}
 	
-	function set_value_count($key, $value) {
+	function set_value_count($key, $value, $id) {
 		global $wpdb;
 		
-		$query = $wpdb->prepare("SELECT COUNT(meta_id) FROM `". $wpdb->postmeta."` WHERE `". $wpdb->postmeta."`.meta_key = %s AND `". $wpdb->postmeta."`.meta_value = %s;", $key, $value);
+		if ( $id ) $where = " AND `". $wpdb->postmeta."`.post_id<>".$id;
+		$query = $wpdb->prepare("SELECT COUNT(meta_id) FROM `". $wpdb->postmeta."` WHERE `". $wpdb->postmeta."`.meta_key = %s AND `". $wpdb->postmeta."`.meta_value = %s $where;", $key, $value);
 		$count = $wpdb->get_var($query);
-				
 		return (int)$count;
 	}
 	
@@ -3525,7 +3544,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 					if ( is_array($value) ) :
 						foreach ( $value as $val ) :
 							if ( $data['valueCount'] == true ) :
-								$count = $this->set_value_count($title, $val)-1;
+								$count = $this->set_value_count($title, $val, '')-1;
 								if ( $count<=0 )
 									unset($options['value_count'][$title][$val]);
 								else
@@ -3534,7 +3553,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 						endforeach;
 					else :
 						if ( $data['valueCount'] == true ) :
-							$count = $this->set_value_count($title, $value)-1;
+							$count = $this->set_value_count($title, $value, '')-1;
 							if ( $count<=0 )
 								unset($options['value_count'][$title][$value]);
 							else
