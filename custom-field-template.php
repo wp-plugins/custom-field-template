@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.8.2
+Version: 1.8.3
 Author URI: http://wpgogo.com/
 */
 
@@ -727,7 +727,7 @@ type = file';
 			endfor;
 		endif;
 				
-		return $content;
+		return do_shortcode($content);
 	}
 	
 	function custom_field_template_admin() {
@@ -2595,7 +2595,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 				if ( is_numeric($data['parentSN']) ) $field_key = $data['parentSN'];
 				$name = $this->sanitize_name( $title );
 				$title = $wpdb->escape(stripcslashes(trim($title)));
-				
+
 				switch ( $data['type'] ) :
 					case 'fieldset_open' :
 						$save_value[$title][0] = count($_REQUEST[$name]);
@@ -2820,6 +2820,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 								if ( $_REQUEST[$this->sanitize_name($title)] ) $fieldsetcounter = count($_REQUEST[$this->sanitize_name($title)])-1;
 								else if ( $_REQUEST['post'] ) $fieldsetcounter = $this->get_post_meta( $_REQUEST['post'], $title, true )-1;
 								else $fieldsetcounter = 0;
+								if ( $data['multiple'] ) $fieldset_multiple = 1;
 							endif;
 							if ( is_array($fieldset) ) :
 								if ( !$tmp_parentSN2[$title] ) $tmp_parentSN2[$title] = $tmp_parentSN;
@@ -2868,10 +2869,12 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 								for($i=0;$i<$fieldsetcounter;$i++) :
 									$returndata = array_merge($returndata, $fieldset);
 								endfor;
-								
 								$groupcounter = (int)$this->get_post_meta( $_REQUEST['post_ID'], $title, true );
-								if ( $groupcounter == 0 ) $groupcounter = 2;
-								if ( $_REQUEST[$this->sanitize_name($title)] ) $gap += (($groupcounter - count($_REQUEST[$this->sanitize_name($title)])))*count($fieldset);
+								if ( $groupcounter == 0 ) $groupcounter = $fieldsetcounter;
+								if ( $_REQUEST[$this->sanitize_name($title)] && $fieldset_multiple ) :
+									$gap += ($groupcounter - count($_REQUEST[$this->sanitize_name($title)]))*count($fieldset);
+									unset($fieldset_multiple);
+								endif;
 								unset($fieldset, $tmp_parentSN2);
 							endif;
 							unset($counter);
@@ -2891,7 +2894,6 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 				endforeach;
 			endif;
 		}
-
 		return $returndata;
 	}
 
@@ -3226,7 +3228,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 
 			if ( $button === true )
 				$output .= '<p><input type="submit" value="' . $search_label . '" class="cftsearch_submit" /></p>' . "\n";
-			$output .= '<input type="hidden" name="cftsearch_submit" value="1" /></p>' . "\n";
+			$output .= '<input type="hidden" name="cftsearch_submit" value="1" />' . "\n";
 			$output .= '</form>' . "\n";
 		else :
 			$fields = $this->get_custom_fields( $template );
