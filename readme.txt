@@ -3,8 +3,8 @@ Contributors: Hiroaki Miyashita
 Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
-Tested up to: 3.1
-Stable tag: 1.8.3
+Tested up to: 3.1.1
+Stable tag: 1.8.4
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -64,6 +64,7 @@ Localization
 
 * Belorussian (by_BY) - [Marcis Gasuns](http://www.fatcow.com/)
 * Catalan (ca) - [Andreu Llos](http://andreullos.com/)
+* Czech (cs_CZ) - [Jakub](http://www.webees.cz/)
 * German (de_DE) - F J Kaiser
 * Spanish (es_ES) - [Dario Ferrer](http://www.darioferrer.com/)
 * French (fr_FR) - Nicolas Lemoine
@@ -103,14 +104,20 @@ See the default template and modify it.
 
 == Changelog ==
 
+= 1.8.4 =
+* Form validation with the jQuery validatation plugin. You need to check `Use the jQuery validation` in the global settings. ex) class = required, class = email, class = url, etc.
+* Support of the multiple option of the textarea type with TinyMCE.
+* Code cleaning.
+* Czech (cs_CZ) - Jakub
+
 = 1.8.3 =
-Bugfix: combination of the fieldset type and the normal type.
+* Bugfix: combination of the fieldset type and the normal type.
 
 = 1.8.2 =
-Bugfix: multiple options for the fieldset type.
+* Bugfix: multiple options for the fieldset type.
 
 = 1.8.1 =
-Bugfix: tag save.
+* Bugfix: tag save.
 
 = 1.8 =
 * Added the `tagName` attribute for the `insertTag` of the custom taxonomy.
