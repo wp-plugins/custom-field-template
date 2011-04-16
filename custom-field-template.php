@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.8.5
+Version: 1.8.6
 Author URI: http://wpgogo.com/
 */
 
@@ -1339,6 +1339,9 @@ hideKey = true<br />
 </tr>
 <tr>
 <th>mediaPicker</th><td></td><td></td><td></td><td></td><td></td><td>mediaPicker = true</td>
+</tr>
+<tr>
+<th>mediaRemove</th><td></td><td></td><td></td><td></td><td></td><td>mediaRemove = true</td>
 </tr>
 <tr>
 <th>code</th><td>code = 0</td><td>code = 0</td><td>code = 0</td><td>code = 0</td><td>code = 0</td><td></td>
@@ -2719,13 +2722,14 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 
 						if ( $data['type'] == 'file' ) :
 							if ( isset($_REQUEST[$name.'_delete'][$field_key][$data['cftnum']]) ) :
-								wp_delete_attachment($value);
+								if ( empty($data['mediaRemove']) ) wp_delete_attachment($value);
 								delete_post_meta($id, $title, $value);
+								unset($value);
 							endif;
 							if( isset($tmpfiles[$name][$field_key][$data['cftnum']]) ) :
 								$_FILES[$title] = $tmpfiles[$name][$field_key][$data['cftnum']];
 								if ( $value ) :
-									wp_delete_attachment($value);
+									if ( empty($data['mediaRemove']) ) wp_delete_attachment($value);
 								endif;
 
 								if ( isset($data['relation']) && $data['relation'] == true ) :
