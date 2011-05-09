@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.8.6
+Version: 1.8.7
 Author URI: http://wpgogo.com/
 */
 
@@ -1401,10 +1401,10 @@ hideKey = true<br />
 <th>style</th><td>style = color:#FF0000;</td><td>style = color:#FF0000;</td><td>style = color:#FF0000;</td><td>style = color:#FF0000;</td><td>style = color:#FF0000;</td><td>style = color:#FF0000;</td>
 </tr>
 <tr>
-<th>before</th><td>before = abcde</td><td></td><td></td><td>before = abcde</td><td></td><td>before = abcde</td>
+<th>before</th><td>before = abcde</td><td></td><td>before = abcde</td><td>before = abcde</td><td>before = abcde</td><td>before = abcde</td>
 </tr>
 <tr>
-<th>after</th><td>after = abcde</td><td></td><td></td><td>after = abcde</td><td></td><td>after = abcde</td>
+<th>after</th><td>after = abcde</td><td></td><td>after = abcde</td><td>after = abcde</td><td>after = abcde</td><td>after = abcde</td>
 </tr>
 <tr>
 <th>valueCount</th><td>valueCount = true</td><td>valueCount = true</td><td>valueCount = true</td><td>valueCount = true</td><td>valueCount = true</td><td></td>
@@ -1740,6 +1740,9 @@ jQuery(this).addClass("closed");
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$i = 0;
+		
+		$out .= trim($before);
+		
 		if ( is_array($values) ) :
 			foreach( $values as $val ) {
 				$id = $name . '_' . $this->sanitize_name( $val ) . '_' . $sid . '_' . $cftnum;
@@ -1756,7 +1759,7 @@ jQuery(this).addClass("closed");
 				$i++;
 			}
 		endif;	 
-		$out .= '</dd></dl>'."\n";
+		$out .= trim($after).'</dd></dl>'."\n";
 		
 		return $out;			
 	}
@@ -1956,6 +1959,8 @@ new_id = original_id.replace(/([0-9]+)$/, parseInt(matchval)+1);}if ( tinyMCE.ge
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		
+		$out .= trim($before);
+		
 		if ( $htmlEditor == true ) :
 			if( $tinyMCE == true ) $quicktags_hide = ' jQuery(\'#qt_' . sha1($name . $rand) . '_qtags\').hide();';
 			$out .= '<div class="quicktags"><script type="text/javascript">' . "\n" . '// <![CDATA[' . "\n" . '
@@ -1965,7 +1970,7 @@ new_id = original_id.replace(/([0-9]+)$/, parseInt(matchval)+1);}if ( tinyMCE.ge
 		
 		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . $name . $rand . '"><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . '][]" rows="' .$rows. '" cols="' . $cols . '"' . $content_class . $style . $event_output . '>' . esc_attr(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
 		if ( $htmlEditor == true ) $out .= '</div>';
-		$out .= '</dd></dl>'."\n";
+		$out .= trim($after).'</dd></dl>'."\n";
 		
 		return $out;
 	}
@@ -2023,7 +2028,7 @@ new_id = original_id.replace(/([0-9]+)$/, parseInt(matchval)+1);}if ( tinyMCE.ge
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$out .= trim($before).'<input id="' . $name . $sid . '_' . $cftnum . '" name="' . $name . '['.$sid.'][]" type="file" size="' . $size . '"' . $class . $style . ' onchange="if (jQuery(this).val()) { jQuery(\'#cft_save_button\').attr(\'disabled\', true); jQuery(\'#post-preview\').hide(); } else { jQuery(\'#cft_save_button\').attr(\'disabled\', false); jQuery(\'#post-preview\').show(); }" />'.trim($after).$picker;
 
-		if ( isset($value) && ( $value = intval($value) ) && $thumb_url = wp_get_attachment_image_src( $value ) ) :
+		if ( isset($value) && ( $value = intval($value) ) && $thumb_url = wp_get_attachment_image_src( $value, 'thumbnail', true ) ) :
 			$thumb_url = $thumb_url[0];
 			
 			$post = get_post($value);
@@ -2179,7 +2184,7 @@ tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''
 							$addfield .= '</span>';
 						endif;
 		
-						if ( isset($data['legend']) ) $out .= '<legend>' . stripcslashes(trim($data['legend'])) . $addfield . '</legend>';
+						if ( isset($data['legend']) || isset($addfield) ) $out .= '<legend>' . stripcslashes(trim($data['legend'])) . $addfield . '</legend>';
 					}
 					else if( $data['type'] == 'fieldset_close' ) {
 						$out .= '</fieldset>';
