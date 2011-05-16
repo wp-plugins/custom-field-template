@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.8.8
+Version: 1.8.9
 Author URI: http://wpgogo.com/
 */
 
@@ -1744,7 +1744,7 @@ jQuery(this).addClass("closed");
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$i = 0;
 		
-		$out .= trim($before);
+		$out .= trim($before).'<input name="' . $name . '[' . $sid . '][' . $cftnum . ']" value="" type="hidden" />';
 		
 		if ( is_array($values) ) :
 			foreach( $values as $val ) {
@@ -2191,7 +2191,11 @@ tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''
 							$addfield .= '</span>';
 						endif;
 		
-						if ( isset($data['legend']) || isset($addfield) ) $out .= '<legend>' . stripcslashes(trim($data['legend'])) . $addfield . '</legend>';
+						if ( isset($data['legend']) || isset($addfield) ) :
+							if ( !isset($data['legend']) ) $data['legend'] = '';
+							if ( !isset($addfield) ) $addfield = '';
+							$out .= '<legend>' . stripcslashes(trim($data['legend'])) . $addfield . '</legend>';
+						endif;
 					}
 					else if( $data['type'] == 'fieldset_close' ) {
 						$out .= '</fieldset>';
@@ -2683,17 +2687,20 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			endforeach;
 		endif;
 		unset($_FILES);
-		
+
 		foreach( $fields as $field_key => $field_val) :
 			foreach( $field_val as $title => $data) :
 				//if ( is_numeric($data['parentSN']) ) $field_key = $data['parentSN'];
 				$name = $this->sanitize_name( $title );
 				$title = $wpdb->escape(stripcslashes(trim($title)));
 
-				foreach( $_REQUEST[$name] as $tmp_key => $tmp_val ) :
-					$field_key = $tmp_key;
-					break;
-				endforeach;
+				unset($field_key);
+				if ( isset($_REQUEST[$name]) && is_array($_REQUEST[$name]) ) :
+					foreach( $_REQUEST[$name] as $tmp_key => $tmp_val ) :
+						$field_key = $tmp_key;
+						if ( is_array($tmp_val) ) $_REQUEST[$name][$tmp_key] = array_values($tmp_val);
+					endforeach;
+				endif;
 				
 				switch ( $data['type'] ) :
 					case 'fieldset_open' :
