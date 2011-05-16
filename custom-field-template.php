@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.8.9
+Version: 1.9
 Author URI: http://wpgogo.com/
 */
 
@@ -1679,7 +1679,7 @@ jQuery(this).addClass("closed");
 	}
 	
 	function make_radio( $name, $sid, $data ) {
-		$cftnum = $values = $valueLabel = $valueLabels = $clearButton = $default = $hideKey = $label = $code = $class = $style = $before = $after = $multipleButton = $onclick = $ondblclick = $onkeydown = $onkeypress = $onkeyup = $onmousedown = $onmouseup = $onmouseover = $onmouseout = $onmousemove = $onfocus = $onblur = $onchange = $onselect = '';
+		$cftnum = $values = $valueLabels = $clearButton = $default = $hideKey = $label = $code = $class = $style = $before = $after = $multipleButton = $onclick = $ondblclick = $onkeydown = $onkeypress = $onkeyup = $onmousedown = $onmouseup = $onmouseover = $onmouseout = $onmousemove = $onfocus = $onblur = $onchange = $onselect = '';
 		$hide = $addfield = $out = '';
 		extract($data);
 		$options = $this->get_custom_field_template_data();
@@ -1689,6 +1689,7 @@ jQuery(this).addClass("closed");
 
 		if ( isset($code) && is_numeric($code) ) :
 			eval(stripcslashes($options['php'][$code]));
+			if ( !empty($valueLabel) && is_array($valueLabel) ) $valueLabels = $valueLabel;
 		endif;
 		
 		if ( !isset($_REQUEST['default']) || (isset($_REQUEST['default']) && $_REQUEST['default'] != true) ) $_REQUEST['default'] = false;
@@ -1703,14 +1704,12 @@ jQuery(this).addClass("closed");
 		if ( empty($ct_value) ) :
 			$ct_value = !empty($startNum) ? $startNum-1 : 1;
 		endif;
-
-		if ( !empty($valueLabel) ) $valueLabels = $valueLabel;
-			
+		
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		if ( !empty($class) ) $class = ' class="' . $class . '"';
 		if ( !empty($style) ) $style = ' style="' . $style . '"';
 
-		if ( !empty($label) && $options['custom_field_template_replace_keys_by_labels'] )
+		if ( !empty($label) && !empty($options['custom_field_template_replace_keys_by_labels']) )
 			$title = stripcslashes($label);
 
 		$event = array('onclick' => $onclick, 'ondblclick' => $ondblclick, 'onkeydown' => $onkeydown, 'onkeypress' => $onkeypress, 'onkeyup' => $onkeyup, 'onmousedown' => $onmousedown, 'onmouseup' => $onmouseup, 'onmouseover' => $onmouseover, 'onmouseout' => $onmouseout, 'onmousemove' => $onmousemove, 'onfocus' => $onfocus, 'onblur' => $onblur, 'onchange' => $onchange, 'onselect' => $onselect);
@@ -1740,12 +1739,12 @@ jQuery(this).addClass("closed");
 			'</dt>' .
 			'<dd>';
 
-		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
+		if ( !empty($label) && empty($options['custom_field_template_replace_keys_by_labels']) )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		$i = 0;
 		
 		$out .= trim($before).'<input name="' . $name . '[' . $sid . '][' . $cftnum . ']" value="" type="hidden" />';
-		
+
 		if ( is_array($values) ) :
 			foreach( $values as $val ) {
 				$id = $name . '_' . $this->sanitize_name( $val ) . '_' . $sid . '_' . $cftnum;
@@ -1768,7 +1767,7 @@ jQuery(this).addClass("closed");
 	}
 	
 	function make_select( $name, $sid, $data ) {
-		$cftnum = $values = $valueLabel = $valueLabels = $default = $hideKey = $label = $code = $class = $style = $before = $after = $selectLabel = $multipleButton = $onclick = $ondblclick = $onkeydown = $onkeypress = $onkeyup = $onmousedown = $onmouseup = $onmouseover = $onmouseout = $onmousemove = $onfocus = $onblur = $onchange = $onselect = '';
+		$cftnum = $values = $valueLabels = $default = $hideKey = $label = $code = $class = $style = $before = $after = $selectLabel = $multipleButton = $onclick = $ondblclick = $onkeydown = $onkeypress = $onkeyup = $onmousedown = $onmouseup = $onmouseover = $onmouseout = $onmousemove = $onfocus = $onblur = $onchange = $onselect = '';
 		$hide = $addfield = $out = '';
 		extract($data);
 		$options = $this->get_custom_field_template_data();
@@ -1778,6 +1777,7 @@ jQuery(this).addClass("closed");
 
 		if ( isset($code) && is_numeric($code) ) :
 			eval(stripcslashes($options['php'][$code]));
+			if ( !empty($valueLabel) && is_array($valueLabel) ) $valueLabels = $valueLabel;
 		endif;
 	
 		if ( !isset($_REQUEST['default']) || (isset($_REQUEST['default']) && $_REQUEST['default'] != true) ) $_REQUEST['default'] = false;
@@ -1792,8 +1792,6 @@ jQuery(this).addClass("closed");
 		if ( empty($ct_value) ) :
 			$ct_value = !empty($startNum) ? $startNum-1 : 1;
 		endif;
-		
-		if ( !empty($valueLabel) ) $valueLabels = $valueLabel;
 		
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		if ( !empty($class) ) $class = ' class="' . $class . '"';
