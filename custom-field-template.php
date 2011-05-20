@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.9
+Version: 1.9.1
 Author URI: http://wpgogo.com/
 */
 
@@ -2021,7 +2021,7 @@ jQuery(this).addClass("closed");
 
 		if ( $mediaPicker == true ) :
 			$picker = __(' OR ', 'custom-field-template');
-			$picker .= '<a href="'.$image_upload_iframe_src.'&post_id='.$_REQUEST[ 'post' ].'&TB_iframe=1&tab='.$tab.'&cftid='.$name . $sid . '_' . $cftnum.'"  class="thickbox" onclick="jQuery('."'#cft_clicked_id'".').val('."'".$name.$sid.'_'.$cftnum."'".');">'.__('Select by Media Picker', 'custom-field-template').'</a>';
+			$picker .= '<a href="'.$image_upload_iframe_src.'&post_id='.$_REQUEST[ 'post' ].'&TB_iframe=1&tab='.$tab.'"  class="thickbox" onclick="jQuery('."'#cft_clicked_id'".').val(jQuery(this).parent().find(\'input\').attr(\'id\'));">'.__('Select by Media Picker', 'custom-field-template').'</a>';
 		endif;
 				
 		$out .= 
@@ -2045,9 +2045,9 @@ jQuery(this).addClass("closed");
 			endif;
 			
 			$out .= '<p><label for="'.$name . $sid . '_' . $cftnum . '_delete"><input type="checkbox" name="'.$name . '_delete[' . $sid . '][' . $cftnum . ']" id="'.$name . $sid . '_' . $cftnum . '_delete" value="1" class="delete_file_checkbox" /> ' . __('Delete', 'custom-field-template') . '</label> <img src="'.$thumb_url.'" width="32" height="32" style="vertical-align:middle;" /> ' . $title . ' </p>';
-			$out .= '<input type="hidden" id="' . $name . $sid . '_' . $cftnum . '_hide" name="'.$name . '[' . $sid . '][]" value="' . $value . '" />';
+			$out .= '<input type="hidden" id="' . $name . $sid . '_' . $cftnum . '_hide" name="'.$name . '[' . $sid . '][' . $cftnum . ']" value="' . $value . '" />';
 		else :
-			$out .= '<input type="hidden" id="' . $name . $sid . '_' . $cftnum . '_hide" name="'.$name . '[' . $sid . '][]" value="" />';
+			$out .= '<input type="hidden" id="' . $name . $sid . '_' . $cftnum . '_hide" name="'.$name . '[' . $sid . '][' . $cftnum . ']" value="" />';
 		endif;
 
 		$out .= '</dd></dl>'."\n";
