@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.9.2
+Version: 1.9.3
 Author URI: http://wpgogo.com/
 */
 
@@ -2267,10 +2267,18 @@ tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''
 					'	else { ed = tinyMCE.get("content"); if(ed) {if(!ed.isHidden()) isTinyMCE = true;}}' . "\n" .
 					'	if ( typeof tinyMCE != "undefined" && isTinyMCE && !ed.isHidden() ) {' . "\n" .
 					'		ed.focus();' . "\n" .
-					'		//if (tinymce.isIE)' . "\n" .
-					'			//ed.selection.moveToBookmark(tinymce.EditorManager.activeEditor.windowManager.bookmark);' . "\n" .
-					'		if ( h.indexOf("[caption") != -1 )' . "\n" .
-					'			h = ed.plugins.wpeditimage._do_shcode(h);' . "\n" .
+					'		if ( tinymce.isIE && ed.windowManager.insertimagebookmark )' . "\n" .
+					'			ed.selection.moveToBookmark(ed.windowManager.insertimagebookmark);' . "\n" .
+					'		if ( h.indexOf("[caption") === 0 ) {' . "\n" .
+					'			if ( ed.plugins.wpeditimage )' . "\n" .
+					'				h = ed.plugins.wpeditimage._do_shcode(h);' . "\n" .
+					'		} else if ( h.indexOf("[gallery") === 0 ) {' . "\n" .
+					'			if ( ed.plugins.wpgallery )' . "\n" .
+					'				h = ed.plugins.wpgallery._do_gallery(h);' . "\n" .
+					'		} else if ( h.indexOf("[embed") === 0 ) {' . "\n" .
+					'			if ( ed.plugins.wordpress )' . "\n" .
+					'				h = ed.plugins.wordpress._setEmbed(h);' . "\n" .
+					'		}' . "\n" .
 					'		ed.execCommand("mceInsertContent", false, h);' . "\n" .
 					'	} else {' . "\n" .
 					'		if ( tmpFocus ) edInsertContent(tmpFocus, h);' . "\n" .
@@ -2626,7 +2634,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 	}
 
 	function edit_meta_value( $id, $post ) {
-		global $wpdb, $wp_version;
+		global $wpdb, $wp_version, $current_user;
 		$options = $this->get_custom_field_template_data();
 		
 		if( !isset( $id ) || isset($_REQUEST['post_ID']) )
@@ -2691,6 +2699,11 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 				//if ( is_numeric($data['parentSN']) ) $field_key = $data['parentSN'];
 				$name = $this->sanitize_name( $title );
 				$title = $wpdb->escape(stripcslashes(trim($title)));
+				
+				if ( isset($data['level']) && is_numeric($data['level']) && $current_user->user_level < $data['level'] ) :
+					$save_value[$title] = $this->get_post_meta($id, $title, false);
+					continue;
+				endif;
 
 				unset($field_key);
 				if ( isset($_REQUEST[$name]) && is_array($_REQUEST[$name]) ) :
@@ -2725,10 +2738,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 								if ( isset($data['valueCount']) && $data['valueCount'] == true ) :
 									$options['value_count'][$title][$value] = $this->set_value_count($title, $value, $id)+1;
 								endif;
-						
-								if ( $data['type'] == 'textarea' && isset($_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size']) ) {
-									preg_match('/cw=[0-9]+&ch=([0-9]+)/', $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$i]) . '_size'], $matched);
-									$options['tinyMCE'][$id][$name][$i] = (int)($matched[1]/20);			
+								if ( $data['type'] == 'textarea' && isset($_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$field_key]) . '_size']) ) {
+									preg_match('/cw=[0-9]+&ch=([0-9]+)/', $_REQUEST['TinyMCE_' . $name . trim($_REQUEST[ $name."_rand" ][$field_key]) . '_size'], $matched);
+									$options['tinyMCE'][$id][$name][$field_key] = (int)($matched[1]/20);			
 								}
 								$save_value[$title][] = $value;
 							elseif ( isset($data['blank']) && $data['blank'] == true ) :
@@ -2751,7 +2763,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 							endif;
 							if( isset($tmpfiles[$name][$field_key][$data['cftnum']]) ) :
 								$_FILES[$title] = $tmpfiles[$name][$field_key][$data['cftnum']];
-								if ( $value ) :
+								if ( isset($value) ) :
 									if ( empty($data['mediaRemove']) ) wp_delete_attachment($value);
 								endif;
 
@@ -2812,7 +2824,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		endforeach;
 
 		if ( !empty($tags_input) && is_array($tags_input) ) :
-			foreach ( $tags_input as $tags_key => $tags_value ) :
+			  foreach ( $tags_input as $tags_key => $tags_value ) :
 				if ( class_exists('SimpleTags') && $tags_key == 'post_tag' ) :
 					wp_cache_flush();
 					$taxonomy = wp_get_object_terms($id, 'post_tag', array());
@@ -3648,7 +3660,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 	function custom_field_template_delete_post($post_id) {
 		global $wpdb;
 		$options = $this->get_custom_field_template_data();
-		$id = $options['posts'][$post_id];
+		$id = !empty($options['posts'][$post_id]) ? $options['posts'][$post_id] : '';
 		
 		if ( is_numeric($id) ) :
 			$fields = $this->get_custom_fields($id);
