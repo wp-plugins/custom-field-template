@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.9.3
+Version: 1.9.4
 Author URI: http://wpgogo.com/
 */
 
@@ -2117,14 +2117,32 @@ jQuery(this).addClass("closed");
 			endif;
 		endif;
 
-		if ( (!isset($_REQUEST['post']) || $_REQUEST['post']<0) && !empty($options['custom_fields'][$id]['category']) && $options['custom_fields'][$id]['category'] && $_REQUEST['cft_mode'] != 'ajaxload' )
+		if ( (!isset($_REQUEST['post']) || $_REQUEST['post']<0) && !empty($options['custom_fields'][$id]['category']) && $_REQUEST['cft_mode'] != 'ajaxload' )
 			return;
-		
-		if ( isset($_REQUEST['post']) && !empty($options['custom_fields'][$id]['category']) && $options['custom_fields'][$id]['category'] && !isset($options['posts'][$_REQUEST['post']]) && $options['posts'][$_REQUEST['post']] !== $id && $_REQUEST['cft_mode'] != 'ajaxload' )
+	
+		if ( isset($_REQUEST['post']) && !empty($options['custom_fields'][$id]['category']) && !isset($options['posts'][$_REQUEST['post']]) && $options['posts'][$_REQUEST['post']] !== $id && $_REQUEST['cft_mode'] != 'ajaxload' )
 			return;
-			
-		if ( !isset($_REQUEST['id']) && !empty($options['custom_fields'][$id]['category']) && $options['custom_fields'][$id]['category'] && $_REQUEST['cft_mode'] == 'ajaxload' )
-			return;
+	
+		if ( !isset($_REQUEST['id']) && !empty($options['custom_fields'][$id]['category']) && $_REQUEST['cft_mode'] == 'ajaxload' ) :
+			$category = explode(',', $options['custom_fields'][$id]['category']);
+			$category = array_filter( $category );
+			$category = array_unique(array_filter(array_map('trim', $category)));
+	
+			if ( !empty($_REQUEST['tax_input']) && is_array($_REQUEST['tax_input']) ) :
+				foreach($_REQUEST['tax_input'] as $key => $val) :
+					foreach($val as $key2 => $val2 ) :
+						if ( in_array($val2, $category) ) : $notreturn = 1; break; endif;;
+					endforeach;
+				endforeach;
+			else :
+				if ( !empty($_REQUEST['post_category']) && is_array($_REQUEST['post_category']) ) :
+					foreach($_REQUEST['post_category'] as $val) :
+						if ( in_array($val, $category) ) : $notreturn = 1; break; endif;;
+					endforeach;
+				endif;
+			endif;
+			if ( empty($notreturn) ) return;
+		endif;
 
 		if ( !empty($options['custom_fields'][$id]['post']) ) :
 			$post_ids = explode(',', $options['custom_fields'][$id]['post']);
@@ -2236,7 +2254,7 @@ tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''
 	}
 
 	function insert_custom_field() {
-		global $wp_version, $post;
+		global $wp_version, $post, $wpdb;
 		$options = $this->get_custom_field_template_data();
 		$out = '';
 		
@@ -2388,9 +2406,18 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 					$categories = explode(',', $val['category']);
 					$categories = array_filter($categories);
 					array_walk( $categories, create_function('&$v', '$v = trim($v);') );
+					$query = $wpdb->prepare("SELECT * FROM `".$wpdb->prefix."term_taxonomy` WHERE term_id IN (".$val['category'].")");
+					$result = $wpdb->get_results($query, ARRAY_A);
+					$category_taxonomy = array();
+					if ( !empty($result) && is_array($result) ) :
+						for($i=0;$i<count($result);$i++) :
+							$category_taxonomy[$result[$i]['term_id']] = $result[$i]['taxonomy'];
+						endfor;
+					endif;
 					foreach($categories as $cat_id) :
 						if ( is_numeric($cat_id) ) :
-							$out .=		'jQuery(\'#in-category-' . $cat_id . '\').click(function(){if(jQuery(\'#in-category-' . $cat_id . '\').attr(\'checked\') == true) { if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID.length=0;}; jQuery.get(\'?page=custom-field-template/custom-field-template.php&cft_mode=selectbox&post=\'+jQuery(\'#post_ID\').val()+\'&\'+jQuery(\'#'.$taxonomy.'-all :input\').fieldSerialize(), function(html) { jQuery(\'#cft_selectbox\').html(html);';
+							if ( $taxonomy == 'category' ) $taxonomy = $category_taxonomy[$cat_id];
+							$out .=		'jQuery(\'#in-'.$category_taxonomy[$cat_id].'-' . $cat_id . '\').click(function(){if(jQuery(\'#in-'.$category_taxonomy[$cat_id].'-' . $cat_id . '\').attr(\'checked\') == true) { if(tinyMCEID.length) { for(i=0;i<tinyMCEID.length;i++) {tinyMCE.execCommand(\'mceRemoveControl\', false, tinyMCEID[i]);} tinyMCEID.length=0;}; jQuery.get(\'?page=custom-field-template/custom-field-template.php&cft_mode=selectbox&post=\'+jQuery(\'#post_ID\').val()+\'&\'+jQuery(\'#'.$taxonomy.'-all :input\').fieldSerialize(), function(html) { jQuery(\'#cft_selectbox\').html(html);';
 							if ( !empty($options['custom_field_template_use_autosave']) ) :
 								$out .= ' var fields = jQuery(\'#cft :input\').fieldSerialize();';
 								$out .= 'jQuery.ajax({type: \'POST\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxsave&post=\'+jQuery(\'#post_ID\').val()+\'&custom-field-template-verify-key=\'+jQuery(\'#custom-field-template-verify-key\').val()+\'&\'+fields, success: function(){jQuery(\'#custom_field_template_select\').val(\'' . $key . '\');jQuery.ajax({type: \'GET\', url: \'?page=custom-field-template/custom-field-template.php&cft_mode=ajaxload&id=' . $key . '&post=\'+jQuery(\'#post_ID\').val(), success: function(html) {';
@@ -2510,7 +2537,14 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		$categories = get_the_category($post_id);
 		$cats = array();
 		if ( is_array($categories) ) foreach($categories as $category) $cats[] = $category->cat_ID;
-		if ( !empty($_REQUEST['post_category']) ) $cats = array_merge($cats, $_REQUEST['post_category']);
+		
+		if ( !empty($_REQUEST['tax_input']) && is_array($_REQUEST['tax_input']) ) :
+			foreach($_REQUEST['tax_input'] as $key => $val) :
+				$cats = array_merge($cats, $val);
+			endforeach;
+		elseif ( !empty($_REQUEST['post_category']) ) :
+			$cats = array_merge($cats, $_REQUEST['post_category']);
+		endif;
 
 		for ( $i=0; $i < count($options['custom_fields']); $i++ ) :
 			unset($cat_ids, $template_files, $post_ids);
