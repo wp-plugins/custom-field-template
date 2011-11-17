@@ -3,8 +3,8 @@ Contributors: Hiroaki Miyashita
 Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
-Tested up to: 3.2.1
-Stable tag: 1.9.4
+Tested up to: 3.3
+Stable tag: 1.9.5
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -104,6 +104,11 @@ See the default template and modify it.
 4. Auto Hook of `the_content()` in the option page of this plugin may help you do this. You can use [cft] shortcodes here. You can switch the cft formats in each category.
 
 == Changelog ==
+
+= 1.9.5 =
+* tinyMCE and quicktags in WordPress 3.3.
+* Upgrade of jQuery Validation Plugin.
+* Bugfix: multiple and fieldset options (Thanks, Colin Duwe).
 
 = 1.9.4 =
 * Support of taxonomies in the category ID field.

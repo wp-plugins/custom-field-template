@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.9.4
+Version: 1.9.5
 Author URI: http://wpgogo.com/
 */
 
@@ -66,6 +66,7 @@ class custom_field_template {
 			add_shortcode( 'cft', array(&$this, 'output_custom_field_values') );
 			add_shortcode( 'cftsearch', array(&$this, 'search_custom_field_values') );
 		endif;
+		
 	}
 		
 	function custom_field_template_init() {
@@ -147,6 +148,8 @@ class custom_field_template {
 			add_action( 'edit_form_advanced', array(&$this, 'insert_custom_field'), 1 );
 			add_action( 'edit_page_form', array(&$this, 'insert_custom_field'), 1 );
 		} else {
+			if ( substr($wp_version, 0, 3) >= '3.3' ) 
+				require_once(ABSPATH . 'wp-admin/includes/screen.php');
 			require_once(ABSPATH . 'wp-admin/includes/template.php');
 			add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), 'post', 'normal', 'core');
 			add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), 'page', 'normal', 'core');
@@ -168,7 +171,7 @@ class custom_field_template {
 				endforeach;
 				if ( isset($custom_post_type) && is_array($custom_post_type) ) :
 					foreach( $custom_post_type as $val ) :
-						if ( function_exists('remove_meta_box') && $options['custom_field_template_disable_default_custom_fields'] ) :
+						if ( function_exists('remove_meta_box') && !empty($options['custom_field_template_disable_default_custom_fields']) ) :
 							remove_meta_box('postcustom', $val, 'normal');
 						endif;
 						add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), $val, 'normal', 'core');
@@ -633,7 +636,6 @@ type = file';
 #cft dd p.label { font-weight:bold; margin:0; }
 #cft_instruction { margin:10px; }
 #cft fieldset { border:1px solid #CCC; margin:5px; padding:5px; }
-#cft .mceStatusbar { padding-bottom:22px; }
 #cft .dl_checkbox { margin:0; }
 ';
 		update_option('custom_field_template_data', $options);
@@ -1883,10 +1885,18 @@ jQuery(this).addClass("closed");
 			$out = '<script type="text/javascript">' . "\n" .
 					'// <![CDATA[' . "\n" .
 					'jQuery(document).ready(function() {if ( typeof tinyMCE != "undefined" ) {' . "\n";
+					
+			if ( substr($wp_version, 0, 3) < '3.3' ) :
+				$load_tinyMCE = 'tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '");';
+				$editorcontainer_class = ' class="editorcontainer"';
+			else :
+				$load_tinyMCE = 'var ed = new tinyMCE.Editor("'. $name . $rand . '", tinyMCEPreInit.mceInit["content"]); ed.render();';
+				$editorcontainer_class = ' class="wp-editor-container"';
+			endif;
 			if ( !empty($options['custom_field_template_use_wpautop']) ) :
-				$out .=	'document.getElementById("'. $name . $rand . '").value = document.getElementById("'. $name . $rand . '").value; tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '"); tinyMCEID.push("'. $name . $rand . '");' . "\n";
+				$out .=	'document.getElementById("'. $name . $rand . '").value = document.getElementById("'. $name . $rand . '").value; '.$load_tinyMCE.' tinyMCEID.push("'. $name . $rand . '");' . "\n";
 			else:
-				$out .=	'document.getElementById("'. $name . $rand . '").value = switchEditors.wpautop(document.getElementById("'. $name . $rand . '").value); tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '"); tinyMCEID.push("'. $name . $rand . '");' . "\n";
+				$out .=	'document.getElementById("'. $name . $rand . '").value = switchEditors.wpautop(document.getElementById("'. $name . $rand . '").value); '.$load_tinyMCE.' tinyMCEID.push("'. $name . $rand . '");' . "\n";
 			endif;
 			$out .= '}});' . "\n";
 			$out .= '// ]]>' . "\n" . '</script>';
@@ -1898,31 +1908,36 @@ jQuery(this).addClass("closed");
 
 			if ( $mediaButton == true ) :
 				$media_upload_iframe_src = "media-upload.php";
-
-				if ( !$mediaOffImage ) :
-					$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src?type=image");
-					$image_title = __('Add an Image');
-					$media .= "<a href=\"{$image_upload_iframe_src}&TB_iframe=true\" id=\"add_image{$rand}\" title='$image_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-image.gif' alt='$image_title' /></a> ";
-				endif;
-				if ( !$mediaOffVideo ) :
-					$video_upload_iframe_src = apply_filters('video_upload_iframe_src', "$media_upload_iframe_src?type=video");
-					$video_title = __('Add Video');
-					$media .= "<a href=\"{$video_upload_iframe_src}&amp;TB_iframe=true\" id=\"add_video{$rand}\" title='$video_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-video.gif' alt='$video_title' /></a> ";
-				endif;
-				if ( !$mediaOffAudio ) :
-					$audio_upload_iframe_src = apply_filters('audio_upload_iframe_src', "$media_upload_iframe_src?type=audio");
-					$audio_title = __('Add Audio');
-					$media .= "<a href=\"{$audio_upload_iframe_src}&amp;TB_iframe=true\" id=\"add_audio{$rand}\" title='$audio_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-music.gif' alt='$audio_title' /></a> ";
-				endif;
-				if ( !$mediaOffMedia ) :
+				
+				if ( substr($wp_version, 0, 3) < '3.3' ) :
+					if ( !$mediaOffImage ) :
+						$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src?type=image");
+						$image_title = __('Add an Image');
+						$media .= "<a href=\"{$image_upload_iframe_src}&TB_iframe=true\" id=\"add_image{$rand}\" title='$image_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-image.gif' alt='$image_title' /></a> ";
+					endif;
+					if ( !$mediaOffVideo ) :
+						$video_upload_iframe_src = apply_filters('video_upload_iframe_src', "$media_upload_iframe_src?type=video");
+						$video_title = __('Add Video');
+						$media .= "<a href=\"{$video_upload_iframe_src}&amp;TB_iframe=true\" id=\"add_video{$rand}\" title='$video_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-video.gif' alt='$video_title' /></a> ";
+					endif;
+					if ( !$mediaOffAudio ) :
+						$audio_upload_iframe_src = apply_filters('audio_upload_iframe_src', "$media_upload_iframe_src?type=audio");
+						$audio_title = __('Add Audio');
+						$media .= "<a href=\"{$audio_upload_iframe_src}&amp;TB_iframe=true\" id=\"add_audio{$rand}\" title='$audio_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-music.gif' alt='$audio_title' /></a> ";
+					endif;
+					if ( !$mediaOffMedia ) :
+						$media_title = __('Add Media');
+						$media .= "<a href=\"{$media_upload_iframe_src}?TB_iframe=true\" id=\"add_media{$rand}\" title='$media_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-other.gif' alt='$media_title' /></a>";
+					endif;
+				else :
 					$media_title = __('Add Media');
-					$media .= "<a href=\"{$media_upload_iframe_src}?TB_iframe=true\" id=\"add_media{$rand}\" title='$media_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-other.gif' alt='$media_title' /></a>";
+					$media .= "<a href=\"{$media_upload_iframe_src}?TB_iframe=true\" id=\"add_media{$rand}\" title='$media_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button.png' alt='$media_title' /></a>";
 				endif;
 			endif;
 
 			$switch = '<div>';
 			if( $tinyMCE == true && user_can_richedit() ) {
-				$switch .= '<a href="#toggle" onclick="switchMode(\''.$name.$rand.'\'); return false;">' . __('Toggle', 'custom-field-template') . '</a>';
+				$switch .= '<a href="#toggle" onclick="switchMode(jQuery(this).parent().parent().parent().find(\'textarea\').attr(\'id\')); return false;">' . __('Toggle', 'custom-field-template') . '</a>';
 			}
 			$switch .= '</div>';
 		}
@@ -1931,7 +1946,13 @@ jQuery(this).addClass("closed");
 				
 		if ( $hideKey == true ) $hide = ' class="hideKey"';
 		$content_class = ' class="';
-		if ( $htmlEditor == true ) $content_class .= 'content';
+		if ( $htmlEditor == true || $tinyMCE == true ) :
+			if ( substr($wp_version, 0, 3) < '3.3' ) :
+				$content_class .= 'content';
+			else :
+				$content_class .= 'wp-editor-area';
+			endif;
+		endif;
 		if ( !empty($class) ) $content_class .= ' ' . $class;
 		$content_class .= '"';
 		if ( !empty($style) ) $style = ' style="' . $style . '"';
@@ -1948,10 +1969,27 @@ jQuery(this).addClass("closed");
 
 		if ( $multipleButton == true && $ct_value == $cftnum ) :
 			$addfield .= '<div style="margin-top:-1em;">';
+			if ( !empty($htmlEditor) ) :
+				if ( substr($wp_version, 0, 3) < '3.3' ) :
+					$load_htmlEditor1 = 'jQuery(\'#qt_\'+original_id+\'_qtags\').remove();';
+					$load_htmlEditor2 = 'qt_set(original_id);qt_set(new_id);';
+					if( $tinyMCE == true ) : $load_htmlEditor2 .= ' jQuery(\'#qt_\'+original_id+\'_qtags\').hide(); jQuery(\'#qt_\'+new_id+\'_qtags\').hide();'; endif;
+				else  :
+					$load_htmlEditor1 = 'jQuery(\'#qt_\'+original_id+\'_toolbar\').remove();';
+					$load_htmlEditor2 = 'new QTags(new_id);QTags._buttonsInit();';
+					if( $tinyMCE == true ) : $load_htmlEditor2 .= ' jQuery(\'#qt_\'+new_id+\'_toolbar\').hide();'; endif;
+				endif;
+			endif;
 			if ( !empty($tinyMCE) ) :
-				$addfield .= '<a href="#clear" onclick="var original_id, new_id; jQuery(this).parent().parent().parent().find('."'textarea'".').each(function(){original_id = jQuery(this).attr('."'id'".');tinyMCE.execCommand(' . "'mceRemoveControl'" . ',false,jQuery(this).attr('."'id'".'));});var clone = jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent()); clone.find('."'textarea'".').val('."''".');if(original_id.match(/([0-9]+)$/)) {var matchval = RegExp.$1;re = new RegExp(matchval, '."'ig'".');clone.html(clone.html().replace(re, parseInt(matchval)+1)); new_id = original_id.replace(/([0-9]+)$/, parseInt(matchval)+1);}if ( tinyMCE.get(jQuery(this).attr('."original_id".')) ) {tinyMCE.execCommand(' . "'mceAddControl'" . ',false, original_id);tinyMCE.execCommand(' . "'mceAddControl'" . ',false, new_id);}jQuery(this).parent().css('."'visibility','hidden'".');jQuery(this).parent().prev().css('."'visibility','hidden'".'); return false;">' . __('Add New', 'custom-field-template') . '</a>';
+				if ( substr($wp_version, 0, 3) < '3.3' ) :
+					$load_tinyMCE = 'tinyMCE.execCommand(' . "'mceAddControl'" . ',false, original_id);tinyMCE.execCommand(' . "'mceAddControl'" . ',false, new_id);';
+				else :
+					$load_tinyMCE = 'var ed = new tinyMCE.Editor(original_id, tinyMCEPreInit.mceInit[\'content\']); ed.render(); var ed = new tinyMCE.Editor(new_id, tinyMCEPreInit.mceInit[\'content\']); ed.render();';
+				endif;
+
+				$addfield .= '<a href="#clear" onclick="var original_id; var new_id; jQuery(this).parent().parent().parent().find('."'textarea'".').each(function(){original_id = jQuery(this).attr('."'id'".');'.$load_htmlEditor1.'tinyMCE.execCommand(' . "'mceRemoveControl'" . ',false,jQuery(this).attr('."'id'".'));});var clone = jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent()); clone.find('."'textarea'".').val('."''".');if(original_id.match(/([0-9]+)$/)) {var matchval = RegExp.$1;re = new RegExp(matchval, '."'ig'".');clone.html(clone.html().replace(re, parseInt(matchval)+1)); new_id = original_id.replace(/([0-9]+)$/, parseInt(matchval)+1);}if ( tinyMCE.get(jQuery(this).attr('."original_id".')) ) {'.$load_tinyMCE.'}jQuery(this).parent().css('."'visibility','hidden'".');'.$load_htmlEditor2.'jQuery(this).parent().prev().css('."'visibility','hidden'".'); return false;">' . __('Add New', 'custom-field-template') . '</a>';
 			else :
-				$addfield .= '<a href="#clear" onclick="var original_id, new_id; jQuery(this).parent().parent().parent().find('."'textarea'".').each(function(){original_id = jQuery(this).attr('."'id'".');});var clone = jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent()); clone.find('."'textarea'".').val('."''".');if(original_id.match(/([0-9]+)$/)) {var matchval = RegExp.$1;re = new RegExp(matchval, '."'ig'".');clone.html(clone.html().replace(re, parseInt(matchval)+1)); new_id = original_id.replace(/([0-9]+)$/, parseInt(matchval)+1);}jQuery(this).parent().css('."'visibility','hidden'".');jQuery(this).parent().prev().css('."'visibility','hidden'".'); return false;">' . __('Add New', 'custom-field-template') . '</a>';
+				$addfield .= '<a href="#clear" onclick="var original_id; var new_id; jQuery(this).parent().parent().parent().find('."'textarea'".').each(function(){original_id = jQuery(this).attr('."'id'".');});'.$load_htmlEditor1.'var clone = jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent()); clone.find('."'textarea'".').val('."''".');if(original_id.match(/([0-9]+)$/)) {var matchval = RegExp.$1;re = new RegExp(matchval, '."'ig'".');clone.html(clone.html().replace(re, parseInt(matchval)+1)); new_id = original_id.replace(/([0-9]+)$/, parseInt(matchval)+1);}'.$load_htmlEditor2.'jQuery(this).parent().css('."'visibility','hidden'".');jQuery(this).parent().prev().css('."'visibility','hidden'".'); return false;">' . __('Add New', 'custom-field-template') . '</a>';
 			endif;
 			$addfield .= '</div>';
 		endif;		
@@ -1965,16 +2003,26 @@ jQuery(this).addClass("closed");
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
 		
 		$out .= trim($before);
+
+		if ( ($htmlEditor == true || $tinyMCE == true) && substr($wp_version, 0, 3) < '3.3' ) $out .= '<div class="quicktags">';
 		
 		if ( $htmlEditor == true ) :
-			if( $tinyMCE == true ) $quicktags_hide = ' jQuery(\'#qt_' . sha1($name . $rand) . '_qtags\').hide();';
-			$out .= '<div class="quicktags"><script type="text/javascript">' . "\n" . '// <![CDATA[' . "\n" . '
-		jQuery(document).ready(function() { qt_' . sha1($name . $rand) . ' = new QTags(\'qt_' . sha1($name . $rand) . '\', \'' . $name . $rand . '\', \'editorcontainer_' . $name . $rand . '\', \'more\'); ' . $quicktags_hide . ' });' . "\n" . '// ]]>' . "\n" . '</script>';
-			$editorcontainer_class = ' class="editorcontainer"';
+			if ( substr($wp_version, 0, 3) < '3.3' ) :
+				if( $tinyMCE == true ) $quicktags_hide = ' jQuery(\'#qt_' . $name . $rand . '_qtags\').hide();';
+				$out .= '<script type="text/javascript">' . "\n" . '// <![CDATA[' . '
+		jQuery(document).ready(function() { qt_' . $name . $rand . ' = new QTags(\'qt_' . $name . $rand . '\', \'' . $name . $rand . '\', \'editorcontainer_' . $name . $rand . '\', \'more\'); ' . $quicktags_hide . ' });' . "\n" . '// ]]>' . "\n" . '</script>';
+				$editorcontainer_class = ' class="editorcontainer"';
+			else :
+				if( $tinyMCE == true ) $quicktags_hide = ' jQuery(\'#qt_' . $name . $rand . '_toolbar\').hide();';
+				$out .= '<script type="text/javascript">' . "\n" . '// <![CDATA[' . '
+		jQuery(document).ready(function() { new QTags(\'' . $name . $rand . '\'); QTags._buttonsInit(); ' . $quicktags_hide . ' }); ' . "\n";
+				$out .=  '// ]]>' . "\n" . '</script>';
+				$editorcontainer_class = ' class="wp-editor-container"';
+			endif;
 		endif;
 		
 		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . $name . $rand . '"><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . '][]" rows="' .$rows. '" cols="' . $cols . '"' . $content_class . $style . $event_output . '>' . esc_attr(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
-		if ( $htmlEditor == true ) $out .= '</div>';
+		if ( ($htmlEditor == true || $tinyMCE == true) && substr($wp_version, 0, 3) < '3.3' ) $out .= '</div>';
 		$out .= trim($after).'</dd></dl>'."\n";
 		
 		return $out;
@@ -2199,8 +2247,17 @@ jQuery(this).addClass("closed");
 							if ( isset($_REQUEST['post']) ) $addbutton = $this->get_post_meta( $_REQUEST['post'], $title, true )-1;
 							if ( !isset($addbutton) || $addbutton<=0 ) $addbutton = 0;
 							if ( $data['cftnum']/2 == $addbutton ) :
-								$addfield .= ' <a href="#clear" onclick="var textarea_ids = new Array();jQuery(this).parent().parent().parent().find('."'textarea'".').each(function(){ed = tinyMCE.get(jQuery(this).attr('."'id'".')); if(ed) {textarea_ids.push(jQuery(this).attr('."'id'".'));tinyMCE.execCommand(' . "'mceRemoveControl'" . ',false,jQuery(this).attr('."'id'".'));}});var checked_ids = new Array();jQuery(this).parent().parent().parent().find('."'input[type=radio]:checked'".').each(function(){checked_ids.push(jQuery(this).attr('."'id'".'));});var tmp = jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent());for( var i=0;i<checked_ids.length;i++) { jQuery('."'#'+checked_ids[i]".').attr('."'checked'".', true); }
-tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''".');tmp.find('."'select'".').val('."''".');tmp.find('."'textarea'".').val('."''".');tmp.find('."'input'".').attr('."'checked',false".');tmp.find('."'p'".').remove();tmp.find('."'dl'".').each(function(){	if(jQuery(this).attr('."'id'".')){if(jQuery(this).attr('."'id'".').match(/_([0-9]+)$/)) {matchval = RegExp.$1;matchval++;jQuery(this).attr('."'id',".'jQuery(this).attr('."'id'".').replace(/_([0-9]+)$/, \'_\'+matchval));	jQuery(this).find('."'textarea'".').each(function(){if(jQuery(this).attr('."'id'".').match(/([0-9]+)$/)) {var check = false;for( var i=0;i<textarea_ids.length;i++) { if ( jQuery(this).attr('."'id'".')==textarea_ids[i] ) { check = true; } }if ( check ) {	matchval2 = RegExp.$1;jQuery(this).attr('."'id',".'jQuery(this).attr('."'id'".').replace(/([0-9]+)$/, parseInt(matchval2)+1));re = new RegExp(matchval2, '."'ig'".');jQuery(this).parent().parent().parent().html(jQuery(this).parent().parent().parent().html().replace(re, parseInt(matchval2)+1));	textarea_ids.push(jQuery(this).attr('."'id'".'));}}	jQuery(this).attr('."'name',".'jQuery(this).attr('."'name'".').replace(/\[([0-9]+)\]$/, \'[\'+matchval+\']\'));});jQuery(this).find('."'input'".').each(function(){jQuery(this).attr('."'id',".'jQuery(this).attr('."'id'".').replace(/_([0-9]+)_/, \'_\'+matchval+\'_\'));jQuery(this).attr('."'id',".'jQuery(this).attr('."'id'".').replace(/_([0-9]+)$/, \'_\'+matchval));jQuery(this).attr('."'name',".'jQuery(this).attr('."'name'".').replace(/\[([0-9]+)\]$/, \'[\'+matchval+\']\'));});jQuery(this).find('."'label'".').each(function(){jQuery(this).attr('."'for',".'jQuery(this).attr('."'for'".').replace(/_([0-9]+)_/, \'_\'+matchval+\'_\'));jQuery(this).attr('."'for',".'jQuery(this).attr('."'for'".').replace(/_([0-9]+)$/, \'_\'+matchval));jQuery(this).attr('."'for',".'jQuery(this).attr('."'for'".').replace(/\[([0-9]+)\]$/, \'[\'+matchval+\']\'));});}}});for( var i=0;i<textarea_ids.length;i++) { tinyMCE.execCommand(' . "'mceAddControl'" . ',false, textarea_ids[i]); }jQuery(this).parent().css('."'visibility','hidden'".');return false;">' . __('Add New', 'custom-field-template') . '</a>';
+								if ( substr($wp_version, 0, 3) < '3.3' ) :
+									$load_htmlEditor1 = 'if ( jQuery(\'#qt_\'+jQuery(this).attr('."'id'".')+\'_qtags\').html() ) {jQuery(\'#qt_\'+jQuery(this).attr('."'id'".')+\'_qtags\').remove();';
+									$load_htmlEditor2 = 'qt_set(textarea_html_ids[i]);';
+									$load_tinyMCE = 'tinyMCE.execCommand(' . "'mceAddControl'" . ',false, textarea_tmce_ids[i]); switchMode(textarea_tmce_ids[i]); switchMode(textarea_tmce_ids[i]);';
+								else :
+									$load_htmlEditor1 = 'if ( jQuery(\'#qt_\'+jQuery(this).attr('."'id'".')+\'_toolbar\').html() ) {jQuery(\'#qt_\'+jQuery(this).attr('."'id'".')+\'_toolbar\').remove();';
+									$load_htmlEditor2 = 'new QTags(textarea_html_ids[i]);QTags._buttonsInit();';
+									$load_tinyMCE = 'var ed = new tinyMCE.Editor(textarea_tmce_ids[i], tinyMCEPreInit.mceInit[\'content\']); ed.render(); switchMode(textarea_tmce_ids[i]); switchMode(textarea_tmce_ids[i]);';
+								endif;
+								$addfield .= '<input type="hidden" id="' . $this->sanitize_name( $title ) . '_count" value="0" /><script type="text/javascript">jQuery(document).ready(function() {jQuery(\'#' . $this->sanitize_name( $title ) . '_count\').val(0); });</script>';
+								$addfield .= ' <a href="#clear" onclick="var textarea_tmce_ids = new Array();var textarea_html_ids = new Array();var html_start = 0;jQuery(this).parent().parent().parent().find('."'textarea'".').each(function(){if ( jQuery(this).attr('."'id'".') ) {'.$load_htmlEditor1.'if ( jQuery(\'#'.$this->sanitize_name( $title ).'_count\').val() == 0 ) html_start++;textarea_html_ids.push(jQuery(this).attr('."'id'".'));}}ed = tinyMCE.get(jQuery(this).attr('."'id'".')); if(ed) {textarea_tmce_ids.push(jQuery(this).attr('."'id'".'));tinyMCE.execCommand(' . "'mceRemoveControl'" . ',false,jQuery(this).attr('."'id'".'));}});var checked_ids = new Array();jQuery(this).parent().parent().parent().find('."'input[type=radio]:checked'".').each(function(){checked_ids.push(jQuery(this).attr('."'id'".'));});var tmp = jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent());tmp.find('."'input'".').attr('."'checked',false".');for( var i=0;i<checked_ids.length;i++) { jQuery('."'#'+checked_ids[i]".').attr('."'checked'".', true); }tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''".');tmp.find('."'select'".').val('."''".');tmp.find('."'textarea'".').text('."''".');tmp.find('."'p'".').remove();tmp.find('."'dl'".').each(function(){if(jQuery(this).attr('."'id'".')){if(jQuery(this).attr('."'id'".').match(/_([0-9]+)$/)) {matchval = RegExp.$1;matchval++;jQuery(this).attr('."'id',".'jQuery(this).attr('."'id'".').replace(/_([0-9]+)$/, \'_\'+matchval));jQuery(this).find('."'textarea'".').each(function(){if(jQuery(this).attr('."'id'".').match(/([0-9]+)$/)) {var tmce_check = false;var html_check = false;for( var i=0;i<textarea_tmce_ids.length;i++) { if ( jQuery(this).attr('."'id'".')==textarea_tmce_ids[i] ) { tmce_check = true; } }for( var i=0;i<textarea_html_ids.length;i++) { if ( jQuery(this).attr('."'id'".')==textarea_html_ids[i] ) { html_check = true; } }  if ( tmce_check || html_check ) {matchval2 = RegExp.$1;jQuery(this).attr('."'id',".'jQuery(this).attr('."'id'".').replace(/([0-9]+)$/, parseInt(matchval2)+1));re = new RegExp(matchval2, '."'ig'".');jQuery(this).parent().parent().parent().html(jQuery(this).parent().parent().parent().html().replace(re, parseInt(matchval2)+1));if ( tmce_check ) textarea_tmce_ids.push(jQuery(this).attr('."'id'".'));if ( html_check ) textarea_html_ids.push(jQuery(this).attr('."'id'".'));}}jQuery(this).attr('."'name',".'jQuery(this).attr('."'name'".').replace(/\[([0-9]+)\]$/, \'[\'+matchval+\']\'));});jQuery(this).find('."'input'".').each(function(){if(jQuery(this).attr('."'id'".')){jQuery(this).attr('."'id',".'jQuery(this).attr('."'id'".').replace(/_([0-9]+)_/, \'_\'+matchval+\'_\'));jQuery(this).attr('."'id',".'jQuery(this).attr('."'id'".').replace(/_([0-9]+)$/, \'_\'+matchval));}if(jQuery(this).attr('."'name'".')){jQuery(this).attr('."'name',".'jQuery(this).attr('."'name'".').replace(/\[([0-9]+)\]$/, \'[\'+matchval+\']\'));}});jQuery(this).find('."'label'".').each(function(){jQuery(this).attr('."'for',".'jQuery(this).attr('."'for'".').replace(/_([0-9]+)_/, \'_\'+matchval+\'_\'));jQuery(this).attr('."'for',".'jQuery(this).attr('."'for'".').replace(/_([0-9]+)$/, \'_\'+matchval));jQuery(this).attr('."'for',".'jQuery(this).attr('."'for'".').replace(/\[([0-9]+)\]$/, \'[\'+matchval+\']\'));});}}});for( var i=html_start;i<textarea_html_ids.length;i++) { '.$load_htmlEditor2.' }for( var i=html_start;i<textarea_tmce_ids.length;i++) { '.$load_tinyMCE.' }jQuery(this).parent().css('."'visibility','hidden'".');jQuery(\'#'.$this->sanitize_name( $title ).'_count\').val(parseInt(jQuery(\'#'.$this->sanitize_name( $title ).'_count\').val())+1);return false;">' . __('Add New', 'custom-field-template') . '</a>';
 							else :
 								$addfield .= ' <a href="#clear" onclick="jQuery(this).parent().parent().parent().remove();return false;">' . __('Delete', 'custom-field-template') . '</a>';
 							endif;
@@ -2279,6 +2336,7 @@ tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''
 		
 		$out .= 	'<script type="text/javascript">' . "\n" .
 					'// <![CDATA[' . "\n";
+		$out .=		'function qt_set(new_id) { eval("qt_"+new_id+" = new QTags(\'qt_"+new_id+"\', \'"+new_id+"\', \'editorcontainer_"+new_id+"\', \'more\');");}';
 		$out .= 	'function send_to_custom_field(h) {' . "\n" .
 					'	if ( tmpFocus ) ed = tmpFocus;' . "\n" .
 					'	else if ( typeof tinyMCE == "undefined" ) ed = document.getElementById("content");' . "\n" .
@@ -2308,6 +2366,18 @@ tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''
 								'	tmpFocus = undefined;' . "\n" .
 								'	isTinyMCE = false;' . "\n";
 					}
+
+		if ( substr($wp_version, 0, 3) < '3.3' ) :
+			$qt_position = 'prev()';
+		else :
+			$qt_position = 'children(\':first\')';
+		endif;
+
+		if ( substr($wp_version, 0, 3) < '3.3' ) :
+			$load_tinyMCE = 'tinyMCE.execCommand(' . "'mceAddControl'" . ',false, id);';
+		else :
+			$load_tinyMCE = 'var ed = new tinyMCE.Editor(id, tinyMCEPreInit.mceInit[\'content\']); ed.render();';
+		endif;
 
 		$out .=		'}' . "\n" .
 					'jQuery(".thickbox").bind("click", function (e) {' . "\n" .
@@ -2340,10 +2410,10 @@ tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''
 					'	var ed = tinyMCE.get(id);' . "\n" .
 					'	if ( ! ed || ed.isHidden() ) {' . "\n" .
 					'		document.getElementById(id).value = switchEditors.wpautop(document.getElementById(id).value);' . "\n" .
-					'		if ( ed ) { jQuery(\'#editorcontainer_\'+id).prev().hide(); ed.show(); }' . "\n" .
-					'		else {tinyMCE.execCommand("mceAddControl", false, id);}' . "\n" .
+					'		if ( ed ) { jQuery(\'#editorcontainer_\'+id).'.$qt_position.'.hide(); ed.show(); }' . "\n" .
+					'		else {'.$load_tinyMCE.'}' . "\n" .
 					'	} else {' . "\n" .
-					'		ed.hide(); jQuery(\'#editorcontainer_\'+id).prev().show(); document.getElementById(id).style.color="#000000";' . "\n" .
+					'		ed.hide(); jQuery(\'#editorcontainer_\'+id).'.$qt_position.'.show(); document.getElementById(id).style.color="#000000";' . "\n" .
 					'	}' . "\n" .
 					'}' . "\n";
 					
@@ -2486,7 +2556,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		$out .= $body;
 		$out .= '</div>';
 		
-		$out .= '<div style="position:absolute; top:30px; right:5px;">';
+		if ( substr($wp_version, 0, 3) < '3.3' ) :
+			$top_margin = 30;
+		else :
+			$top_margin = 0;
+		endif;
+				
+		$out .= '<div style="position:absolute; top:'.$top_margin.'px; right:5px;">';
 		$out .= '<img class="waiting" style="display:none; vertical-align:middle;" src="images/loading.gif" alt="" id="cftloading_img" /> ';
 		if ( !empty($options['custom_field_template_use_disable_button']) ) :
 		$out .= '<input type="hidden" id="disable_value" value="0" />';
@@ -3194,7 +3270,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 								endif;
 								if ( empty($value) && $val['outputNone'] ) $value = $val['outputNone'];
 								if ( $val['shortCode'] == true ) $value = do_shortcode($value);			
-								if ( !empty($val['label']) && $options['custom_field_template_replace_keys_by_labels'] )
+								if ( !empty($val['label']) && !empty($options['custom_field_template_replace_keys_by_labels']) )
 									$key = stripcslashes($val['label']);
 								if ( $val['hideKey'] != true && $num == 0 )
 									$output .= '<dt>' . $key . '</dt>' . "\n";
