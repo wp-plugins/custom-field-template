@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 1.9.5
+Version: 1.9.6
 Author URI: http://wpgogo.com/
 */
 
@@ -148,8 +148,9 @@ class custom_field_template {
 			add_action( 'edit_form_advanced', array(&$this, 'insert_custom_field'), 1 );
 			add_action( 'edit_page_form', array(&$this, 'insert_custom_field'), 1 );
 		} else {
-			if ( substr($wp_version, 0, 3) >= '3.3' ) 
+			if ( substr($wp_version, 0, 3) >= '3.3' && file_exists(ABSPATH . 'wp-admin/includes/screen.php') ) :
 				require_once(ABSPATH . 'wp-admin/includes/screen.php');
+			endif;
 			require_once(ABSPATH . 'wp-admin/includes/template.php');
 			add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), 'post', 'normal', 'core');
 			add_meta_box('cftdiv', __('Custom Field Template', 'custom-field-template'), array(&$this, 'insert_custom_field'), 'page', 'normal', 'core');
@@ -2105,9 +2106,8 @@ jQuery(this).addClass("closed");
 
 
 	function load_custom_field( $id = 0 ) {
-		global $userdata, $post, $wp_version;
-		get_currentuserinfo();
-		$level = $userdata->user_level;
+		global $current_user, $post, $wp_version;
+		$level = $current_user->user_level;
 
 		$options = $this->get_custom_field_template_data();
 		
