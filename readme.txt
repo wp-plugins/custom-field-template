@@ -3,8 +3,8 @@ Contributors: Hiroaki Miyashita
 Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
-Tested up to: 3.3.1
-Stable tag: 1.9.9
+Tested up to: 3.4
+Stable tag: 2.0
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -76,6 +76,7 @@ Localization
 * Polish (pl_PL) - [Difreo](http://www.difreo.pl/)
 * Brazilian Portuguese (pt_BR) - [Caciano Gabriel](http://www.gn10.com.br/)
 * Russian (ru_RU) - [Sonika](http://www.sonika.ru/blog/)
+* Swedish (sv_SE) - [Pontus Carlsson](http://www.fristil.se/)
 * Turkish (tr_TR) - [Omer Faruk](http://ramerta.com/)
 * Ukranian (uk_UA) - [Andrew Kovalev](http://www.portablecomponentsforall.com)
 * Uzbek (uz_UZ) - [Alexandra Bolshova](http://www.comfi.com/)
@@ -105,6 +106,12 @@ See the default template and modify it.
 4. Auto Hook of `the_content()` in the option page of this plugin may help you do this. You can use [cft] shortcodes here. You can switch the cft formats in each category.
 
 == Changelog ==
+
+= 2.0 =
+* Option to deploy the box in each template. Category ID and page template file name refinement have not been supported yet.
+* Swedish (sv_SE) - Pontus Carlsson
+* Bugfix: save button with the tinyMCE editor.
+* Bugfix: output of custom field values.
 
 = 1.9.9 =
 * Code cleaning.
