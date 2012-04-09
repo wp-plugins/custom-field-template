@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.0
+Version: 2.0.1
 Author URI: http://wpgogo.com/
 */
 
@@ -461,10 +461,13 @@ class custom_field_template {
 	}
 	
 	function custom_field_template_dbx_post_sidebar() {
+		global $wp_version;
 		$options = $this->get_custom_field_template_data();
 		
 		if ( !empty($options['custom_field_template_deploy_box']) ) :
-			$siffix = '"+win.jQuery("#cft_current_template").val()+"';
+			$suffix = '"+win.jQuery("#cft_current_template").val()+"';
+		else :
+			$suffix = '';
 		endif;
 
 		$out = '';
@@ -538,14 +541,10 @@ class custom_field_template {
 					}
 
 		if ( substr($wp_version, 0, 3) < '3.3' ) :
-			$qt_position = 'prev()';
-		else :
-			$qt_position = 'children(\':first\')';
-		endif;
-
-		if ( substr($wp_version, 0, 3) < '3.3' ) :
+			$qt_position = 'jQuery(\'#editorcontainer_\'+id).prev()';
 			$load_tinyMCE = 'tinyMCE.execCommand(' . "'mceAddControl'" . ',false, id);';
 		else :
+			$qt_position = 'jQuery(\'#qt_\'+id+\'_toolbar\')';
 			$load_tinyMCE = 'var ed = new tinyMCE.Editor(id, tinyMCEPreInit.mceInit[\'content\']); ed.render();';
 		endif;
 
@@ -580,10 +579,10 @@ class custom_field_template {
 					'	var ed = tinyMCE.get(id);' . "\n" .
 					'	if ( ! ed || ed.isHidden() ) {' . "\n" .
 					'		document.getElementById(id).value = switchEditors.wpautop(document.getElementById(id).value);' . "\n" .
-					'		if ( ed ) { jQuery(\'#editorcontainer_\'+id).'.$qt_position.'.hide(); ed.show(); }' . "\n" .
+					'		if ( ed ) { '.$qt_position.'.hide(); ed.show(); }' . "\n" .
 					'		else {'.$load_tinyMCE.'}' . "\n" .
 					'	} else {' . "\n" .
-					'		ed.hide(); jQuery(\'#editorcontainer_\'+id).'.$qt_position.'.show(); document.getElementById(id).style.color="#000000";' . "\n" .
+					'		ed.hide(); '.$qt_position.'.show(); document.getElementById(id).style.color="#000000";' . "\n" .
 					'	}' . "\n" .
 					'}' . "\n";
 				
@@ -1592,7 +1591,7 @@ hideKey = true<br />
 <th>endNum</th><td>endNum = 10</td><td></td><td>endNum = 10</td><td>endNum = 10</td><td>endNum = 10</td><td>endNum = 10</td>
 </tr>
 <tr>
-<th>multipleButton</th><td>multipleButton = true</td><td></td><td>multipleButton = true</td><td>multipleButton = true</td><td></td><td>multipleButton = true</td>
+<th>multipleButton</th><td>multipleButton = true</td><td></td><td>multipleButton = true</td><td>multipleButton = true</td><td>multipleButton = true</td><td>multipleButton = true</td>
 </tr>
 <tr>
 <th>blank</th><td>blank = true</td><td>blank = true</td><td>blank = true</td><td>blank = true</td><td>blank = true</td><td>blank = true</td>
@@ -2105,16 +2104,16 @@ jQuery(this).addClass("closed");
 					'jQuery(document).ready(function() {if ( typeof tinyMCE != "undefined" ) {' . "\n";
 					
 			if ( substr($wp_version, 0, 3) < '3.3' ) :
-				$load_tinyMCE = 'tinyMCE.execCommand("mceAddControl", false, "'. $name . $rand . '");';
+				$load_tinyMCE = 'tinyMCE.execCommand("mceAddControl", false, "'. sha1($name . $rand) . '");';
 				$editorcontainer_class = ' class="editorcontainer"';
 			else :
-				$load_tinyMCE = 'var ed = new tinyMCE.Editor("'. $name . $rand . '", tinyMCEPreInit.mceInit["content"]); ed.render();';
+				$load_tinyMCE = 'var ed = new tinyMCE.Editor("'. sha1($name . $rand) . '", tinyMCEPreInit.mceInit["content"]); ed.render();';
 				$editorcontainer_class = ' class="wp-editor-container"';
 			endif;
 			if ( !empty($options['custom_field_template_use_wpautop']) ) :
-				$out .=	'document.getElementById("'. $name . $rand . '").value = document.getElementById("'. $name . $rand . '").value; '.$load_tinyMCE.' tinyMCEID.push("'. $name . $rand . '");' . "\n";
+				$out .=	'document.getElementById("'. sha1($name . $rand) . '").value = document.getElementById("'. sha1($name . $rand) . '").value; '.$load_tinyMCE.' tinyMCEID.push("'. sha1($name . $rand) . '");' . "\n";
 			else:
-				$out .=	'document.getElementById("'. $name . $rand . '").value = switchEditors.wpautop(document.getElementById("'. $name . $rand . '").value); '.$load_tinyMCE.' tinyMCEID.push("'. $name . $rand . '");' . "\n";
+				$out .=	'document.getElementById("'. sha1($name . $rand) . '").value = switchEditors.wpautop(document.getElementById("'. sha1($name . $rand) . '").value); '.$load_tinyMCE.' tinyMCEID.push("'. sha1($name . $rand) . '");' . "\n";
 			endif;
 			$out .= '}});' . "\n";
 			$out .= '// ]]>' . "\n" . '</script>';
@@ -2226,20 +2225,20 @@ jQuery(this).addClass("closed");
 		
 		if ( $htmlEditor == true ) :
 			if ( substr($wp_version, 0, 3) < '3.3' ) :
-				if( $tinyMCE == true ) $quicktags_hide = ' jQuery(\'#qt_' . $name . $rand . '_qtags\').hide();';
+				if( $tinyMCE == true ) $quicktags_hide = ' jQuery(\'#qt_' . sha1($name . $rand) . '_qtags\').hide();';
 				$out .= '<script type="text/javascript">' . "\n" . '// <![CDATA[' . '
-		jQuery(document).ready(function() { qt_' . $name . $rand . ' = new QTags(\'qt_' . $name . $rand . '\', \'' . $name . $rand . '\', \'editorcontainer_' . $name . $rand . '\', \'more\'); ' . $quicktags_hide . ' });' . "\n" . '// ]]>' . "\n" . '</script>';
+		jQuery(document).ready(function() { qt_' . sha1($name . $rand) . ' = new QTags(\'qt_' . sha1($name . $rand) . '\', \'' . sha1($name . $rand) . '\', \'editorcontainer_' . sha1($name . $rand) . '\', \'more\'); ' . $quicktags_hide . ' });' . "\n" . '// ]]>' . "\n" . '</script>';
 				$editorcontainer_class = ' class="editorcontainer"';
 			else :
-				if( $tinyMCE == true ) $quicktags_hide = ' jQuery(\'#qt_' . $name . $rand . '_toolbar\').hide();';
+				if( $tinyMCE == true ) $quicktags_hide = ' jQuery(\'#qt_' . sha1($name . $rand) . '_toolbar\').hide();';
 				$out .= '<script type="text/javascript">' . "\n" . '// <![CDATA[' . '
-		jQuery(document).ready(function() { new QTags(\'' . $name . $rand . '\'); QTags._buttonsInit(); ' . $quicktags_hide . ' }); ' . "\n";
+		jQuery(document).ready(function() { new QTags(\'' . sha1($name . $rand) . '\'); QTags._buttonsInit(); ' . $quicktags_hide . ' }); ' . "\n";
 				$out .=  '// ]]>' . "\n" . '</script>';
 				$editorcontainer_class = ' class="wp-editor-container"';
 			endif;
 		endif;
 		
-		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . $name . $rand . '"><textarea id="' . $name . $rand . '" name="' . $name . '[' . $sid . '][]" rows="' .$rows. '" cols="' . $cols . '"' . $content_class . $style . $event_output . '>' . esc_attr(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
+		$out .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . sha1($name . $rand) . '"><textarea id="' . sha1($name . $rand) . '" name="' . $name . '[' . $sid . '][]" rows="' .$rows. '" cols="' . $cols . '"' . $content_class . $style . $event_output . '>' . esc_attr(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
 		if ( ($htmlEditor == true || $tinyMCE == true) && substr($wp_version, 0, 3) < '3.3' ) $out .= '</div>';
 		$out .= trim($after).'</dd></dl>'."\n";
 		
