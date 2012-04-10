@@ -4,7 +4,7 @@ Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom, fields, field, template, meta, custom field, custom fields, custom field template
 Requires at least: 2.1
 Tested up to: 3.4
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 
 This plugin adds the default custom fields on the Write Post/Page.
 
@@ -59,6 +59,7 @@ The Custom Field Template plugin adds the default custom fields on the Write Pos
 * Adds the attribute of `singleList` attribute in order to output with `<ul><li>` if the value is single. ex) `singleList = true`
 * Adds the file upload type. (`type = file`)
 * Adds the fieldset type. (`type = fieldset_open`, `type = fieldset_close`)
+* Adds the option to deploy the box in each template.
 
 Localization
 
@@ -106,6 +107,10 @@ See the default template and modify it.
 4. Auto Hook of `the_content()` in the option page of this plugin may help you do this. You can use [cft] shortcodes here. You can switch the cft formats in each category.
 
 == Changelog ==
+
+= 2.0.2 =
+* Bugfix: checkbox output with the label attribute.
+* Bugfix: mediaButton attribute.
 
 = 2.0.1 =
 * Bugix: multibyte string key names with the html editor.

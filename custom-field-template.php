@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.0.1
+Version: 2.0.2
 Author URI: http://wpgogo.com/
 */
 
@@ -2130,25 +2130,25 @@ jQuery(this).addClass("closed");
 					if ( !$mediaOffImage ) :
 						$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src?type=image");
 						$image_title = __('Add an Image');
-						$media .= "<a href=\"{$image_upload_iframe_src}&TB_iframe=true\" id=\"add_image{$rand}\" title='$image_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-image.gif' alt='$image_title' /></a> ";
+						$media .= "<a href=\"{$image_upload_iframe_src}&TB_iframe=true\" id=\"add_image{$rand}\" title='$image_title' onclick=\"focusTextArea('".sha1($name.$rand)."'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-image.gif' alt='$image_title' /></a> ";
 					endif;
 					if ( !$mediaOffVideo ) :
 						$video_upload_iframe_src = apply_filters('video_upload_iframe_src', "$media_upload_iframe_src?type=video");
 						$video_title = __('Add Video');
-						$media .= "<a href=\"{$video_upload_iframe_src}&amp;TB_iframe=true\" id=\"add_video{$rand}\" title='$video_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-video.gif' alt='$video_title' /></a> ";
+						$media .= "<a href=\"{$video_upload_iframe_src}&amp;TB_iframe=true\" id=\"add_video{$rand}\" title='$video_title' onclick=\"focusTextArea('".sha1($name.$rand)."'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-video.gif' alt='$video_title' /></a> ";
 					endif;
 					if ( !$mediaOffAudio ) :
 						$audio_upload_iframe_src = apply_filters('audio_upload_iframe_src', "$media_upload_iframe_src?type=audio");
 						$audio_title = __('Add Audio');
-						$media .= "<a href=\"{$audio_upload_iframe_src}&amp;TB_iframe=true\" id=\"add_audio{$rand}\" title='$audio_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-music.gif' alt='$audio_title' /></a> ";
+						$media .= "<a href=\"{$audio_upload_iframe_src}&amp;TB_iframe=true\" id=\"add_audio{$rand}\" title='$audio_title' onclick=\"focusTextArea('".sha1($name.$rand)."'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-music.gif' alt='$audio_title' /></a> ";
 					endif;
 					if ( !$mediaOffMedia ) :
 						$media_title = __('Add Media');
-						$media .= "<a href=\"{$media_upload_iframe_src}?TB_iframe=true\" id=\"add_media{$rand}\" title='$media_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-other.gif' alt='$media_title' /></a>";
+						$media .= "<a href=\"{$media_upload_iframe_src}?TB_iframe=true\" id=\"add_media{$rand}\" title='$media_title' onclick=\"focusTextArea('".sha1($name.$rand)."'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button-other.gif' alt='$media_title' /></a>";
 					endif;
 				else :
 					$media_title = __('Add Media');
-					$media .= "<a href=\"{$media_upload_iframe_src}?TB_iframe=true\" id=\"add_media{$rand}\" title='$media_title' onclick=\"focusTextArea('{$name}{$rand}'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button.png' alt='$media_title' /></a>";
+					$media .= "<a href=\"{$media_upload_iframe_src}?TB_iframe=true\" id=\"add_media{$rand}\" title='$media_title' onclick=\"focusTextArea('".sha1($name.$rand)."'); jQuery(this).attr('href',jQuery(this).attr('href').replace('\?','?post_id='+jQuery('#post_ID').val())); return thickbox(this);\"><img src='images/media-button.png' alt='$media_title' /></a>";
 				endif;
 			endif;
 
@@ -3401,9 +3401,10 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 								if ( empty($value) && $val['outputNone'] ) $value = $val['outputNone'];
 								if ( $val['shortCode'] == true ) $value = do_shortcode($value);			
 								if ( !empty($val['label']) && !empty($options['custom_field_template_replace_keys_by_labels']) )
-									$key = stripcslashes($val['label']);
+									$key_val = stripcslashes($val['label']);
+								else $key_val = $key;
 								if ( $val['hideKey'] != true && $num == 0 )
-									$output .= '<dt>' . $key . '</dt>' . "\n";
+									$output .= '<dt>' . $key_val . '</dt>' . "\n";
 								$output .= '<dd>' . $value . '</dd>' . "\n";
 							endforeach;
 						endif;
