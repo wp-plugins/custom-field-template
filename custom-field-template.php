@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.0.2
+Version: 2.0.3
 Author URI: http://wpgogo.com/
 */
 
@@ -34,7 +34,7 @@ class custom_field_template {
 	var $is_excerpt;
 
 	function custom_field_template() {
-		add_action( 'init', array(&$this, 'custom_field_template_init') );
+		add_action( 'init', array(&$this, 'custom_field_template_init'), 100 );
 		add_action( 'admin_menu', array(&$this, 'custom_field_template_admin_menu') );
 		add_action( 'admin_print_scripts', array(&$this, 'custom_field_template_admin_scripts') );
 		add_action( 'admin_head', array(&$this, 'custom_field_template_admin_head'), 100 );
@@ -734,21 +734,22 @@ class custom_field_template {
 		
 		wp_enqueue_script( 'jquery' );
 		wp_enqueue_script( 'jquery-form' );
-		wp_enqueue_script( 'date', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/date.js', array('jquery') );
 		wp_enqueue_script( 'bgiframe', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.bgiframe.js', array('jquery') ) ;
-		wp_enqueue_script( 'datePicker', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.datePicker.js', array('jquery') );
 		wp_enqueue_script( 'textarearesizer', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.textarearesizer.js', array('jquery') );
-		if( strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || (is_object($post) && $post->post_type=='page') ) :
+		if( strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php') || (is_object($post) && $post->post_type=='page') ) :
+			wp_enqueue_script('date', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/date.js', array('jquery') );
+			wp_enqueue_script('datePicker', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.datePicker.js', array('jquery') );
 			wp_enqueue_script('editor');
 			wp_enqueue_script('quicktags');
+
+			if ( !empty($options['custom_field_template_use_validation']) ) :
+				wp_enqueue_script( 'jquery-validate', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.validate.js', array('jquery') );
+				wp_enqueue_script( 'additional-methods', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/additional-methods.js', array('jquery') );
+				if ( file_exists(ABSPATH . PLUGINDIR . '/' . $plugin_dir . '/js/messages_' . WPLANG . '.js') )
+					wp_enqueue_script( 'messages_' . WPLANG, '/' . PLUGINDIR . '/' . $plugin_dir . '/js/messages_' . WPLANG .'.js', array('jquery') );
+			endif;
 		endif;
 
-		if ( !empty($options['custom_field_template_use_validation']) ) :
-			wp_enqueue_script( 'jquery-validate', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.validate.js', array('jquery') );
-			wp_enqueue_script( 'additional-methods', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/additional-methods.js', array('jquery') );
-			if ( file_exists(ABSPATH . PLUGINDIR . '/' . $plugin_dir . '/js/messages_' . WPLANG . '.js') )
-				wp_enqueue_script( 'messages_' . WPLANG, '/' . PLUGINDIR . '/' . $plugin_dir . '/js/messages_' . WPLANG .'.js', array('jquery') );
-		endif;
 	}
 
 	function install_custom_field_template_data() {
@@ -815,7 +816,8 @@ type = file';
 	
 	function install_custom_field_template_css() {
 		$options = get_option('custom_field_template_data');
-		$options['css'] = '.cft:after { content:" "; clear:both; height:0; display:block; visibility:hidden; }
+		$options['css'] = '.cft { overflow:hidden; }
+.cft:after { content:" "; clear:both; height:0; display:block; visibility:hidden; }
 .cft dl { margin:10px 0; }
 .cft dl:after { content:" "; clear:both; height:0; display:block; visibility:hidden; }
 .cft dt { width:20%; clear:both; float:left; display:inline; font-weight:bold; text-align:center; }
@@ -2286,7 +2288,7 @@ jQuery(this).addClass("closed");
 
 		if ( $mediaPicker == true ) :
 			$picker = __(' OR ', 'custom-field-template');
-			$picker .= '<a href="'.$image_upload_iframe_src.'&post_id='.$_REQUEST[ 'post' ].'&TB_iframe=1&tab='.$tab.'" class="thickbox" onclick="jQuery('."'#cft_current_template'".').val(jQuery(this).parent().parent().parent().attr(\'id\').replace(\'cft_\',\'\'));jQuery('."'#cft_clicked_id'".').val(jQuery(this).parent().find(\'input\').attr(\'id\'));">'.__('Select by Media Picker', 'custom-field-template').'</a>';
+			$picker .= '<a href="'.$image_upload_iframe_src.'&post_id='.$_REQUEST[ 'post' ].'&TB_iframe=1&tab='.$tab.'" class="thickbox" onclick="jQuery('."'#cft_current_template'".').val(jQuery(this).parent().parent().parent().parent().attr(\'id\').replace(\'cft_\',\'\'));jQuery('."'#cft_clicked_id'".').val(jQuery(this).parent().find(\'input\').attr(\'id\'));">'.__('Select by Media Picker', 'custom-field-template').'</a>';
 		endif;
 				
 		$out .= 
@@ -2296,7 +2298,7 @@ jQuery(this).addClass("closed");
 
 		if ( !empty($label) && !$options['custom_field_template_replace_keys_by_labels'] )
 			$out .= '<p class="label">' . stripcslashes($label) . '</p>';
-		$out .= trim($before).'<input id="' . $name . $sid . '_' . $cftnum . '" name="' . $name . '['.$sid.'][]" type="file" size="' . $size . '"' . $class . $style . ' onchange="if (jQuery(this).val()) { jQuery(\'#cft_save_button\'+jQuery(this).parent().parent().parent().attr(\'id\').replace(\'cft_\',\'\')).attr(\'disabled\', true); jQuery(\'#post-preview\').hide(); } else { jQuery(\'#cft_save_button\').attr(\'disabled\', false); jQuery(\'#post-preview\').show(); }" />'.trim($after).$picker;
+		$out .= trim($before).'<input id="' . $name . $sid . '_' . $cftnum . '" name="' . $name . '['.$sid.'][]" type="file" size="' . $size . '"' . $class . $style . ' onchange="if (jQuery(this).val()) { jQuery(\'#cft_save_button\'+jQuery(this).parent().parent().parent().parent().attr(\'id\').replace(\'cft_\',\'\')).attr(\'disabled\', true); jQuery(\'#post-preview\').hide(); } else { jQuery(\'#cft_save_button\').attr(\'disabled\', false); jQuery(\'#post-preview\').show(); }" />'.trim($after).$picker;
 
 		if ( isset($value) && ( $value = intval($value) ) && $thumb_url = wp_get_attachment_image_src( $value, 'thumbnail', true ) ) :
 			$thumb_url = $thumb_url[0];
@@ -2444,6 +2446,7 @@ jQuery(this).addClass("closed");
 		endif;
 
 		$out .= '<div id="cft_'.$id.'">';
+		$out .= '<div>';
 		$out .= '<input type="hidden" name="custom-field-template-id[]" id="custom-field-template-id" value="' . $id . '" />';
 		foreach( $fields as $field_key => $field_val ) :
 			foreach( $field_val as $title => $data ) {
@@ -2526,6 +2529,7 @@ jQuery(this).addClass("closed");
 				'	});' . "\n";	
 		$out .= '// ]]>' . "\n" .
 				'</script>';				
+		$out .= '</div>';
 		$out .= '</div>';
 	
 		return array($out, $id);
