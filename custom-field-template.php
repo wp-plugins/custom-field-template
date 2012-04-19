@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.0.3
+Version: 2.0.4
 Author URI: http://wpgogo.com/
 */
 
@@ -352,6 +352,7 @@ class custom_field_template {
 		echo '<link rel="stylesheet" type="text/css" href="' . wp_guess_url() . '/' . PLUGINDIR . '/' . $plugin_dir . '/js/datePicker.css" />'."\n";
 
 		if ( !empty($options['custom_field_template_use_validation']) ) :
+			if( strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php') || (is_object($post) && $post->post_type=='page') ) :
 ?>
 <script type="text/javascript">
 // <![CDATA[
@@ -367,6 +368,7 @@ class custom_field_template {
 </style>
 
 <?php
+			endif;
 		endif;
 
 		if ( substr($wp_version, 0, 3) >= '2.7' && is_user_logged_in() && ( strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php') ) && !strstr($_SERVER['REQUEST_URI'], 'page=') ) {
