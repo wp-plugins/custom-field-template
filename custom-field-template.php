@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.0.5
+Version: 2.0.6
 Author URI: http://wpgogo.com/
 */
 
@@ -67,7 +67,6 @@ class custom_field_template {
 			add_shortcode( 'cft', array(&$this, 'output_custom_field_values') );
 			add_shortcode( 'cftsearch', array(&$this, 'search_custom_field_values') );
 		endif;
-		
 	}
 		
 	function custom_field_template_init() {
@@ -909,7 +908,7 @@ type = file';
 						endforeach;
 					endif;
 				elseif ( $options['hook'][$i]['post_type']=='post' ) :
-					if ( is_category() || is_single() ) :
+					if ( is_single() ) :
 						if ( !empty($options['hook'][$i]['use_php']) ) :
 							$options['hook'][$i]['content'] = $this->EvalBuffer(stripcslashes($options['hook'][$i]['content']));
 						endif;
@@ -1404,21 +1403,21 @@ ex. `radio` and `select`:</dt><dd>$values = array('dog', 'cat', 'monkey'); $defa
 <tr><th><strong>HOOK #<?php echo $i; ?></strong></th></tr>
 <tr><td>
 <p><label for="custom_field_template_hook_position[<?php echo $i; ?>]"><?php echo sprintf(__('Position', 'custom-field-template'), $i); ?></label>:<br />
-<input type="radio" name="custom_field_template_hook_position[<?php echo $i; ?>]" value="1" <?php if( isset($options['hook'][$i]['position']) && $options['hook'][$i]['position']==1 ) echo ' checked="checked"'; ?> /> <?php _e('Before the content', 'custom-field-template'); ?>
-<input type="radio" name="custom_field_template_hook_position[<?php echo $i; ?>]" value="0" <?php if( isset($options['hook'][$i]['position']) && $options['hook'][$i]['position']==0) echo ' checked="checked"'; ?> /> <?php _e('After the content', 'custom-field-template'); ?>
-<input type="radio" name="custom_field_template_hook_position[<?php echo $i; ?>]" value="2" <?php if( isset($options['hook'][$i]['position']) && $options['hook'][$i]['position']==2) echo ' checked="checked"'; ?> /> <?php echo sprintf(__('Inside the content ([cfthook hook=%d])', 'custom-field-template'), $i); ?>
+<label><input type="radio" name="custom_field_template_hook_position[<?php echo $i; ?>]" value="1" <?php if( isset($options['hook'][$i]['position']) && $options['hook'][$i]['position']==1 ) echo ' checked="checked"'; ?> /> <?php _e('Before the content', 'custom-field-template'); ?></label> 
+<label><input type="radio" name="custom_field_template_hook_position[<?php echo $i; ?>]" value="0" <?php if( isset($options['hook'][$i]['position']) && $options['hook'][$i]['position']==0) echo ' checked="checked"'; ?> /> <?php _e('After the content', 'custom-field-template'); ?></label> 
+<label><input type="radio" name="custom_field_template_hook_position[<?php echo $i; ?>]" value="2" <?php if( isset($options['hook'][$i]['position']) && $options['hook'][$i]['position']==2) echo ' checked="checked"'; ?> /> <?php echo sprintf(__('Inside the content ([cfthook hook=%d])', 'custom-field-template'), $i); ?></label>
 </p>
 <p><label for="custom_field_template_hook_post_type[<?php echo $i; ?>]"><?php echo sprintf(__('Post Type', 'custom-field-template'), $i); ?></label>:<br />
-<input type="radio" name="custom_field_template_hook_post_type[<?php echo $i; ?>]" id="custom_field_template_hook_post_type[<?php echo $i; ?>]" value=""<?php if ( !isset($options['hook'][$i]['post_type']) ) :  echo ' checked="checked"'; endif; ?> /> <?php _e('Both', 'custom-field-template'); ?>
-<input type="radio" name="custom_field_template_hook_post_type[<?php echo $i; ?>]" id="custom_field_template_hook_post_type[<?php echo $i; ?>]" value="post"<?php if ( isset($options['hook'][$i]['post_type']) && $options['hook'][$i]['post_type']=='post') : echo ' checked="checked"'; endif; ?> /> <?php _e('Post', 'custom-field-template'); ?>
-<input type="radio" name="custom_field_template_hook_post_type[<?php echo $i; ?>]" id="custom_field_template_hook_post_type[<?php echo $i; ?>]" value="page"<?php if ( isset($options['hook'][$i]['post_type']) && $options['hook'][$i]['post_type']=='page') : echo ' checked="checked"'; endif; ?> /> <?php _e('Page', 'custom-field-template'); ?></p>
+<label><input type="radio" name="custom_field_template_hook_post_type[<?php echo $i; ?>]" id="custom_field_template_hook_post_type[<?php echo $i; ?>]" value=""<?php if ( !isset($options['hook'][$i]['post_type']) ) :  echo ' checked="checked"'; endif; ?> /> <?php _e('Both', 'custom-field-template'); ?></label> 
+<label><input type="radio" name="custom_field_template_hook_post_type[<?php echo $i; ?>]" id="custom_field_template_hook_post_type[<?php echo $i; ?>]" value="post"<?php if ( isset($options['hook'][$i]['post_type']) && $options['hook'][$i]['post_type']=='post') : echo ' checked="checked"'; endif; ?> /> <?php _e('Post', 'custom-field-template'); ?></label> 
+<label><input type="radio" name="custom_field_template_hook_post_type[<?php echo $i; ?>]" id="custom_field_template_hook_post_type[<?php echo $i; ?>]" value="page"<?php if ( isset($options['hook'][$i]['post_type']) && $options['hook'][$i]['post_type']=='page') : echo ' checked="checked"'; endif; ?> /> <?php _e('Page', 'custom-field-template'); ?></label></p>
 <p><label for="custom_field_template_hook_custom_post_type[<?php echo $i; ?>]"><?php echo sprintf(__('Custom Post Type (comma-deliminated)', 'custom-field-template'), $i); ?></label>:<br />
 <input type="text" name="custom_field_template_hook_custom_post_type[<?php echo $i; ?>]" id="custom_field_template_hook_custom_post_type[<?php echo $i; ?>]" value="<?php if ( isset($options['hook'][$i]['custom_post_type']) ) echo esc_attr(stripcslashes($options['hook'][$i]['custom_post_type'])); ?>" size="80" /></p>
 <p><label for="custom_field_template_hook_category[<?php echo $i; ?>]"><?php echo sprintf(__('Category ID (comma-deliminated)', 'custom-field-template'), $i); ?></label>:<br />
 <input type="text" name="custom_field_template_hook_category[<?php echo $i; ?>]" id="custom_field_template_hook_category[<?php echo $i; ?>]" value="<?php if ( isset($options['hook'][$i]['category']) ) echo esc_attr(stripcslashes($options['hook'][$i]['category'])); ?>" size="80" /></p>
 <p><label for="custom_field_template_hook_content[<?php echo $i; ?>]"><?php echo sprintf(__('Content', 'custom-field-template'), $i); ?></label>:<br /><textarea name="custom_field_template_hook_content[<?php echo $i; ?>]" class="large-text resizable" rows="5" cols="80"><?php if ( isset($options['hook'][$i]['content']) ) echo stripcslashes($options['hook'][$i]['content']); ?></textarea></p>
-<p><input type="checkbox" name="custom_field_template_hook_use_php[<?php echo $i; ?>]" id="custom_field_template_hook_use_php[<?php echo $i; ?>]" value="1" <?php if ( !empty($options['hook'][$i]['use_php']) ) { echo ' checked="checked"'; } ?> /> <?php _e('Use PHP', 'custom-field-template'); ?></p>
-<p><input type="checkbox" name="custom_field_template_hook_feed[<?php echo $i; ?>]" id="custom_field_template_hook_feed[<?php echo $i; ?>]" value="1" <?php if ( !empty($options['hook'][$i]['feed']) ) { echo ' checked="checked"'; } ?> /> <?php _e('Apply to feeds', 'custom-field-template'); ?></p>
+<p><label><input type="checkbox" name="custom_field_template_hook_use_php[<?php echo $i; ?>]" id="custom_field_template_hook_use_php[<?php echo $i; ?>]" value="1" <?php if ( !empty($options['hook'][$i]['use_php']) ) { echo ' checked="checked"'; } ?> /> <?php _e('Use PHP', 'custom-field-template'); ?></label></p>
+<p><label><input type="checkbox" name="custom_field_template_hook_feed[<?php echo $i; ?>]" id="custom_field_template_hook_feed[<?php echo $i; ?>]" value="1" <?php if ( !empty($options['hook'][$i]['feed']) ) { echo ' checked="checked"'; } ?> /> <?php _e('Apply to feeds', 'custom-field-template'); ?></label></p>
 </td></tr>
 <?php
 	endfor;
@@ -1744,7 +1743,7 @@ hideKey = true<br />
 <h3><?php _e('CMS x WP', 'custom-field-template'); ?></h3>
 <div class="inside">
 <p><?php _e('There are much more plugins which are useful for developing business websites such as membership sites or ec sites. You could totally treat WordPress as CMS by use of CMS x WP plugins.', 'custom-field-template'); ?></p>
-<p style="text-align:center"><a href="http://www.cmswp.jp/" target="_blank"><img src="<?php echo get_option('home') . '/' . PLUGINDIR . '/' . $plugin_dir . '/js/'; ?>cmswp.jpg" width="125" height="125" alt="CMSxWP" /></a><br /><a href="http://www.cmswp.jp/" target="_blank"><?php _e('WordPress plugin sales site: CMS x WP', 'custom-field-template'); ?></a></p>
+<p style="text-align:center"><a href="http://www.cmswp.jp/" target="_blank"><img src="<?php echo get_option('siteurl') . '/' . PLUGINDIR . '/' . $plugin_dir . '/js/'; ?>cmswp.jpg" width="125" height="125" alt="CMSxWP" /></a><br /><a href="http://www.cmswp.jp/" target="_blank"><?php _e('WordPress plugin sales site: CMS x WP', 'custom-field-template'); ?></a></p>
 </div>
 </div>
 <?php
@@ -2939,7 +2938,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 	function edit_meta_value( $id, $post ) {
 		global $wpdb, $wp_version, $current_user;
 		$options = $this->get_custom_field_template_data();
-		
+
 		if( !isset( $id ) || isset($_REQUEST['post_ID']) )
 			$id = $_REQUEST['post_ID'];
 		
@@ -3142,7 +3141,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 				else
 					$tags_input = $tags_value;
 				if ( substr($wp_version, 0, 3) >= '2.8' )
-					wp_set_post_terms( $id, $tags_value, $tags_key ); 
+					wp_set_post_terms( $id, $tags_value, $tags_key, true ); 
 				else if ( substr($wp_version, 0, 3) >= '2.3' )
 					wp_set_post_tags( $id, $tags_value );
 			endforeach;
@@ -3364,6 +3363,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		), $attr));
 
 		$metakey = $key;
+		$output = '';
 		if ( $metakey ) :
 			if ( $value_count && $value ) :
 				return number_format($options['value_count'][$metakey][$value]);
@@ -3382,7 +3382,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 						$val = wp_get_attachment_image($val, $image_size);
 					endif;
 				endif;
-				$output .= $before_value . $val . $after_value . "\n";
+				$output .= (isset($before_value) ? $before_value : '') . $val . (isset($after_value) ? $after_value : '') . "\n";
 			endforeach;
 			if ( $after_list ) : $output .= $after_list . "\n"; endif;
 			return do_shortcode($output);
@@ -3918,7 +3918,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 					$sql = " meta.meta_value " . $_REQUEST['order'];
 				endif;
 			endif;
-			echo $sql;
+
 			return $sql;
 		endif;
 
@@ -4013,6 +4013,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		global $wpdb;
 		$options = $this->get_custom_field_template_data();
 		unset($options['value_count']);
+		set_time_limit(0);
 
 		if ( is_array($options['custom_fields']) ) :
 			for($j=0;$j<count($options['custom_fields']);$j++) :
