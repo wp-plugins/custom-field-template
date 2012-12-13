@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.0.7
+Version: 2.0.8
 Author URI: http://wpgogo.com/
 */
 
@@ -2558,7 +2558,7 @@ jQuery(this).addClass("closed");
 						list($out_all,$out_key,$out_value) = $this->make_radio( $title, $parentSN, $data );
 					}
 					else if( $data['type'] == 'select' ) {
-						$data['values'] = explode( '#', $data['value'] );
+						if ( isset($data['value']) ) $data['values'] = explode( '#', $data['value'] );
 						if ( isset($data['valueLabel']) ) $data['valueLabels'] = explode( '#', $data['valueLabel'] );
 						list($out_all,$out_key,$out_value) = $this->make_select( $title, $parentSN, $data );
 					}
@@ -2680,7 +2680,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 					$categories = explode(',', $val['category']);
 					$categories = array_filter($categories);
 					array_walk( $categories, create_function('&$v', '$v = trim($v);') );
-					$query = $wpdb->prepare("SELECT * FROM `".$wpdb->prefix."term_taxonomy` WHERE term_id IN (".$val['category'].")");
+					$query = $wpdb->prepare("SELECT * FROM `".$wpdb->prefix."term_taxonomy` WHERE term_id IN (%s)", $val['category']);
 					$result = $wpdb->get_results($query, ARRAY_A);
 					$category_taxonomy = array();
 					if ( !empty($result) && is_array($result) ) :
@@ -3513,13 +3513,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 							$replace[0] = $val;
 
 							$search = array();
-							if($val['searchType']) eval('$search["type"] =' . stripslashes($val['searchType']));
-							if($val['searchValue']) eval('$search["value"] =' . stripslashes($val['searchValue']));
-							if($val['searchOperator']) eval('$search["operator"] =' . stripslashes($val['searchOperator']));
-							if($val['searchValueLabel']) eval('$search["valueLabel"] =' . stripslashes($val['searchValueLabel']));
-							if($val['searchDefault']) eval('$search["default"] =' . stripslashes($val['searchDefault']));
-							if($val['searchClass']) eval('$search["class"] =' . stripslashes($val['searchClass']));
-							if($val['searchSelectLabel']) eval('$search["selectLabel"] =' . stripslashes($val['searchSelectLabel']));
+							if( isset($val['searchType']) ) eval('$search["type"] =' . stripslashes($val['searchType']));
+							if( isset($val['searchValue']) ) eval('$search["value"] =' . stripslashes($val['searchValue']));
+							if( isset($val['searchOperator']) ) eval('$search["operator"] =' . stripslashes($val['searchOperator']));
+							if( isset($val['searchValueLabel']) ) eval('$search["valueLabel"] =' . stripslashes($val['searchValueLabel']));
+							if( isset($val['searchDefault']) ) eval('$search["default"] =' . stripslashes($val['searchDefault']));
+							if( isset($val['searchClass']) ) eval('$search["class"] =' . stripslashes($val['searchClass']));
+							if( isset($val['searchSelectLabel']) ) eval('$search["selectLabel"] =' . stripslashes($val['searchSelectLabel']));
 							
 							foreach ( $search as $skey => $sval ) :
 								$j = 1;
@@ -3622,13 +3622,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										endif;
 										break;
 									case 'select':
-										if ( $rval['class'] ) $class = ' class="' . $rval['class'] . '"'; 
+										if ( isset($rval['class']) ) $class = ' class="' . $rval['class'] . '"'; 
 										$values = explode( '#', $rval['value'] );
-										$valueLabel = explode( '#', $rval['valueLabel'] );
-										$default = explode( '#', $rval['default'] );
-										$selectLabel= $rval['selectLabel'];
+										$valueLabel = isset($rval['valueLabel']) ? explode( '#', $rval['valueLabel'] ) : array();
+										$default = isset($rval['default']) ? explode( '#', $rval['default'] ) : array();
+										$selectLabel= isset($rval['selectLabel']) ? $rval['selectLabel'] : '';
 
-										if ( is_numeric($rval['searchCode']) ) :
+										if ( isset($rval['searchCode']) && is_numeric($rval['searchCode']) ) :
 											eval(stripcslashes($options['php'][$rval['searchCode']]));
 										endif;
 										$replace_val[$rkey] .= '<select name="cftsearch[' . rawurlencode($key) . '][' . $rkey . '][]"' . $class . '>';
@@ -3784,9 +3784,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 					foreach ( $field_val as $key => $val ) :
 						$replace[$key] = $val;
 						$search = array();
-						if($val['searchType']) eval('$search["type"] =' . stripslashes($val['searchType']));
-						if($val['searchValue']) eval('$search["value"] =' . stripslashes($val['searchValue']));
-						if($val['searchOperator']) eval('$search["operator"] =' . stripslashes($val['searchOperator']));
+						if( isset($val['searchType']) ) eval('$search["type"] =' . stripslashes($val['searchType']));
+						if( isset($val['searchValue']) ) eval('$search["value"] =' . stripslashes($val['searchValue']));
+						if( isset($val['searchOperator']) ) eval('$search["operator"] =' . stripslashes($val['searchOperator']));
 						
 						foreach ( $search as $skey => $sval ) :
 							$j = 1;
@@ -3814,6 +3814,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										if ( $replace[$key][$key2]['type'] == 'checkbox' || !$replace[$key][$key2]['type'] ) $where .= ' OR ';
 										else $where .= ' AND ';
 									endif;
+									if ( !isset($replace[$key][$key2]['operator']) ) $replace[$key][$key2]['operator'] = '';
 									switch( $replace[$key][$key2]['operator'] ) :
 										case '<=' :
 										case '>=' :
@@ -3823,13 +3824,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										case '<>' :
 										case '<=>':
 											if ( is_numeric($val3) ) :
-												$where .=  $wpdb->prepare(" ID IN (SELECT `" . $wpdb->postmeta . "`.post_id FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %d) GROUP BY `" . $wpdb->postmeta . "`.post_id) ", $key, trim($val3));
+												$where .=  $wpdb->prepare(" ID IN (SELECT `" . $wpdb->postmeta . "`.post_id FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %d) ) ", $key, trim($val3));
 											else :
-												$where .= $wpdb->prepare(" ID IN (SELECT `" . $wpdb->postmeta . "`.post_id FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %s) GROUP BY `" . $wpdb->postmeta . "`.post_id) ", $key, trim($val3));
+												$where .= $wpdb->prepare(" ID IN (SELECT `" . $wpdb->postmeta . "`.post_id FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value " . $replace[$key][$key2]['operator'] . " %s) ) ", $key, trim($val3));
 											endif;
 											break;
 										default :
-											$where .= $wpdb->prepare(" ID IN (SELECT `" . $wpdb->postmeta . "`.post_id FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value LIKE %s) GROUP BY `" . $wpdb->postmeta . "`.post_id) ", $key, '%'.trim($val3).'%');
+											$where .= $wpdb->prepare(" ID IN (SELECT `" . $wpdb->postmeta . "`.post_id FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_key = %s AND `" . $wpdb->postmeta . "`.meta_value LIKE %s) ) ", $key, '%'.trim($val3).'%');
 											break;
 									endswitch;
 									$ch++;
@@ -3853,7 +3854,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			foreach ( $s as $v ) :
 				if ( !empty($v) ) :
 					if ( $i>0 ) $where .= ' AND ';
-					$where .= $wpdb->prepare(" ID IN (SELECT `" . $wpdb->postmeta . "`.post_id FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_value LIKE %s) GROUP BY `" . $wpdb->postmeta . "`.post_id) ", '%'.trim($v).'%');
+					$where .= $wpdb->prepare(" ID IN (SELECT `" . $wpdb->postmeta . "`.post_id FROM `" . $wpdb->postmeta . "` WHERE (`" . $wpdb->postmeta . "`.meta_value LIKE %s) ) ", '%'.trim($v).'%');
 					$i++;
 				endif;
 			endforeach;
@@ -3869,7 +3870,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			endif;
 			$where .= " AND `" . $wpdb->posts . "`.post_type = 'post'"; 
 		endif;
-		if ( is_array($_REQUEST['cftcategory_not_in']) ) :
+		if ( isset($_REQUEST['cftcategory_not_in']) && is_array($_REQUEST['cftcategory_not_in']) ) :
 			$ids = get_objects_in_term($_REQUEST['cftcategory_not_in'], 'category');
 			if ( is_array($ids) && count($ids) > 0 ) :
 				$in_posts = "'" . implode("', '", $ids) . "'";
@@ -3877,16 +3878,16 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			endif;
 		endif;
 		
-		if ( $_REQUEST['post_type'] ) :
+		if ( !empty($_REQUEST['post_type']) ) :
 			$where .= $wpdb->prepare(" AND `" . $wpdb->posts . "`.post_type = %s", trim($_REQUEST['post_type'])); 
 		endif;
 				
-		if ( $_REQUEST['no_is_search'] ) :
+		if ( !empty($_REQUEST['no_is_search']) ) :
 			$where .= " AND `".$wpdb->posts."`.post_status = 'publish'";
 		else :
 			$where .= " AND `".$wpdb->posts."`.post_status = 'publish' GROUP BY `".$wpdb->posts."`.ID";
 		endif;
-		
+				
 		return $where;
 	}
 
@@ -3907,13 +3908,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		if ( empty($_REQUEST['order']) || ((strtoupper($_REQUEST['order']) != 'ASC') && (strtoupper($_REQUEST['order']) != 'DESC')) )
 			$_REQUEST['order'] = 'DESC';
 
-		if ( $_REQUEST['orderby'] ) :
+		if ( !empty($_REQUEST['orderby']) ) :
 			if ( in_array($_REQUEST['orderby'], array('post_author', 'post_date', 'post_title', 'post_modified', 'menu_order', 'post_parent', 'ID')) ):
 				$sql = "`" . $wpdb->posts . "`." . $_REQUEST['orderby'] . " " . $_REQUEST['order'];
 			elseif ( $_REQUEST['orderby'] == 'rand' ):
 				$sql = "RAND()";
 			else:
-				if ( in_array($_REQUEST['cast'], array('binary', 'char', 'date', 'datetime', 'signed', 'time', 'unsigned')) ) :
+				if ( !empty($_REQUEST['cast']) && in_array($_REQUEST['cast'], array('binary', 'char', 'date', 'datetime', 'signed', 'time', 'unsigned')) ) :
 					$sql = " CAST(meta.meta_value AS " . $_REQUEST['cast'] . ") " . $_REQUEST['order'];
 				else :
 					$sql = " meta.meta_value " . $_REQUEST['order'];

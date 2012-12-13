@@ -4,7 +4,7 @@ Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom field, custom fields, custom, fields, field, template, meta, custom field template, custom post type
 Requires at least: 2.1
 Tested up to: 3.5
-Stable tag: 2.0.7
+Stable tag: 2.0.8
 License: GPLv2 or later
 
 The Custom Field Template plugin extends the functionality of custom fields.
@@ -110,6 +110,9 @@ See the default template and modify it.
 4. Auto Hook of `the_content()` in the option page of this plugin may help you do this. You can use [cft] shortcodes here. You can switch the cft formats in each category.
 
 == Changelog ==
+
+= 2.0.8 =
+* Code cleaning.
 
 = 2.0.7 =
 * Bugfix: media insert.
