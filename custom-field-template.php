@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.1
+Version: 2.1.1
 Author URI: http://wpgogo.com/
 */
 
@@ -1041,7 +1041,7 @@ type = file';
 		elseif ( !empty($_POST['custom_field_template_php_submit']) ) :
 			unset($options['php']);
 			for($i=0;$i<count($_POST["custom_field_template_php"]);$i++) {
-				if( isset($_POST["custom_field_template_php"][$i]) )
+				if( !empty($_POST["custom_field_template_php"][$i]) )
 					$options['php'][] = $_POST["custom_field_template_php"][$i];
 			}			
 			update_option('custom_field_template_data', $options);
@@ -1793,6 +1793,8 @@ jQuery(this).addClass("closed");
 		extract($data);
 		$options = $this->get_custom_field_template_data();
 
+		$name = stripslashes($name);
+
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		$name_id = preg_replace( '/%/', '', $name );
@@ -1880,6 +1882,8 @@ jQuery(this).addClass("closed");
 		extract($data);
 		$options = $this->get_custom_field_template_data();
 
+		$name = stripslashes($name);
+
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		$name_id = preg_replace( '/%/', '', $name );
@@ -1939,6 +1943,8 @@ jQuery(this).addClass("closed");
 		$hide = $addfield = $out = $out_key = $out_value = '';
 		extract($data);
 		$options = $this->get_custom_field_template_data();
+
+		$name = stripslashes($name);
 
 		$title = $name;
 		$name = $this->sanitize_name( $name );
@@ -2030,6 +2036,8 @@ jQuery(this).addClass("closed");
 		extract($data);
 		$options = $this->get_custom_field_template_data();
 
+		$name = stripslashes($name);
+
 		$title = $name;
 		$name = $this->sanitize_name( $name );
 		$name_id = preg_replace( '/%/', '', $name );
@@ -2115,6 +2123,8 @@ jQuery(this).addClass("closed");
 		$options = $this->get_custom_field_template_data();
 
 		global $wp_version;
+
+		$name = stripslashes($name);
 
 		$title = $name;
 		$name = $this->sanitize_name( $name );
@@ -2295,9 +2305,11 @@ jQuery(this).addClass("closed");
 	
 	function make_file( $name, $sid, $data ) {
 		$cftnum = $size = $hideKey = $label = $class = $style = $before = $after = $multipleButton = $relation = $mediaLibrary = $mediaPicker = '';
-		$hide = $addfield = $out = $out_key = $out_value = $picker = '';
+		$hide = $addfield = $out = $out_key = $out_value = $picker = $inside_fieldset = '';
 		extract($data);
 		$options = $this->get_custom_field_template_data();
+
+		$name = stripslashes($name);
 
 		$title = $name;
 		$name = $this->sanitize_name( $name );
@@ -2335,7 +2347,9 @@ jQuery(this).addClass("closed");
 
 		if ( $mediaPicker == true ) :
 			$picker = __(' OR ', 'custom-field-template');
-			$picker .= '<a href="'.$image_upload_iframe_src.'&post_id='.$_REQUEST[ 'post' ].'&TB_iframe=1&tab='.$tab.'" class="thickbox" onclick="jQuery('."'#cft_current_template'".').val(jQuery(this).parent().parent().parent().parent().attr(\'id\').replace(\'cft_\',\'\'));jQuery('."'#cft_clicked_id'".').val(jQuery(this).parent().find(\'input\').attr(\'id\'));">'.__('Select by Media Picker', 'custom-field-template').'</a>';
+			$picker .= '<a href="'.$image_upload_iframe_src.'&post_id='.$_REQUEST[ 'post' ].'&TB_iframe=1&tab='.$tab.'" class="thickbox" onclick="jQuery('."'#cft_current_template'".').val(jQuery(this).parent().parent().parent().';
+			if ( $inside_fieldset ) $picker .= 'parent().';
+			$picker .= 'parent().attr(\'id\').replace(\'cft_\',\'\'));jQuery('."'#cft_clicked_id'".').val(jQuery(this).parent().find(\'input\').attr(\'id\'));">'.__('Select by Media Picker', 'custom-field-template').'</a>';
 		endif;
 		
 		$out_key = '<span' . $hide . '><label for="' . $name_id . $sid . '_' . $cftnum . '">' . $title . '</label></span>'.$addfield;
@@ -2502,11 +2516,13 @@ jQuery(this).addClass("closed");
 			$format = stripslashes($options['shortcode_format'][$options['custom_fields'][$id]['format']]);
 
 		$last_title = '';
+		$fieldset_open = 0;
 		foreach( $fields as $field_key => $field_val ) :
 			foreach( $field_val as $title => $data ) {
 				$class = $style = $addfield = $tmpout = $out_all = $out_key = $out_value = $duplicator = '';
 				if ( isset($data['parentSN']) && is_numeric($data['parentSN']) ) $parentSN = $data['parentSN'];
 				else $parentSN = $field_key;
+				if ( $fieldset_open ) $data['inside_fieldset'] = 1;
 					if ( isset($data['level']) && is_numeric($data['level']) ) :
 						if ( $data['level'] > $level ) continue;
 					endif;
@@ -2516,6 +2532,7 @@ jQuery(this).addClass("closed");
 						$tmpout .= '</div><div' . $class . $style . '>';
 					}
 					else if( $data['type'] == 'fieldset_open' ) {
+						$fieldset_open = 1;
 						if ( !empty($data['class']) ) $class = ' class="' . $data['class'] . '"';
 						if ( !empty($data['style']) ) $style = ' style="' . $data['style'] . '"';
 						$tmpout .= '<fieldset' . $class . $style . '>'."\n";
@@ -2550,6 +2567,7 @@ jQuery(this).addClass("closed");
 						endif;
 					}
 					else if( $data['type'] == 'fieldset_close' ) {
+						$fieldset_open = 0;
 						$tmpout .= '</fieldset>';
 					}
 					else if( $data['type'] == 'textfield' || $data['type'] == 'text' ) {
@@ -3161,6 +3179,8 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		
 		update_option('custom_field_template_data', $options);
 		wp_cache_flush();
+		
+		do_action('cft_save_post', $post_id, $post);
 	}
 	
 	function parse_ini_str($Str,$ProcessSections = TRUE) {
@@ -3686,10 +3706,11 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 				foreach( $field_val as $key => $val) :
 					if ( $val['search'] == true ) :
 						if ( !empty($val['label']) && !empty($options['custom_field_template_replace_keys_by_labels']) )
-							$key = stripcslashes($val['label']);
+							$label = stripcslashes($val['label']);
+						else $label = $key;
 						$output .= '<dl>' ."\n";
 						if ( $val['hideKey'] != true) :
-							$output .= '<dt><label>' . $key . '</label></dt>' ."\n";
+							$output .= '<dt><label>' . $label . '</label></dt>' ."\n";
 						endif;
 
 						$class = "";
