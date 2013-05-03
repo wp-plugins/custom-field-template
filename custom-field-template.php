@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.1.2
+Version: 2.1.3
 Author URI: http://wpgogo.com/
 */
 
@@ -288,10 +288,16 @@ class custom_field_template {
 		}
 	
 		if ( $key ) :
-			if ( $single ) :
+			if ( $single && isset($meta_cache[$key][0]) ) :
 				return maybe_unserialize( $meta_cache[$key][0] );
 			else :
-				return array_map('maybe_unserialize', $meta_cache[$key]);
+				if ( isset($meta_cache[$key]) ) :
+					if ( is_array($meta_cache[$key]) ) :
+						return array_map('maybe_unserialize', $meta_cache[$key]);
+					else :
+						return $meta_cache[$key];
+					endif;
+				endif;
 			endif;
 		else :		
 			return array_map('maybe_unserialize', $meta_cache);
@@ -3452,36 +3458,36 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 					foreach ( $fields as $field_key => $field_val ) :					
 						foreach ( $field_val as $key => $val ) :
 							$replace_val = '';
-							if ( count($data[$key]) > 1 ) :
-								if ( $val['sort'] == 'asc' ) :
+							if ( isset($data[$key]) && count($data[$key]) > 1 ) :
+								if ( isset($val['sort']) && $val['sort'] == 'asc' ) :
 									sort($data[$key]);
-								elseif ( $val['sort'] == 'desc' ) :
+								elseif ( isset($val['sort']) && $val['sort'] == 'desc' ) :
 									rsort($data[$key]);
 								endif;
 								if ( $before_list ) : $replace_val = $before_list . "\n"; endif;
 								foreach ( $data[$key] as $val2 ) :
 									$value = $val2;
-									if ( is_numeric($val['outputCode']) ) :
+									if ( isset($val['outputCode']) && is_numeric($val['outputCode']) ) :
 										eval(stripcslashes($options['php'][$val['outputCode']]));
 									endif;
-									if ( $val['shortCode'] == true ) $value = do_shortcode($value);
+									if ( isset($val['shortCode']) && $val['shortCode'] == true ) $value = do_shortcode($value);
 									$replace_val .= $before_value . $value . $after_value . "\n";
 								endforeach;
 								if ( $after_list ) : $replace_val .= $after_list . "\n"; endif;
-							elseif ( count($data[$key]) == 1 ) :
+							elseif ( isset($data[$key]) && count($data[$key]) == 1 ) :
 								$value = $data[$key][0];
-								if ( is_numeric($val['outputCode']) ) :
+								if ( isset($val['outputCode']) && is_numeric($val['outputCode']) ) :
 									eval(stripcslashes($options['php'][$val['outputCode']]));
 								endif;
-								if ( $val['shortCode'] == true ) $value = do_shortcode($value);
+								if ( isset($val['shortCode']) && $val['shortCode'] == true ) $value = do_shortcode($value);
 								$replace_val = $value;
-								if ( $val['singleList'] == true ) :
+								if ( isset($val['singleList']) && $val['singleList'] == true ) :
 									if ( $before_list ) : $replace_val = $before_list . "\n"; endif;
 									$replace_val .= $before_value . $value . $after_value . "\n";
 									if ( $after_list ) : $replace_val .= $after_list . "\n"; endif;
 								endif;
 							else :
-								if ( $val['outputNone'] ) $replace_val = $val['outputNone'];
+								if ( isset($val['outputNone']) ) $replace_val = $val['outputNone'];
 								else $replace_val = '';
 							endif;
 							if ( isset($options['shortcode_format_use_php'][$format]) )
@@ -3504,26 +3510,26 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			$output = '<dl class="cft cft'.$template.'">' . "\n";
 			foreach ( $fields as $field_key => $field_val ) :					
 				foreach ( $field_val as $key => $val ) :
-					if ( $keylist[$key] == true ) break;
+					if ( isset($keylist[$key]) && $keylist[$key] == true ) break;
 					$values = $this->get_post_meta( $post_id, $key );
 					if ( $values ):
-						if ( $val['sort'] == 'asc' ) :
+						if ( isset($val['sort']) && $val['sort'] == 'asc' ) :
 							sort($values);
-						elseif ( $val['sort'] == 'desc' ) :
+						elseif ( isset($val['sort']) && $val['sort'] == 'desc' ) :
 							rsort($values);
 						endif;
-						if ( $val['output'] == true ) :
+						if ( isset($val['output']) && $val['output'] == true ) :
 							foreach ( $values as $num => $value ) :
 								$value = str_replace('\\', '\\\\', $value); 
-								if ( is_numeric($val['outputCode']) ) :
+								if ( isset($val['outputCode']) && is_numeric($val['outputCode']) ) :
 									eval(stripcslashes($options['php'][$val['outputCode']]));
 								endif;
 								if ( empty($value) && $val['outputNone'] ) $value = $val['outputNone'];
-								if ( $val['shortCode'] == true ) $value = do_shortcode($value);			
+								if ( isset($val['shortCode']) && $val['shortCode'] == true ) $value = do_shortcode($value);			
 								if ( !empty($val['label']) && !empty($options['custom_field_template_replace_keys_by_labels']) )
 									$key_val = stripcslashes($val['label']);
 								else $key_val = $key;
-								if ( $val['hideKey'] != true && $num == 0 )
+								if ( isset($val['hideKey']) && $val['hideKey'] != true && $num == 0 )
 									$output .= '<dt>' . $key_val . '</dt>' . "\n";
 								$output .= '<dd>' . $value . '</dd>' . "\n";
 							endforeach;
@@ -3997,7 +4003,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 	function get_preview_id( $post_id ) {
 		global $post;
 		$preview_id = 0;
-		if ( $post->ID == $post_id && is_preview() && $preview = wp_get_post_autosave( $post->ID ) ) :
+		if ( isset($post) && $post->ID == $post_id && is_preview() && $preview = wp_get_post_autosave( $post->ID ) ) :
 			$preview_id = $preview->ID;
 		endif;
 		return $preview_id;
