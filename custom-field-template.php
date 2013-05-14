@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.1.3
+Version: 2.1.4
 Author URI: http://wpgogo.com/
 */
 
@@ -2021,7 +2021,8 @@ jQuery(this).addClass("closed");
 
 		if ( is_array($values) ) :
 			foreach( $values as $val ) {
-				$id = $name_id . '_' . $this->sanitize_name( $val ) . '_' . $sid . '_' . $cftnum;
+				$value_id = preg_replace( '/%/', '', $this->sanitize_name( $val ) );
+				$id = $name_id . '_' . $value_id . '_' . $sid . '_' . $cftnum;
 			
 				$checked = ( stripcslashes(trim( $val )) == trim( $selected ) ) ? 'checked="checked"' : '';
 			
