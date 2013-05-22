@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.1.4
+Version: 2.1.5
 Author URI: http://wpgogo.com/
 */
 
@@ -3031,7 +3031,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		
 		$save_value = array();
 
-		if ( is_array($_FILES) ) :
+		if ( !empty($_FILES) && is_array($_FILES) ) :
 			foreach($_FILES as $key => $val ) :
 				foreach( $val as $key2 => $val2 ) :
 					if ( is_array($val2) ) :
@@ -3210,7 +3210,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 		update_option('custom_field_template_data', $options);
 		wp_cache_flush();
 		
-		do_action('cft_save_post', $post_id, $post);
+		do_action('cft_save_post', $id, $post);
 	}
 	
 	function parse_ini_str($Str,$ProcessSections = TRUE) {
@@ -3348,7 +3348,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 									$gap += ($org_counter - $counter);
 								endif;
 							else :
-								if ( !isset($cftisexist[$title]) ) $Data[$Data_key][$title]['parentSN'] = $tmp_parentSN+$gap;
+								if ( !isset($cftisexist[$title]) && !isset($fieldset) ) $Data[$Data_key][$title]['parentSN'] = $tmp_parentSN+$gap;
 								else $Data[$Data_key][$title]['parentSN'] = $tmp_parentSN;
 								$returndata[] = $Data[$Data_key];
 								if ( isset($fieldset) && is_array($fieldset) ) :
