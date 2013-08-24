@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.1.6
+Version: 2.1.7
 Author URI: http://wpgogo.com/
 */
 
@@ -299,8 +299,10 @@ class custom_field_template {
 					endif;
 				endif;
 			endif;
-		else :		
-			return array_map('maybe_unserialize', $meta_cache);
+		else :
+			if ( is_array($meta_cache) ) :
+				return array_map('maybe_unserialize', $meta_cache);
+			endif;
 		endif;
 
 		return '';
@@ -318,7 +320,8 @@ class custom_field_template {
 				$this->install_custom_field_template_css();
 				$options = $this->get_custom_field_template_data();
 			}
-					
+			
+			$out = '';	
 			$out .= '<fieldset style="clear:both;">' . "\n";
 			$out .= '<div class="inline-edit-group">';
 			$out .=	'<style type="text/css">' . "\n" .
@@ -330,7 +333,7 @@ class custom_field_template {
 			if ( count($options['custom_fields'])>1 ) {
 				$out .= '<select id="custom_field_template_select">';
 				for ( $i=0; $i < count($options['custom_fields']); $i++ ) {
-					if ( $i == $options['posts'][$_REQUEST['post']] ) {
+					if ( isset($_REQUEST['post']) && isset($options['posts'][$_REQUEST['post']]) && $i == $options['posts'][$_REQUEST['post']] ) {
 						$out .= '<option value="' . $i . '" selected="selected">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
 					} else
 						$out .= '<option value="' . $i . '">' . stripcslashes($options['custom_fields'][$i]['title']) . '</option>';
@@ -1159,7 +1162,7 @@ margin-bottom:0pt;
 <p><label for="custom_field_template_title[<?php echo $i; ?>]"><?php echo sprintf(__('Template Title', 'custom-field-template'), $i); ?></label>:<br />
 <input type="text" name="custom_field_template_title[<?php echo $i; ?>]" id="custom_field_template_title[<?php echo $i; ?>]" value="<?php if ( isset($options['custom_fields'][$i]['title']) )  echo esc_attr(stripcslashes($options['custom_fields'][$i]['title'])); ?>" size="80" /></p>
 <p><label for="custom_field_template_instruction[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Template Instruction', 'custom-field-template'), $i); ?></a></label>:<br />
-<textarea class="large-text" name="custom_field_template_instruction[<?php echo $i; ?>]" id="custom_field_template_instruction[<?php echo $i; ?>]" rows="5" cols="80"<?php if ( empty($options['custom_fields'][$i]['instruction']) ) : echo ' style="display:none;"'; endif; ?>><?php if ( isset($options['custom_fields'][$i]['instruction']) ) echo stripcslashes($options['custom_fields'][$i]['instruction']); ?></textarea></p>
+<textarea class="large-text" name="custom_field_template_instruction[<?php echo $i; ?>]" id="custom_field_template_instruction[<?php echo $i; ?>]" rows="5" cols="80"<?php if ( empty($options['custom_fields'][$i]['instruction']) ) : echo ' style="display:none;"'; endif; ?>><?php if ( isset($options['custom_fields'][$i]['instruction']) ) echo htmlspecialchars(stripcslashes($options['custom_fields'][$i]['instruction'])); ?></textarea></p>
 <p><label for="custom_field_template_post_type[<?php echo $i; ?>]"><a href="javascript:void(0);" onclick="jQuery(this).parent().next().next().toggle();"><?php echo sprintf(__('Post Type', 'custom-field-template'), $i); ?></a></label>:<br />
 <span<?php if ( empty($options['custom_fields'][$i]['post_type']) ) : echo ' style="display:none;"'; endif; ?>>
 <input type="radio" name="custom_field_template_post_type[<?php echo $i; ?>]" id="custom_field_template_post_type[<?php echo $i; ?>]" value=""<?php if ( !isset($options['custom_fields'][$i]['post_type']) ) :  echo ' checked="checked"'; endif; ?> /> <?php _e('Both', 'custom-field-template'); ?>
@@ -1187,7 +1190,7 @@ margin-bottom:0pt;
 ?>
 </select></p>
 <p><label for="custom_field_template_content[<?php echo $i; ?>]"><?php echo sprintf(__('Template Content', 'custom-field-template'), $i); ?></label>:<br />
-<textarea name="custom_field_template_content[<?php echo $i; ?>]" class="resizable large-text" id="custom_field_template_content[<?php echo $i; ?>]" rows="10" cols="80"><?php if ( isset($options['custom_fields'][$i]['content']) ) echo stripcslashes($options['custom_fields'][$i]['content']); ?></textarea></p>
+<textarea name="custom_field_template_content[<?php echo $i; ?>]" class="resizable large-text" id="custom_field_template_content[<?php echo $i; ?>]" rows="10" cols="80"><?php if ( isset($options['custom_fields'][$i]['content']) ) echo htmlspecialchars(stripcslashes($options['custom_fields'][$i]['content'])); ?></textarea></p>
 </td></tr>
 <?php
 	}
@@ -1325,7 +1328,7 @@ margin-bottom:0pt;
 <table class="form-table" style="margin-bottom:5px;">
 <tbody>
 <tr><td>
-<p><textarea name="custom_field_template_css" class="large-text resizable" id="custom_field_template_css" rows="10" cols="80"><?php if ( isset($options['css']) ) echo stripcslashes($options['css']); ?></textarea></p>
+<p><textarea name="custom_field_template_css" class="large-text resizable" id="custom_field_template_css" rows="10" cols="80"><?php if ( isset($options['css']) ) echo htmlspecialchars(stripcslashes($options['css'])); ?></textarea></p>
 </td></tr>
 <tr><td>
 <p><input type="submit" name="custom_field_template_css_submit" value="<?php _e('Update Options &raquo;', 'custom-field-template'); ?>" class="button-primary" /></p>
@@ -1352,7 +1355,7 @@ margin-bottom:0pt;
 ?>
 <tr><th><strong>FORMAT #<?php echo $i; ?></strong></th></tr>
 <tr><td>
-<p><textarea name="custom_field_template_shortcode_format[<?php echo $i; ?>]" class="large-text resizable" rows="10" cols="80"><?php if ( isset($options['shortcode_format'][$i]) ) echo stripcslashes($options['shortcode_format'][$i]); ?></textarea></p>
+<p><textarea name="custom_field_template_shortcode_format[<?php echo $i; ?>]" class="large-text resizable" rows="10" cols="80"><?php if ( isset($options['shortcode_format'][$i]) ) echo htmlspecialchars(stripcslashes($options['shortcode_format'][$i])); ?></textarea></p>
 <p><label><input type="checkbox" name="custom_field_template_shortcode_format_use_php[<?php echo $i; ?>]" value="1" <?php if ( !empty($options['shortcode_format_use_php'][$i]) ) { echo ' checked="checked"'; } ?> /> <?php _e('Use PHP', 'custom-field-template'); ?></label></p>
 </td></tr>
 <?php
@@ -1386,7 +1389,7 @@ ex. `radio` and `select`:</dt><dd>$values = array('dog', 'cat', 'monkey'); $defa
 ?>
 <tr><th><strong>CODE #<?php echo $i; ?></strong></th></tr>
 <tr><td>
-<p><textarea name="custom_field_template_php[]" class="large-text resizable" rows="10" cols="80"><?php if ( isset($options['php'][$i]) ) echo stripcslashes($options['php'][$i]); ?></textarea></p>
+<p><textarea name="custom_field_template_php[]" class="large-text resizable" rows="10" cols="80"><?php if ( isset($options['php'][$i]) ) echo htmlspecialchars(stripcslashes($options['php'][$i])); ?></textarea></p>
 </td></tr>
 <?php
 	endfor;
@@ -1427,7 +1430,7 @@ ex. `radio` and `select`:</dt><dd>$values = array('dog', 'cat', 'monkey'); $defa
 <input type="text" name="custom_field_template_hook_custom_post_type[<?php echo $i; ?>]" id="custom_field_template_hook_custom_post_type[<?php echo $i; ?>]" value="<?php if ( isset($options['hook'][$i]['custom_post_type']) ) echo esc_attr(stripcslashes($options['hook'][$i]['custom_post_type'])); ?>" size="80" /></p>
 <p><label for="custom_field_template_hook_category[<?php echo $i; ?>]"><?php echo sprintf(__('Category ID (comma-deliminated)', 'custom-field-template'), $i); ?></label>:<br />
 <input type="text" name="custom_field_template_hook_category[<?php echo $i; ?>]" id="custom_field_template_hook_category[<?php echo $i; ?>]" value="<?php if ( isset($options['hook'][$i]['category']) ) echo esc_attr(stripcslashes($options['hook'][$i]['category'])); ?>" size="80" /></p>
-<p><label for="custom_field_template_hook_content[<?php echo $i; ?>]"><?php echo sprintf(__('Content', 'custom-field-template'), $i); ?></label>:<br /><textarea name="custom_field_template_hook_content[<?php echo $i; ?>]" class="large-text resizable" rows="5" cols="80"><?php if ( isset($options['hook'][$i]['content']) ) echo stripcslashes($options['hook'][$i]['content']); ?></textarea></p>
+<p><label for="custom_field_template_hook_content[<?php echo $i; ?>]"><?php echo sprintf(__('Content', 'custom-field-template'), $i); ?></label>:<br /><textarea name="custom_field_template_hook_content[<?php echo $i; ?>]" class="large-text resizable" rows="5" cols="80"><?php if ( isset($options['hook'][$i]['content']) ) echo htmlspecialchars(stripcslashes($options['hook'][$i]['content'])); ?></textarea></p>
 <p><label><input type="checkbox" name="custom_field_template_hook_use_php[<?php echo $i; ?>]" id="custom_field_template_hook_use_php[<?php echo $i; ?>]" value="1" <?php if ( !empty($options['hook'][$i]['use_php']) ) { echo ' checked="checked"'; } ?> /> <?php _e('Use PHP', 'custom-field-template'); ?></label></p>
 <p><label><input type="checkbox" name="custom_field_template_hook_feed[<?php echo $i; ?>]" id="custom_field_template_hook_feed[<?php echo $i; ?>]" value="1" <?php if ( !empty($options['hook'][$i]['feed']) ) { echo ' checked="checked"'; } ?> /> <?php _e('Apply to feeds', 'custom-field-template'); ?></label></p>
 </td></tr>
@@ -2163,6 +2166,7 @@ jQuery(this).addClass("closed");
 		endif;
 		
 		$rand = rand();
+		$switch = '';
 
 		if( $tinyMCE == true ) {
 			$out_value = '<script type="text/javascript">' . "\n" .
@@ -2307,7 +2311,7 @@ jQuery(this).addClass("closed");
 			endif;
 		endif;
 		
-		$out_value .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . sha1($name . $rand) . '"><textarea id="' . sha1($name . $rand) . '" name="' . $name . '[' . $sid . '][]" rows="' .$rows. '" cols="' . $cols . '"' . $content_class . $style . $event_output . $wrap . '>' . esc_attr(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
+		$out_value .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . sha1($name . $rand) . '"><textarea id="' . sha1($name . $rand) . '" name="' . $name . '[' . $sid . '][]" rows="' .$rows. '" cols="' . $cols . '"' . $content_class . $style . $event_output . $wrap . '>' . htmlspecialchars(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
 		if ( ($htmlEditor == true || $tinyMCE == true) && substr($wp_version, 0, 3) < '3.3' ) $out_value .= '</div>';
 		$out_value .= trim($after);
 		$out .= $out_value.'</dd></dl>'."\n";
@@ -3061,7 +3065,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			foreach( $field_val as $title => $data) :
 				//if ( is_numeric($data['parentSN']) ) $field_key = $data['parentSN'];
 				$name = $this->sanitize_name( $title );
-				$title = $wpdb->escape(stripcslashes(trim($title)));
+				$title = esc_sql(stripcslashes(trim($title)));
 				
 				if ( isset($data['level']) && is_numeric($data['level']) && $current_user->user_level < $data['level'] ) :
 					$save_value[$title] = $this->get_post_meta($id, $title, false);
@@ -4064,7 +4068,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			foreach( $fields as $field_key => $field_val) :
 				foreach( $field_val as $title	=> $data) :
 					$name = $this->sanitize_name( $title );
-					$title = $wpdb->escape(stripcslashes(trim($title)));
+					$title = esc_sql(stripcslashes(trim($title)));
 					$value = $this->get_post_meta($post_id, $title);
 					if ( is_array($value) ) :
 						foreach ( $value as $val ) :
@@ -4108,7 +4112,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 				foreach( $fields as $field_key => $field_val) :
 					foreach( $field_val as $title	=> $data) :
 						$name = $this->sanitize_name( $title );
-						$title = $wpdb->escape(stripcslashes(trim($title)));
+						$title = esc_sql(stripcslashes(trim($title)));
 						if ( $data['valueCount'] == true ) :
 							$query = $wpdb->prepare("SELECT COUNT(meta_id) as meta_count, `". $wpdb->postmeta."`.meta_value FROM `". $wpdb->postmeta."` WHERE `". $wpdb->postmeta."`.meta_key = %s GROUP BY `". $wpdb->postmeta."`.meta_value;", $title);
 							$result = $wpdb->get_results($query, ARRAY_A);
