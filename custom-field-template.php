@@ -4,7 +4,7 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.1.7
+Version: 2.1.8
 Author URI: http://wpgogo.com/
 */
 
@@ -2831,6 +2831,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			endif;
 		}
 
+		$out .= '<div style="clear:both;"></div>';
 		echo $out;
 	}
 
@@ -2988,10 +2989,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 								
 		if( isset($_REQUEST['custom-field-template-verify-key']) && !wp_verify_nonce($_REQUEST['custom-field-template-verify-key'], 'custom-field-template') )
 			return $id;
-			
-		if ( $post->post_type == 'revision' )
-    		return $id;
-			
+
 		if ( !empty($_POST['wp-preview']) && $id != $post->ID ) :
 			$revision_ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'revision'", $id ) );
 			$wpdb->query( "DELETE FROM $wpdb->postmeta WHERE post_id IN (" . implode( ',', $revision_ids ) . ")" );
@@ -3013,6 +3011,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 				
 			$id = $post->ID;
 		endif;
+
+		if ( $post->post_type == 'revision' )
+    		return $id;
 
 		if ( !isset($_REQUEST['custom-field-template-id']) ) :
 			if ( isset($options['posts'][$id]) ) unset($options['posts'][$id]);
@@ -4021,7 +4022,10 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 	function get_preview_postmeta( $return, $post_id, $meta_key, $single ) {
 	    if ( $preview_id = $this->get_preview_id( $post_id ) ) :
 	   	    if ( $post_id != $preview_id ) :
-        	    $return = get_post_meta( $preview_id, $meta_key, $single );
+        	    $return = $this->get_post_meta( $preview_id, $meta_key, $single );
+				/*if ( empty($return) && !empty($post_id) ) :
+        	  		$return = $this->get_post_meta( $post_id, $meta_key, $single );
+				endif;*/
         	endif;
     	endif;
     	return $return;
@@ -4057,7 +4061,9 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 	function custom_field_template_delete_post($post_id) {
 		global $wpdb;
 		$options = $this->get_custom_field_template_data();
-		$id = !empty($options['posts'][$post_id]) ? $options['posts'][$post_id] : '';
+		
+	    if ( is_numeric($post_id) )
+			$id = !empty($options['posts'][$post_id]) ? $options['posts'][$post_id] : '';
 		
 		if ( is_numeric($id) ) :
 			$fields = $this->get_custom_fields($id);
