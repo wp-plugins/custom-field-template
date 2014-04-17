@@ -4,8 +4,10 @@ Plugin Name: Custom Field Template
 Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
-Version: 2.1.8
 Author URI: http://wpgogo.com/
+Version: 2.1.9
+Text Domain: custom-field-template
+Domain Path: /
 */
 
 /*
@@ -13,7 +15,7 @@ This program is based on the rc:custom_field_gui plugin written by Joshua Sigar.
 I appreciate your efforts, Joshua.
 */
 
-/*  Copyright 2008 -2013 Hiroaki Miyashita
+/*  Copyright 2008 -2014 Hiroaki Miyashita
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -77,7 +79,7 @@ class custom_field_template {
 
 		if ( function_exists('load_plugin_textdomain') ) {
 			if ( !defined('WP_PLUGIN_DIR') ) {
-				load_plugin_textdomain('custom-field-template', str_replace( ABSPATH, '', dirname(__FILE__) ) );
+				//load_plugin_textdomain('custom-field-template', str_replace( ABSPATH, '', dirname(__FILE__) ) );
 			} else {
 				load_plugin_textdomain('custom-field-template', false, dirname( plugin_basename(__FILE__) ) );
 			}
@@ -558,9 +560,12 @@ class custom_field_template {
 		if ( substr($wp_version, 0, 3) < '3.3' ) :
 			$qt_position = 'jQuery(\'#editorcontainer_\'+id).prev()';
 			$load_tinyMCE = 'tinyMCE.execCommand(' . "'mceAddControl'" . ',false, id);';
-		else :
+		elseif ( substr($wp_version, 0, 3) < '3.9' ) :
 			$qt_position = 'jQuery(\'#qt_\'+id+\'_toolbar\')';
 			$load_tinyMCE = 'var ed = new tinyMCE.Editor(id, tinyMCEPreInit.mceInit[\'content\']); ed.render();';
+		else :
+			$qt_position = 'jQuery(\'#qt_\'+id+\'_toolbar\')';
+			$load_tinyMCE = 'tinyMCE.execCommand("mceAddEditor", true, id);';
 		endif;
 
 		$out .=		'}' . "\n" .
@@ -2176,8 +2181,11 @@ jQuery(this).addClass("closed");
 			if ( substr($wp_version, 0, 3) < '3.3' ) :
 				$load_tinyMCE = 'tinyMCE.execCommand("mceAddControl", false, "'. sha1($name . $rand) . '");';
 				$editorcontainer_class = ' class="editorcontainer"';
-			else :
+			elseif ( substr($wp_version, 0, 3) < '3.9' ) :
 				$load_tinyMCE = 'var ed = new tinyMCE.Editor("'. sha1($name . $rand) . '", tinyMCEPreInit.mceInit["content"]); ed.render();';
+				$editorcontainer_class = ' class="wp-editor-container"';
+			else :
+				$load_tinyMCE = 'tinyMCE.execCommand("mceAddEditor", true, "'. sha1($name . $rand) . '");';
 				$editorcontainer_class = ' class="wp-editor-container"';
 			endif;
 			if ( !empty($options['custom_field_template_use_wpautop']) ) :
@@ -2271,8 +2279,10 @@ jQuery(this).addClass("closed");
 			if ( !empty($tinyMCE) ) :
 				if ( substr($wp_version, 0, 3) < '3.3' ) :
 					$load_tinyMCE = 'tinyMCE.execCommand(' . "'mceAddControl'" . ',false, original_id);tinyMCE.execCommand(' . "'mceAddControl'" . ',false, new_id);';
-				else :
+				elseif ( substr($wp_version, 0, 3) < '3.9' ) :
 					$load_tinyMCE = 'var ed = new tinyMCE.Editor(original_id, tinyMCEPreInit.mceInit[\'content\']); ed.render(); var ed = new tinyMCE.Editor(new_id, tinyMCEPreInit.mceInit[\'content\']); ed.render();';
+				else :
+					$load_tinyMCE = 'tinyMCE.execCommand("mceAddEditor", true, original_id);tinyMCE.execCommand("mceAddEditor", true, new_id);';
 				endif;
 
 				$addfield .= '<a href="#clear" onclick="var original_id; var new_id; jQuery(this).parent().parent().parent().find('."'textarea'".').each(function(){original_id = jQuery(this).attr('."'id'".');'.$load_htmlEditor1.'tinyMCE.execCommand(' . "'mceRemoveControl'" . ',false,jQuery(this).attr('."'id'".'));});var clone = jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent()); clone.find('."'textarea'".').val('."''".');if(original_id.match(/([0-9]+)$/)) {var matchval = RegExp.$1;re = new RegExp(matchval, '."'ig'".');clone.html(clone.html().replace(re, parseInt(matchval)+1)); new_id = original_id.replace(/([0-9]+)$/, parseInt(matchval)+1);}if ( tinyMCE.get(jQuery(this).attr('."original_id".')) ) {'.$load_tinyMCE.'}jQuery(this).parent().css('."'visibility','hidden'".');'.$load_htmlEditor2.'jQuery(this).parent().prev().css('."'visibility','hidden'".'); return false;">' . __('Add New', 'custom-field-template') . '</a>';
@@ -2311,7 +2321,7 @@ jQuery(this).addClass("closed");
 			endif;
 		endif;
 		
-		$out_value .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . sha1($name . $rand) . '"><textarea id="' . sha1($name . $rand) . '" name="' . $name . '[' . $sid . '][]" rows="' .$rows. '" cols="' . $cols . '"' . $content_class . $style . $event_output . $wrap . '>' . htmlspecialchars(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
+		$out_value .= '<div' . $editorcontainer_class . ' id="editorcontainer_' . sha1($name . $rand) . '" style="clear:none;"><textarea id="' . sha1($name . $rand) . '" name="' . $name . '[' . $sid . '][]" rows="' .$rows. '" cols="' . $cols . '"' . $content_class . $style . $event_output . $wrap . '>' . htmlspecialchars(trim($value)) . '</textarea><input type="hidden" name="'.$name.'_rand['.$sid.']" value="'.$rand.'" /></div>';
 		if ( ($htmlEditor == true || $tinyMCE == true) && substr($wp_version, 0, 3) < '3.3' ) $out_value .= '</div>';
 		$out_value .= trim($after);
 		$out .= $out_value.'</dd></dl>'."\n";
@@ -2563,10 +2573,14 @@ jQuery(this).addClass("closed");
 									$load_htmlEditor1 = 'if ( jQuery(\'#qt_\'+jQuery(this).attr('."'id'".')+\'_qtags\').html() ) {jQuery(\'#qt_\'+jQuery(this).attr('."'id'".')+\'_qtags\').remove();';
 									$load_htmlEditor2 = 'qt_set(textarea_html_ids[i]);';
 									$load_tinyMCE = 'tinyMCE.execCommand(' . "'mceAddControl'" . ',false, textarea_tmce_ids[i]); switchMode(textarea_tmce_ids[i]); switchMode(textarea_tmce_ids[i]);';
-								else :
+								elseif ( substr($wp_version, 0, 3) < '3.9' ) :
 									$load_htmlEditor1 = 'if ( jQuery(\'#qt_\'+jQuery(this).attr('."'id'".')+\'_toolbar\').html() ) {jQuery(\'#qt_\'+jQuery(this).attr('."'id'".')+\'_toolbar\').remove();';
 									$load_htmlEditor2 = 'new QTags(textarea_html_ids[i]);QTags._buttonsInit();';
 									$load_tinyMCE = 'var ed = new tinyMCE.Editor(textarea_tmce_ids[i], tinyMCEPreInit.mceInit[\'content\']); ed.render(); switchMode(textarea_tmce_ids[i]); switchMode(textarea_tmce_ids[i]);';
+								else :
+									$load_htmlEditor1 = 'if ( jQuery(\'#qt_\'+jQuery(this).attr('."'id'".')+\'_toolbar\').html() ) {jQuery(\'#qt_\'+jQuery(this).attr('."'id'".')+\'_toolbar\').remove();';
+									$load_htmlEditor2 = 'new QTags(textarea_html_ids[i]);QTags._buttonsInit();';
+									$load_tinyMCE = 'tinyMCE.execCommand("mceAddEditor", true, textarea_tmce_ids[i]); switchMode(textarea_tmce_ids[i]); switchMode(textarea_tmce_ids[i]);';
 								endif;
 								$addfield .= '<input type="hidden" id="' . $this->sanitize_name( $title ) . '_count" value="0" /><script type="text/javascript">jQuery(document).ready(function() {jQuery(\'#' . $this->sanitize_name( $title ) . '_count\').val(0); });</script>';
 								$addfield .= ' <a href="#clear" onclick="var textarea_tmce_ids = new Array();var textarea_html_ids = new Array();var html_start = 0;jQuery(this).parent().parent().parent().find('."'textarea'".').each(function(){if ( jQuery(this).attr('."'id'".') ) {'.$load_htmlEditor1.'if ( jQuery(\'#'.$this->sanitize_name( $title ).'_count\').val() == 0 ) html_start++;textarea_html_ids.push(jQuery(this).attr('."'id'".'));}}ed = tinyMCE.get(jQuery(this).attr('."'id'".')); if(ed) {textarea_tmce_ids.push(jQuery(this).attr('."'id'".'));tinyMCE.execCommand(' . "'mceRemoveControl'" . ',false,jQuery(this).attr('."'id'".'));}});var checked_ids = new Array();jQuery(this).parent().parent().parent().find('."'input[type=radio]:checked'".').each(function(){checked_ids.push(jQuery(this).attr('."'id'".'));});var tmp = jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent());tmp.find('."'input'".').attr('."'checked',false".');for( var i=0;i<checked_ids.length;i++) { jQuery('."'#'+checked_ids[i]".').attr('."'checked'".', true); }tmp.find('."'input[type=text],input[type=hidden],input[type=file]'".').val('."''".');tmp.find('."'select'".').val('."''".');tmp.find('."'textarea'".').text('."''".');tmp.find('."'p'".').remove();tmp.find('."'dl'".').each(function(){if(jQuery(this).attr('."'id'".')){if(jQuery(this).attr('."'id'".').match(/_([0-9]+)$/)) {matchval = RegExp.$1;matchval++;jQuery(this).attr('."'id',".'jQuery(this).attr('."'id'".').replace(/_([0-9]+)$/, \'_\'+matchval));jQuery(this).find('."'textarea'".').each(function(){if(jQuery(this).attr('."'id'".').match(/([0-9]+)$/)) {var tmce_check = false;var html_check = false;for( var i=0;i<textarea_tmce_ids.length;i++) { if ( jQuery(this).attr('."'id'".')==textarea_tmce_ids[i] ) { tmce_check = true; } }for( var i=0;i<textarea_html_ids.length;i++) { if ( jQuery(this).attr('."'id'".')==textarea_html_ids[i] ) { html_check = true; } }  if ( tmce_check || html_check ) {matchval2 = RegExp.$1;jQuery(this).attr('."'id',".'jQuery(this).attr('."'id'".').replace(/([0-9]+)$/, parseInt(matchval2)+1));re = new RegExp(matchval2, '."'ig'".');jQuery(this).parent().parent().parent().html(jQuery(this).parent().parent().parent().html().replace(re, parseInt(matchval2)+1));if ( tmce_check ) textarea_tmce_ids.push(jQuery(this).attr('."'id'".'));if ( html_check ) textarea_html_ids.push(jQuery(this).attr('."'id'".'));}}jQuery(this).attr('."'name',".'jQuery(this).attr('."'name'".').replace(/\[([0-9]+)\]$/, \'[\'+matchval+\']\'));});jQuery(this).find('."'input'".').each(function(){if(jQuery(this).attr('."'id'".')){jQuery(this).attr('."'id',".'jQuery(this).attr('."'id'".').replace(/_([0-9]+)_/, \'_\'+matchval+\'_\'));jQuery(this).attr('."'id',".'jQuery(this).attr('."'id'".').replace(/_([0-9]+)$/, \'_\'+matchval));}if(jQuery(this).attr('."'name'".')){jQuery(this).attr('."'name',".'jQuery(this).attr('."'name'".').replace(/\[([0-9]+)\]$/, \'[\'+matchval+\']\'));}});jQuery(this).find('."'label'".').each(function(){jQuery(this).attr('."'for',".'jQuery(this).attr('."'for'".').replace(/_([0-9]+)_/, \'_\'+matchval+\'_\'));jQuery(this).attr('."'for',".'jQuery(this).attr('."'for'".').replace(/_([0-9]+)$/, \'_\'+matchval));jQuery(this).attr('."'for',".'jQuery(this).attr('."'for'".').replace(/\[([0-9]+)\]$/, \'[\'+matchval+\']\'));});}}});for( var i=html_start;i<textarea_html_ids.length;i++) { '.$load_htmlEditor2.' }for( var i=html_start;i<textarea_tmce_ids.length;i++) { '.$load_tinyMCE.' }jQuery(this).parent().css('."'visibility','hidden'".');jQuery(\'#'.$this->sanitize_name( $title ).'_count\').val(parseInt(jQuery(\'#'.$this->sanitize_name( $title ).'_count\').val())+1);return false;">' . __('Add New', 'custom-field-template') . '</a>';
