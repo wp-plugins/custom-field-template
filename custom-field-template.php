@@ -5,7 +5,7 @@ Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
 Author URI: http://wpgogo.com/
-Version: 2.2.1
+Version: 2.3
 Text Domain: custom-field-template
 Domain Path: /
 */
@@ -15,7 +15,7 @@ This program is based on the rc:custom_field_gui plugin written by Joshua Sigar.
 I appreciate your efforts, Joshua.
 */
 
-/*  Copyright 2008 -2014 Hiroaki Miyashita
+/*  Copyright 2008 -2015 Hiroaki Miyashita
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,6 +56,8 @@ class custom_field_template {
 		add_filter( 'the_content_rss', array(&$this, 'custom_field_template_the_content') );
 
 		add_filter( 'attachment_fields_to_edit', array(&$this, 'custom_field_template_attachment_fields_to_edit'), 10, 2 );
+		add_filter( '_wp_post_revision_fields', array(&$this, 'custom_field_template_wp_post_revision_fields'), 1 );
+		add_filter( 'edit_form_after_title', array(&$this, 'custom_field_template_edit_form_after_title') );
 
 		if ( isset($_REQUEST['cftsearch_submit']) ) :
 			if ( !empty($_REQUEST['limit']) )
@@ -747,6 +749,7 @@ class custom_field_template {
 	function custom_field_template_admin_scripts() {
 		global $post;
 		$options = $this->get_custom_field_template_data();
+		$locale = get_locale();
 
 		if ( !defined('WP_PLUGIN_DIR') )
 			$plugin_dir = str_replace( ABSPATH, '', dirname(__FILE__) );
@@ -767,8 +770,8 @@ class custom_field_template {
 			if ( !empty($options['custom_field_template_use_validation']) ) :
 				wp_enqueue_script( 'jquery-validate', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/jquery.validate.js', array('jquery') );
 				wp_enqueue_script( 'additional-methods', '/' . PLUGINDIR . '/' . $plugin_dir . '/js/additional-methods.js', array('jquery') );
-				if ( file_exists(ABSPATH . PLUGINDIR . '/' . $plugin_dir . '/js/messages_' . WPLANG . '.js') )
-					wp_enqueue_script( 'messages_' . WPLANG, '/' . PLUGINDIR . '/' . $plugin_dir . '/js/messages_' . WPLANG .'.js', array('jquery') );
+				if ( file_exists(ABSPATH . PLUGINDIR . '/' . $plugin_dir . '/js/messages_' . $locale . '.js') )
+					wp_enqueue_script( 'messages_' . $locale, '/' . PLUGINDIR . '/' . $plugin_dir . '/js/messages_' . $locale .'.js', array('jquery') );
 			endif;
 		endif;
 
@@ -856,6 +859,7 @@ type = file';
 	
 	function get_custom_field_template_data() {
 		$options = get_option('custom_field_template_data');
+		if ( !empty($options) && !is_array($options) ) $options = array();
 		return $options;
 	}
 
@@ -985,6 +989,7 @@ type = file';
 	
 	function custom_field_template_admin() {
 		global $wp_version;
+		$locale = get_locale();
 		
 		$options = $this->get_custom_field_template_data();
 
@@ -1747,7 +1752,7 @@ hideKey = true<br />
 </div>
 
 <?php
-	if ( WPLANG == 'ja' ) :
+	if ( $locale == 'ja' ) :
 ?>
 <div class="postbox" style="min-width:200px;">
 <div class="handlediv" title="<?php _e('Click to toggle', 'custom-field-template'); ?>"><br /></div>
@@ -1806,7 +1811,7 @@ jQuery(this).addClass("closed");
 		return $custom_fields;
 	}
 	
-	function make_textfield( $name, $sid, $data ) {
+	function make_textfield( $name, $sid, $data, $post_id ) {
 		$cftnum = $size = $default = $hideKey = $label = $code = $class = $style = $before = $after = $maxlength = $multipleButton = $date = $dateFirstDayOfWeek = $dateFormat = $startDate = $endDate = $readOnly = $onclick = $ondblclick = $onkeydown = $onkeypress = $onkeyup = $onmousedown = $onmouseup = $onmouseover = $onmouseout = $onmousemove = $onfocus = $onblur = $onchange = $onselect = '';
 		$hide = $addfield = $out = $out_key = $out_value = '';
 		extract($data);
@@ -1824,8 +1829,8 @@ jQuery(this).addClass("closed");
 		
 		if ( !isset($_REQUEST['default']) || (isset($_REQUEST['default']) && $_REQUEST['default'] != true) ) $_REQUEST['default'] = false;
 		
-		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 && $_REQUEST['default'] != true ) {
-			$value = $this->get_post_meta( $_REQUEST[ 'post' ], $title, false );
+		if( isset( $post_id ) && $post_id > 0 && $_REQUEST['default'] != true ) {
+			$value = $this->get_post_meta( $post_id, $title, false );
 			if ( !empty($value) && is_array($value) ) {
 				$ct_value = count($value);
 				$value = isset($value[ $cftnum ]) ? $value[ $cftnum ] : '';
@@ -1895,7 +1900,7 @@ jQuery(this).addClass("closed");
 		return array($out, $out_key, $out_value);
 	}
 	
-	function make_checkbox( $name, $sid, $data ) {
+	function make_checkbox( $name, $sid, $data, $post_id ) {
 		$cftnum = $value = $valueLabel = $checked = $hideKey = $label = $code = $class = $style = $before = $after = $onclick = $ondblclick = $onkeydown = $onkeypress = $onkeyup = $onmousedown = $onmouseup = $onmouseover = $onmouseout = $onmousemove = $onfocus = $onblur = $onchange = $onselect = '';
 		$hide = $addfield = $out = $out_key = $out_value = '';
 		extract($data);
@@ -1911,8 +1916,8 @@ jQuery(this).addClass("closed");
 
 		if ( !isset($_REQUEST['default']) || (isset($_REQUEST['default']) && $_REQUEST['default'] != true) ) $_REQUEST['default'] = false;
 
-		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 && $_REQUEST['default'] != true ) {
-			$selected = $this->get_post_meta( $_REQUEST[ 'post' ], $title );
+		if( isset( $post_id ) && $post_id > 0 && $_REQUEST['default'] != true ) {
+			$selected = $this->get_post_meta( $post_id, $title );
 			if ( $selected ) {
  				if ( in_array(stripcslashes($value), $selected) ) $checked = 'checked="checked"';
 			}
@@ -1957,7 +1962,7 @@ jQuery(this).addClass("closed");
 		return array($out, $out_key, $out_value);
 	}
 	
-	function make_radio( $name, $sid, $data ) {
+	function make_radio( $name, $sid, $data, $post_id ) {
 		$cftnum = $values = $valueLabels = $clearButton = $default = $hideKey = $label = $code = $class = $style = $before = $after = $multipleButton = $onclick = $ondblclick = $onkeydown = $onkeypress = $onkeyup = $onmousedown = $onmouseup = $onmouseover = $onmouseout = $onmousemove = $onfocus = $onblur = $onchange = $onselect = '';
 		$hide = $addfield = $out = $out_key = $out_value = '';
 		extract($data);
@@ -1976,8 +1981,8 @@ jQuery(this).addClass("closed");
 		
 		if ( !isset($_REQUEST['default']) || (isset($_REQUEST['default']) && $_REQUEST['default'] != true) ) $_REQUEST['default'] = false;
 
-		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 && $_REQUEST['default'] != true ) {
-			$selected = $this->get_post_meta( $_REQUEST[ 'post' ], $title );
+		if( isset( $post_id ) && $post_id > 0 && $_REQUEST['default'] != true ) {
+			$selected = $this->get_post_meta( $post_id, $title );
 			$ct_value = count($selected);
 			$selected = isset($selected[ $cftnum ]) ? $selected[ $cftnum ] : '';
 		} else {
@@ -2050,7 +2055,7 @@ jQuery(this).addClass("closed");
 		return array($out, $out_key, $out_value);
 	}
 	
-	function make_select( $name, $sid, $data ) {
+	function make_select( $name, $sid, $data, $post_id ) {
 		$cftnum = $values = $valueLabels = $default = $hideKey = $label = $code = $class = $style = $before = $after = $selectLabel = $multipleButton = $onclick = $ondblclick = $onkeydown = $onkeypress = $onkeyup = $onmousedown = $onmouseup = $onmouseover = $onmouseout = $onmousemove = $onfocus = $onblur = $onchange = $onselect = '';
 		$hide = $addfield = $out = $out_key = $out_value = '';
 		extract($data);
@@ -2069,8 +2074,8 @@ jQuery(this).addClass("closed");
 	
 		if ( !isset($_REQUEST['default']) || (isset($_REQUEST['default']) && $_REQUEST['default'] != true) ) $_REQUEST['default'] = false;
 
-		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 && $_REQUEST['default'] != true ) {
-			$selected = $this->get_post_meta( $_REQUEST[ 'post' ], $title );
+		if( isset( $post_id ) && $post_id > 0 && $_REQUEST['default'] != true ) {
+			$selected = $this->get_post_meta( $post_id, $title );
 			$ct_value = count($selected);
 			$selected = isset($selected[ $cftnum ]) ? $selected[ $cftnum ] : '';
 		} else {
@@ -2136,7 +2141,7 @@ jQuery(this).addClass("closed");
 		return array($out, $out_key, $out_value);
 	}
 	
-	function make_textarea( $name, $sid, $data ) {
+	function make_textarea( $name, $sid, $data, $post_id ) {
 		$cftnum = $rows = $cols = $tinyMCE = $htmlEditor = $mediaButton = $default = $hideKey = $label = $code = $class = $style = $wrap = $before = $after = $multipleButton = $mediaOffMedia = $mediaOffImage = $mediaOffVideo = $mediaOffAudio = $onclick = $ondblclick = $onkeydown = $onkeypress = $onkeyup = $onmousedown = $onmouseup = $onmouseover = $onmouseout = $onmousemove = $onfocus = $onblur = $onchange = $onselect = '';
 		$hide = $addfield = $out = $out_key = $out_value = $media = $editorcontainer_class = '';
 		extract($data);
@@ -2156,8 +2161,8 @@ jQuery(this).addClass("closed");
 		
 		if ( !isset($_REQUEST['default']) || (isset($_REQUEST['default']) && $_REQUEST['default'] != true) ) $_REQUEST['default'] = false;
 
-		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 && $_REQUEST['default'] != true ) {
-			$value = $this->get_post_meta( $_REQUEST[ 'post' ], $title );
+		if( isset( $post_id ) && $post_id > 0 && $_REQUEST['default'] != true ) {
+			$value = $this->get_post_meta( $post_id, $title );
 			if ( !empty($value) && is_array($value) ) {
 				$ct_value = count($value);
 				$value = isset($value[ $cftnum ]) ? $value[ $cftnum ] : '';
@@ -2330,7 +2335,7 @@ jQuery(this).addClass("closed");
 		return array($out, $out_key, $out_value);
 	}
 	
-	function make_file( $name, $sid, $data ) {
+	function make_file( $name, $sid, $data, $post_id ) {
 		$cftnum = $size = $hideKey = $label = $class = $style = $before = $after = $multipleButton = $relation = $mediaLibrary = $mediaPicker = '';
 		$hide = $addfield = $out = $out_key = $out_value = $picker = $inside_fieldset = '';
 		extract($data);
@@ -2344,8 +2349,8 @@ jQuery(this).addClass("closed");
 
 		if ( !isset($_REQUEST['default']) || (isset($_REQUEST['default']) && $_REQUEST['default'] != true) ) $_REQUEST['default'] = false;
 
-		if( isset( $_REQUEST[ 'post' ] ) && $_REQUEST[ 'post' ] > 0 && $_REQUEST['default'] != true ) {
-			$value = $this->get_post_meta( $_REQUEST[ 'post' ], $title );
+		if( isset( $post_id ) && $post_id > 0 && $_REQUEST['default'] != true ) {
+			$value = $this->get_post_meta( $post_id, $title );
 			$ct_value = count($value);
 			$value = isset($value[ $cftnum ]) ? $value[ $cftnum ] : '';
 		}
@@ -2374,7 +2379,7 @@ jQuery(this).addClass("closed");
 
 		if ( $mediaPicker == true ) :
 			$picker = __(' OR ', 'custom-field-template');
-			$picker .= '<a href="'.$image_upload_iframe_src.'&post_id='.$_REQUEST[ 'post' ].'&TB_iframe=1&tab='.$tab.'" class="thickbox" onclick="jQuery('."'#cft_current_template'".').val(jQuery(this).parent().parent().parent().';
+			$picker .= '<a href="'.$image_upload_iframe_src.'&post_id='.$post_id.'&TB_iframe=1&tab='.$tab.'" class="thickbox" onclick="jQuery('."'#cft_current_template'".').val(jQuery(this).parent().parent().parent().';
 			if ( $inside_fieldset ) $picker .= 'parent().';
 			$picker .= 'parent().attr(\'id\').replace(\'cft_\',\'\'));jQuery('."'#cft_clicked_id'".').val(jQuery(this).parent().find(\'input\').attr(\'id\'));">'.__('Select by Media Picker', 'custom-field-template').'</a>';
 		endif;
@@ -2398,7 +2403,7 @@ jQuery(this).addClass("closed");
 			$title = esc_attr(trim($post->post_title));
 			
 			if ( !empty($mediaLibrary) ) :
-				$title = '<a href="'.$image_upload_iframe_src.'&post_id='.$_REQUEST[ 'post' ].'&TB_iframe=1&tab='.$tab.'" class="thickbox">'.$title.'</a>';
+				$title = '<a href="'.$image_upload_iframe_src.'&post_id='.$post_id.'&TB_iframe=1&tab='.$tab.'" class="thickbox">'.$title.'</a>';
 			endif;
 			
 			$out_value .= '<p><label for="'.$name . $sid . '_' . $cftnum . '_delete"><input type="checkbox" name="'.$name . '_delete[' . $sid . '][' . $cftnum . ']" id="'.$name_id . $sid . '_' . $cftnum . '_delete" value="1" class="delete_file_checkbox" /> ' . __('Delete', 'custom-field-template') . '</label> <img src="'.$thumb_url.'" width="32" height="32" style="vertical-align:middle;" /> ' . $title . ' </p>';
@@ -2419,7 +2424,11 @@ jQuery(this).addClass("closed");
 
 		$options = $this->get_custom_field_template_data();
 		
-		if ( isset($_REQUEST['post']) ) $post = get_post($_REQUEST['post']);
+		$post_id = isset($_REQUEST['post']) ? $_REQUEST['post'] : '';
+		
+		if ( isset($post_id) ) $post = get_post($post_id);
+
+		if ( isset($_REQUEST['revision']) ) $post_id = $_REQUEST['revision'];
 
 		if ( !empty($options['custom_fields'][$id]['disable']) )
 			return;
@@ -2473,10 +2482,10 @@ jQuery(this).addClass("closed");
 			endif;
 		endif;
 
-		if ( (!isset($_REQUEST['post']) || $_REQUEST['post']<0) && !empty($options['custom_fields'][$id]['category']) && $_REQUEST['cft_mode'] != 'ajaxload' )
+		if ( (!isset($post_id) || $post_id<0) && !empty($options['custom_fields'][$id]['category']) && $_REQUEST['cft_mode'] != 'ajaxload' )
 			return;
 	
-		if ( isset($_REQUEST['post']) && !empty($options['custom_fields'][$id]['category']) && !isset($options['posts'][$_REQUEST['post']]) && $options['posts'][$_REQUEST['post']] !== $id && $_REQUEST['cft_mode'] != 'ajaxload' )
+		if ( isset($post_id) && !empty($options['custom_fields'][$id]['category']) && !isset($options['posts'][$post_id]) && $options['posts'][$post_id] !== $id && $_REQUEST['cft_mode'] != 'ajaxload' )
 			return;
 	
 		if ( !isset($_REQUEST['id']) && !empty($options['custom_fields'][$id]['category']) && $_REQUEST['cft_mode'] == 'ajaxload' ) :
@@ -2504,7 +2513,7 @@ jQuery(this).addClass("closed");
 			$post_ids = explode(',', $options['custom_fields'][$id]['post']);
 			$post_ids = array_filter( $post_ids );
 			$post_ids = array_unique(array_filter(array_map('trim', $post_ids)));
-			if ( !in_array($_REQUEST['post'], $post_ids) )
+			if ( !in_array($post_id, $post_ids) )
 				return;
 		endif;
 
@@ -2567,7 +2576,7 @@ jQuery(this).addClass("closed");
 					
 						if ( isset($data['multipleButton']) && $data['multipleButton'] == true ) :
 							$addfield .= ' <span>';
-							if ( isset($_REQUEST['post']) ) $addbutton = $this->get_post_meta( $_REQUEST['post'], $title, true )-1;
+							if ( isset($post_id) ) $addbutton = $this->get_post_meta( $post_id, $title, true )-1;
 							if ( !isset($addbutton) || $addbutton<=0 ) $addbutton = 0;
 							if ( $data['cftnum']/2 == $addbutton ) :
 								if ( substr($wp_version, 0, 3) < '3.3' ) :
@@ -2602,26 +2611,26 @@ jQuery(this).addClass("closed");
 						$tmpout .= '</fieldset>';
 					}
 					else if( $data['type'] == 'textfield' || $data['type'] == 'text' ) {
-						list($out_all,$out_key,$out_value) = $this->make_textfield( $title, $parentSN, $data );
+						list($out_all,$out_key,$out_value) = $this->make_textfield( $title, $parentSN, $data, $post_id );
 					}
 					else if( $data['type'] == 'checkbox' ) {
-						list($out_all,$out_key,$out_value) = $this->make_checkbox( $title, $parentSN, $data );
+						list($out_all,$out_key,$out_value) = $this->make_checkbox( $title, $parentSN, $data, $post_id );
 					}
 					else if( $data['type'] == 'radio' ) {
 						$data['values'] = explode( '#', $data['value'] );
 						if ( isset($data['valueLabel']) ) $data['valueLabels'] = explode( '#', $data['valueLabel'] );
-						list($out_all,$out_key,$out_value) = $this->make_radio( $title, $parentSN, $data );
+						list($out_all,$out_key,$out_value) = $this->make_radio( $title, $parentSN, $data, $post_id );
 					}
 					else if( $data['type'] == 'select' ) {
 						if ( isset($data['value']) ) $data['values'] = explode( '#', $data['value'] );
 						if ( isset($data['valueLabel']) ) $data['valueLabels'] = explode( '#', $data['valueLabel'] );
-						list($out_all,$out_key,$out_value) = $this->make_select( $title, $parentSN, $data );
+						list($out_all,$out_key,$out_value) = $this->make_select( $title, $parentSN, $data, $post_id );
 					}
 					else if( $data['type'] == 'textarea' ) {
-						list($out_all,$out_key,$out_value) = $this->make_textarea( $title, $parentSN, $data );
+						list($out_all,$out_key,$out_value) = $this->make_textarea( $title, $parentSN, $data, $post_id );
 					}
 					else if( $data['type'] == 'file' ) {
-						list($out_all,$out_key,$out_value) = $this->make_file( $title, $parentSN, $data );
+						list($out_all,$out_key,$out_value) = $this->make_file( $title, $parentSN, $data, $post_id );
 					}
 				if ( isset($options['custom_fields'][$id]['format']) && is_numeric($options['custom_fields'][$id]['format']) ) :
 					$duplicator = '['.$title.']';
@@ -3006,7 +3015,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			return $id;
 
 		if ( !empty($_POST['wp-preview']) && $id != $post->ID ) :
-			$revision_ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'revision'", $id ) );
+			/*$revision_ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_parent = %d AND post_type = 'revision'", $id ) );
 			$wpdb->query( "DELETE FROM $wpdb->postmeta WHERE post_id IN (" . implode( ',', $revision_ids ) . ")" );
 				
 			wp_cache_flush();
@@ -3022,13 +3031,13 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 						add_metadata( 'post', $post->ID, $key, $val );
 					endif;
 				endforeach;
-			endif;
-				
+			endif;*/
+
 			$id = $post->ID;
 		endif;
 
-		if ( $post->post_type == 'revision' )
-    		return $id;
+		/*if ( $post->post_type == 'revision' )
+    		return $id;*/
 
 		if ( !isset($_REQUEST['custom-field-template-id']) ) :
 			if ( isset($options['posts'][$id]) ) unset($options['posts'][$id]);
@@ -4148,6 +4157,15 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 			endfor;
 		endif;
 		update_option('custom_field_template_data', $options);
+	}
+	
+	function custom_field_template_wp_post_revision_fields($fields) {
+		$fields['cft_debug_preview'] = 'cft_debug_preview';
+		return $fields;	
+	}
+	
+	function custom_field_template_edit_form_after_title() {
+		echo '<input type="hidden" name="cft_debug_preview" value="cft_debug_preview" />';
 	}
 }
 
