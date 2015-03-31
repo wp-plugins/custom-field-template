@@ -5,7 +5,7 @@ Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
 Author URI: http://wpgogo.com/
-Version: 2.3
+Version: 2.3.1
 Text Domain: custom-field-template
 Domain Path: /
 */
@@ -870,7 +870,6 @@ type = file';
 	
 	function custom_field_template_get_the_excerpt($excerpt) {
 		$options = $this->get_custom_field_template_data();
-		
 		if ( empty($excerpt) ) $this->is_excerpt = true;
 		if ( !empty($options['custom_field_template_excerpt_shortcode']) ) return do_shortcode($excerpt);
 		else return $excerpt;
@@ -879,13 +878,7 @@ type = file';
 	function custom_field_template_the_content($content) {
 		global $wp_query, $post, $shortcode_tags, $wp_version;
 		$options = $this->get_custom_field_template_data();
-		
-		if ( $this->is_excerpt ) :
-			$this->is_excerpt = false;
-									
-			return $post->post_excerpt ? $post->post_excerpt : strip_shortcodes($content);
-		endif;
-		
+				
 		if ( isset($options['hook']) && count($options['hook']) > 0 ) :
 			$categories = get_the_category();
 			$cats = array();
@@ -893,24 +886,17 @@ type = file';
 				$cats[] = $val->cat_ID;
 			endforeach;
 			
-			if ( !empty($options['custom_fields'][$id]['post_type']) ) :
-				if ( substr($wp_version, 0, 3) < '3.0' ) :
-					if ( $options['custom_fields'][$id]['post_type'] == 'post' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/page-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/page.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit-pages.php')) ) :
-						return;
-					endif;
-					if ( $options['custom_fields'][$id]['post_type'] == 'page' && (strstr($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/post.php') || strstr($_SERVER['REQUEST_URI'], 'wp-admin/edit.php')) ) :
-						return;
-					endif;
-				else :
-					if ( $post->post_type!=$options['custom_fields'][$id]['post_type'] ) :
-						return;
-					endif;
-				endif;
-			endif;
-			
 			for ( $i=0; $i<count($options['hook']); $i++ ) :
+						
+				if ( $this->is_excerpt && empty($options['hook'][$i]['excerpt']) ) :
+					$this->is_excerpt = false;
+					$content = $post->post_excerpt ? $post->post_excerpt : strip_shortcodes($content);
+					$strip_shortcode = 1;
+					continue;
+				endif;
+
 				$options['hook'][$i]['content'] = stripslashes($options['hook'][$i]['content']);
-				if ( is_feed() && !$options['hook'][$i]['feed'] ) break;
+				if ( is_feed() && empty($options['hook'][$i]['feed']) ) break;
 				if ( !empty($options['hook'][$i]['category']) ) :
 					if ( is_category() || is_single() || is_feed() ) :
 						if ( !empty($options['hook'][$i]['use_php']) ) :
@@ -984,7 +970,7 @@ type = file';
 			endfor;
 		endif;
 				
-		return do_shortcode($content);
+		return !empty($strip_shortcode)? $content : do_shortcode($content);
 	}
 	
 	function custom_field_template_admin() {
@@ -1075,13 +1061,14 @@ type = file';
 			$j = 0;
 			for($i=0;$i<count($_POST["custom_field_template_hook_content"]);$i++) {
 				if( $_POST["custom_field_template_hook_content"][$i] ) {
-					$options['hook'][$j]['position'] = $_POST["custom_field_template_hook_position"][$i];
+					$options['hook'][$j]['position'] = !empty($_POST["custom_field_template_hook_position"][$i]) ? $_POST["custom_field_template_hook_position"][$i] : '';
 					$options['hook'][$j]['content']  = $_POST["custom_field_template_hook_content"][$i];
 					$options['hook'][$j]['custom_post_type'] = preg_replace('/\s/', '', $_POST["custom_field_template_hook_custom_post_type"][$i]);
 					$options['hook'][$j]['category'] = preg_replace('/\s/', '', $_POST["custom_field_template_hook_category"][$i]);
-					$options['hook'][$j]['use_php']  = $_POST["custom_field_template_hook_use_php"][$i];
-					$options['hook'][$j]['feed']  = $_POST["custom_field_template_hook_feed"][$i];
-					$options['hook'][$j]['post_type']  = $_POST["custom_field_template_hook_post_type"][$i];
+					$options['hook'][$j]['use_php']  = !empty($_POST["custom_field_template_hook_use_php"][$i]) ? $_POST["custom_field_template_hook_use_php"][$i] : '';
+					$options['hook'][$j]['feed']  = !empty($_POST["custom_field_template_hook_feed"][$i]) ? $_POST["custom_field_template_hook_feed"][$i] : '';
+					$options['hook'][$j]['post_type']  = !empty($_POST["custom_field_template_hook_post_type"][$i]) ? $_POST["custom_field_template_hook_post_type"][$i] : '';
+					$options['hook'][$j]['excerpt']  = !empty($_POST["custom_field_template_hook_excerpt"][$i]) ? $_POST["custom_field_template_hook_excerpt"][$i] : '';
 					$j++;
 				}
 			}			
@@ -1443,6 +1430,7 @@ ex. `radio` and `select`:</dt><dd>$values = array('dog', 'cat', 'monkey'); $defa
 <p><label for="custom_field_template_hook_content[<?php echo $i; ?>]"><?php echo sprintf(__('Content', 'custom-field-template'), $i); ?></label>:<br /><textarea name="custom_field_template_hook_content[<?php echo $i; ?>]" class="large-text resizable" rows="5" cols="80"><?php if ( isset($options['hook'][$i]['content']) ) echo htmlspecialchars(stripcslashes($options['hook'][$i]['content'])); ?></textarea></p>
 <p><label><input type="checkbox" name="custom_field_template_hook_use_php[<?php echo $i; ?>]" id="custom_field_template_hook_use_php[<?php echo $i; ?>]" value="1" <?php if ( !empty($options['hook'][$i]['use_php']) ) { echo ' checked="checked"'; } ?> /> <?php _e('Use PHP', 'custom-field-template'); ?></label></p>
 <p><label><input type="checkbox" name="custom_field_template_hook_feed[<?php echo $i; ?>]" id="custom_field_template_hook_feed[<?php echo $i; ?>]" value="1" <?php if ( !empty($options['hook'][$i]['feed']) ) { echo ' checked="checked"'; } ?> /> <?php _e('Apply to feeds', 'custom-field-template'); ?></label></p>
+<p><label><input type="checkbox" name="custom_field_template_hook_excerpt[<?php echo $i; ?>]" id="custom_field_template_hook_excerpt[<?php echo $i; ?>]" value="1" <?php if ( !empty($options['hook'][$i]['excerpt']) ) { echo ' checked="checked"'; } ?> /> <?php _e('Apply also to excerpts', 'custom-field-template'); ?></label></p>
 </td></tr>
 <?php
 	endfor;
@@ -2191,7 +2179,8 @@ jQuery(this).addClass("closed");
 				$load_tinyMCE = 'var ed = new tinyMCE.Editor("'. $textarea_id . '", tinyMCEPreInit.mceInit["content"]); ed.render();';
 				$editorcontainer_class = ' class="wp-editor-container"';
 			else :
-				$load_tinyMCE = 'tinyMCE.execCommand('."'mceAddEditor'".', true, "'. $textarea_id . '");';
+				$load_tinyMCE = "tinyMCE.init({'convert_urls': false, 'relative_urls': false, 'remove_script_host': false});";
+				$load_tinyMCE .= 'tinyMCE.execCommand('."'mceAddEditor'".', true, "'. $textarea_id . '");';
 				$editorcontainer_class = ' class="wp-editor-container"';
 			endif;
 			if ( !empty($options['custom_field_template_use_wpautop']) ) :
@@ -3627,11 +3616,11 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 									case 'text':
 									case 'textfield':
 									case 'textarea':
-										if ( $rval['class'] ) $class = ' class="' . $rval['class'] . '"'; 
+										if ( !empty($rval['class']) ) $class = ' class="' . $rval['class'] . '"'; 
 										$replace_val[$rkey] .= '<input type="text" name="cftsearch[' . rawurlencode($key) . '][' . $rkey . '][]" value="' . esc_attr($_REQUEST['cftsearch'][rawurlencode($key)][$rkey][0]) . '"' . $class . ' />';
 										break;		
 									case 'checkbox':
-										if ( $rval['class'] ) $class = ' class="' . $rval['class'] . '"'; 
+										if ( !empty($rval['class']) ) $class = ' class="' . $rval['class'] . '"'; 
 										$values = $valueLabel = array();
 										if ( $rkey != 0 )
 											$values = explode( '#', $rval['value'] );
@@ -3674,7 +3663,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										endif;
 										break;
 									case 'radio':
-										if ( $rval['class'] ) $class = ' class="' . $rval['class'] . '"'; 
+										if ( !empty($rval['class']) ) $class = ' class="' . $rval['class'] . '"'; 
 										$values = explode( '#', $rval['value'] );
 										$valueLabel = explode( '#', $rval['valueLabel'] );
 										$default = explode( '#', $rval['default'] );
@@ -3712,7 +3701,7 @@ jQuery("#edButtonPreview").trigger("click"); }' . "\n";*/
 										endif;
 										break;
 									case 'select':
-										if ( isset($rval['class']) ) $class = ' class="' . $rval['class'] . '"'; 
+										if ( !empty($rval['class']) ) $class = ' class="' . $rval['class'] . '"'; 
 										$values = explode( '#', $rval['value'] );
 										$valueLabel = isset($rval['valueLabel']) ? explode( '#', $rval['valueLabel'] ) : array();
 										$default = isset($rval['default']) ? explode( '#', $rval['default'] ) : array();
