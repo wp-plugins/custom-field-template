@@ -4,7 +4,7 @@ Donate link: http://wpgogo.com/development/custom-field-template.html
 Tags: custom field, custom fields, custom, fields, field, template, meta, custom field template, custom post type
 Requires at least: 2.1
 Tested up to: 4.2
-Stable tag: 2.3
+Stable tag: 2.3.2
 License: GPLv2 or later
 
 The Custom Field Template plugin extends the functionality of custom fields.
@@ -112,7 +112,7 @@ See the default template and modify it.
 
 == Changelog ==
 
-= 2.3.1 =
+= 2.3.2 =
 * Auto hook option for the excerpt.
 * Bugfix: relative path for images from the tinymce editor. 
 
