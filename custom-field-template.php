@@ -5,7 +5,7 @@ Plugin URI: http://wpgogo.com/development/custom-field-template.html
 Description: This plugin adds the default custom fields on the Write Post/Page.
 Author: Hiroaki Miyashita
 Author URI: http://wpgogo.com/
-Version: 2.3.2
+Version: 2.3.3
 Text Domain: custom-field-template
 Domain Path: /
 */
@@ -2179,8 +2179,9 @@ jQuery(this).addClass("closed");
 				$load_tinyMCE = 'var ed = new tinyMCE.Editor("'. $textarea_id . '", tinyMCEPreInit.mceInit["content"]); ed.render();';
 				$editorcontainer_class = ' class="wp-editor-container"';
 			else :
-				$load_tinyMCE = "tinyMCE.init({'convert_urls': false, 'relative_urls': false, 'remove_script_host': false});";
-				$load_tinyMCE .= 'tinyMCE.execCommand('."'mceAddEditor'".', true, "'. $textarea_id . '");';
+				$load_tinyMCE = '';
+				if ( wp_default_editor() == 'html' ) $load_tinyMCE .= 'tinyMCE.init({"convert_urls": false, "relative_urls": false, "remove_script_host": false});';
+				$load_tinyMCE .= 'tinyMCE.execCommand('."'mceAddEditor'".', false, "'. $textarea_id . '");';
 				$editorcontainer_class = ' class="wp-editor-container"';
 			endif;
 			if ( !empty($options['custom_field_template_use_wpautop']) ) :
@@ -2277,7 +2278,7 @@ jQuery(this).addClass("closed");
 				elseif ( substr($wp_version, 0, 3) < '3.9' ) :
 					$load_tinyMCE = 'var ed = new tinyMCE.Editor(original_id, tinyMCEPreInit.mceInit[\'content\']); ed.render(); var ed = new tinyMCE.Editor(new_id, tinyMCEPreInit.mceInit[\'content\']); ed.render();';
 				else :
-					$load_tinyMCE = 'tinyMCE.execCommand('."'mceAddEditor'".', true, original_id);tinyMCE.execCommand('."'mceAddEditor'".', true, new_id);';
+					$load_tinyMCE = 'tinyMCE.execCommand('."'mceAddEditor'".', false, original_id);tinyMCE.execCommand('."'mceAddEditor'".', false, new_id);';
 				endif;
 
 				$addfield .= '<a href="#clear" onclick="var original_id; var new_id; jQuery(this).parent().parent().parent().find('."'textarea'".').each(function(){original_id = jQuery(this).attr('."'id'".');'.$load_htmlEditor1.'tinyMCE.execCommand(' . "'mceRemoveControl'" . ',true,jQuery(this).attr('."'id'".'));});var clone = jQuery(this).parent().parent().parent().clone().insertAfter(jQuery(this).parent().parent().parent()); clone.find('."'textarea'".').val('."''".');if(original_id.match(/([0-9])$/)) {var matchval = RegExp.$1;re = new RegExp(matchval, '."'ig'".');clone.html(clone.html().replace(re, parseInt(matchval)+1)); new_id = original_id.replace(/([0-9])$/, parseInt(matchval)+1);}if ( tinyMCE.get(jQuery(this).attr('."original_id".')) ) {'.$load_tinyMCE.'}jQuery(this).parent().css('."'visibility','hidden'".');'.$load_htmlEditor2.'jQuery(this).parent().prev().css('."'visibility','hidden'".'); return false;">' . __('Add New', 'custom-field-template') . '</a>';
